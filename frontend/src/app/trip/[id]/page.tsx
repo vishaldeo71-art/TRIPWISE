@@ -255,7 +255,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* DAY SELECTOR TABS */}
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+        <div id="itinerary-section" className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none scroll-mt-6">
           {trip.days.map((d, idx) => (
             <button
               key={d.dayNumber}

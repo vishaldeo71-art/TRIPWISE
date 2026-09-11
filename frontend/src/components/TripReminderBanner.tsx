@@ -8,16 +8,32 @@ interface TripReminderBannerProps {
   destination?: string;
   startDateText?: string;
   tripId?: string;
+  onViewTrip?: () => void;
 }
 
 export default function TripReminderBanner({
   destination = 'Delhi',
   startDateText = 'Tomorrow',
   tripId,
+  onViewTrip,
 }: TripReminderBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
+
+  const handleViewTrip = (e: React.MouseEvent) => {
+    if (onViewTrip) {
+      e.preventDefault();
+      onViewTrip();
+      return;
+    }
+
+    const itineraryEl = document.getElementById('itinerary-section');
+    if (itineraryEl) {
+      e.preventDefault();
+      itineraryEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900/40 via-indigo-900/30 to-purple-900/40 border border-sky-500/20 p-4 sm:p-5 shadow-lg">
@@ -42,15 +58,14 @@ export default function TripReminderBanner({
         </div>
 
         <div className="flex items-center space-x-2 shrink-0">
-          {tripId && (
-            <Link
-              href={`/trip/${tripId}`}
-              className="flex items-center space-x-1.5 text-xs px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-medium shadow-md transition-colors"
-            >
-              <span>View Trip</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          )}
+          <Link
+            href={tripId ? `/trip/${tripId}#itinerary-section` : '#itinerary-section'}
+            onClick={handleViewTrip}
+            className="flex items-center space-x-1.5 text-xs px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-medium shadow-md transition-colors cursor-pointer"
+          >
+            <span>View Trip</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
           <button
             onClick={() => setDismissed(true)}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
