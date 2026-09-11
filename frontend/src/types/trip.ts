@@ -13,6 +13,8 @@ export interface Activity {
   weatherSuitability: 'High' | 'Moderate' | 'Low' | 'Indoor Only';
   personaSuitability: Persona[];
   whySelectedReason?: string;
+  lat?: number;
+  lng?: number;
   indoorAlternative?: {
     name: string;
     description: string;

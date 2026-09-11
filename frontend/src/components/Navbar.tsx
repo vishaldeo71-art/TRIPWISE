@@ -78,16 +78,28 @@ export default function Navbar() {
             <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" /> Plan Trip
           </Link>
           {user && (
-            <Link
-              href="/dashboard"
-              className={`transition px-3 py-1.5 rounded-xl border ${
-                pathname === '/dashboard'
-                  ? 'bg-brand-500/10 text-sky-300 border-brand-500/30 font-semibold'
-                  : 'border-transparent hover:text-sky-300 hover:bg-slate-900/60'
-              }`}
-            >
-              My Trips
-            </Link>
+            <>
+              <Link
+                href="/dashboard"
+                className={`transition px-3 py-1.5 rounded-xl border ${
+                  pathname === '/dashboard'
+                    ? 'bg-brand-500/10 text-sky-300 border-brand-500/30 font-semibold'
+                    : 'border-transparent hover:text-sky-300 hover:bg-slate-900/60'
+                }`}
+              >
+                My Trips
+              </Link>
+              <Link
+                href="/admin"
+                className={`transition px-3 py-1.5 rounded-xl border ${
+                  pathname === '/admin'
+                    ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30 font-semibold'
+                    : 'border-transparent hover:text-sky-300 hover:bg-slate-900/60'
+                }`}
+              >
+                Admin
+              </Link>
+            </>
           )}
           <Link
             href="/#how-it-works"

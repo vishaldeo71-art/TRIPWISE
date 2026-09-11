@@ -18,6 +18,7 @@ import {
   CloudSun,
   Sparkles
 } from 'lucide-react';
+import TripReminderBanner from '@/components/TripReminderBanner';
 import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
@@ -110,7 +111,16 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Trip Reminder Banner */}
+        {trips.length > 0 && (
+          <TripReminderBanner
+            destination={trips[0].destination}
+            startDateText="Tomorrow"
+            tripId={trips[0].id}
+          />
+        )}
+
         {/* Top Header Banner */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-700/80 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-2xl">
           <div className="space-y-1 z-10">

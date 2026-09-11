@@ -24,6 +24,10 @@ import {
   RefreshCw,
   Umbrella
 } from 'lucide-react';
+import WeatherAdvisorCard from '@/components/WeatherAdvisorCard';
+import SmartRouteCard from '@/components/SmartRouteCard';
+import TripWiseAIModal from '@/components/TripWiseAIModal';
+import TripReminderBanner from '@/components/TripReminderBanner';
 import { supabase } from '@/lib/supabase';
 
 export default function TripViewPage({ params }: { params: { id: string } }) {
@@ -33,6 +37,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
   const [selectedWhyActivity, setSelectedWhyActivity] = useState<Activity | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   useEffect(() => {
     loadTripData();
@@ -148,6 +153,9 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Trip Reminder Banner */}
+        <TripReminderBanner destination={trip.destination} startDateText="Soon" tripId={trip.id} />
+
         {/* Navigation Toolbar */}
         <div className="flex items-center justify-between">
           <Link
@@ -157,22 +165,32 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             <ArrowLeft className="w-4 h-4" /> Back to My Trips
           </Link>
 
-          <button
-            onClick={copyShareUrl}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-semibold flex items-center gap-2 transition"
-          >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-400">Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-4 h-4 text-sky-400" />
-                <span>Share Trip</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsAIModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition shadow-md"
+            >
+              <Sparkles className="w-4 h-4 text-sky-200 animate-pulse" />
+              <span>Ask TripWise AI</span>
+            </button>
+
+            <button
+              onClick={copyShareUrl}
+              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-semibold flex items-center gap-2 transition"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-400">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 text-sky-400" />
+                  <span>Share Trip</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* TRIP HERO HEADER & WEATHER SUMMARY */}
@@ -252,6 +270,26 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
               <span className="text-xs opacity-80 font-normal">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
             </button>
           ))}
+        </div>
+
+        {/* WEATHER ADVISOR & SMART ROUTE CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <WeatherAdvisorCard
+            weatherSummary={trip.weatherSummary}
+            activeDay={currentDay}
+            onAskAI={() => setIsAIModalOpen(true)}
+          />
+          <SmartRouteCard
+            activities={currentDay.activities}
+            baseLat={trip.latitude}
+            baseLng={trip.longitude}
+            onApplyOptimization={(reordered) => {
+              // Update local active day activities with optimized route sequence
+              const updatedDays = [...trip.days];
+              updatedDays[activeDayIdx].activities = reordered;
+              setTrip({ ...trip, days: updatedDays });
+            }}
+          />
         </div>
 
         {/* WEATHER ADAPTATION & PLAN B BANNER */}
@@ -425,6 +463,15 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             </button>
           </div>
         </div>
+      )}
+
+      {/* TripWise AI Assistant Modal */}
+      {trip && (
+        <TripWiseAIModal
+          trip={trip}
+          isOpen={isAIModalOpen}
+          onClose={() => setIsAIModalOpen(false)}
+        />
       )}
 
       <Footer />
