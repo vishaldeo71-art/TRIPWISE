@@ -43,7 +43,7 @@ export default function Navbar() {
         window.history.pushState(null, '', `/#${sectionId}`);
       }
     } else {
-      router.push(`/#${sectionId}`);
+      window.location.href = `/#${sectionId}`;
     }
   };
 

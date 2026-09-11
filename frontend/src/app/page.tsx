@@ -21,15 +21,23 @@ import {
 
 export default function LandingPage() {
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const id = window.location.hash.substring(1);
-      const el = document.getElementById(id);
-      if (el) {
-        setTimeout(() => {
+    const scrollToHash = () => {
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const id = window.location.hash.substring(1);
+        const el = document.getElementById(id);
+        if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+        }
       }
-    }
+    };
+
+    const timer = setTimeout(scrollToHash, 150);
+    window.addEventListener('hashchange', scrollToHash);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('hashchange', scrollToHash);
+    };
   }, []);
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-brand-500 selection:text-white">
