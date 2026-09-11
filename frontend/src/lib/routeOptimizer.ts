@@ -1,4 +1,6 @@
 import { Activity } from '@/types/trip';
+import { getDestinationPlaces } from '@/data/destinationPlaces';
+import { calculateTransitBetween } from '@/lib/transitEngine';
 
 /**
  * Calculates the approximate straight-line distance between two geographic points
@@ -35,11 +37,12 @@ export interface RouteOptimizationResult {
 }
 
 /**
- * Reorders a list of daily activities using a simple Nearest-Neighbor algorithm
+ * Reorders a list of daily activities using Nearest-Neighbor distance calculation
  * to minimize total travel distance between consecutive stops.
  */
 export function optimizeDayRoute(
   activities: Activity[],
+  destinationName: string = 'Delhi',
   baseLat: number = 28.6139,
   baseLng: number = 77.209
 ): RouteOptimizationResult {
@@ -54,9 +57,10 @@ export function optimizeDayRoute(
     };
   }
 
+  const destData = getDestinationPlaces(destinationName, baseLat, baseLng);
+
   // Ensure each activity has valid latitude and longitude coordinates
   const itemsWithCoords = activities.map((act, index) => {
-    // If exact coordinates exist, use them; otherwise derive an explainable local offset
     const lat = act.lat !== undefined ? act.lat : baseLat + (index * 0.015 - 0.02);
     const lng = act.lng !== undefined ? act.lng : baseLng + (index * 0.02 - 0.01);
     return { ...act, lat, lng };
@@ -77,7 +81,6 @@ export function optimizeDayRoute(
   const unvisited = [...itemsWithCoords];
   const optimized: typeof itemsWithCoords = [];
 
-  // Start with the first scheduled activity
   let current = unvisited.shift()!;
   optimized.push(current);
 
@@ -102,28 +105,38 @@ export function optimizeDayRoute(
     optimized.push(current);
   }
 
-  // 3. Calculate optimized total distance after reordering
+  // 3. Re-calculate transitToNext links for the newly ordered activities
+  const reorderedWithTransit = optimized.map((act, i) => {
+    const bestTime = i === 0 ? 'Morning' : i === 1 ? 'Afternoon' : i === 2 ? 'Evening' : 'Night';
+    const updated = { ...act, bestTime: bestTime as any };
+    if (i < optimized.length - 1) {
+      const nextAct = optimized[i + 1];
+      const transit = calculateTransitBetween(act, nextAct, destData.metroStations);
+      return { ...updated, transitToNext: transit };
+    }
+    return { ...updated, transitToNext: undefined };
+  });
+
+  // 4. Calculate optimized total distance
   let optimizedDistanceKm = 0;
-  for (let i = 0; i < optimized.length - 1; i++) {
+  for (let i = 0; i < reorderedWithTransit.length - 1; i++) {
     optimizedDistanceKm += calculateHaversineDistance(
-      optimized[i].lat,
-      optimized[i].lng,
-      optimized[i + 1].lat,
-      optimized[i + 1].lng
+      reorderedWithTransit[i].lat!,
+      reorderedWithTransit[i].lng!,
+      reorderedWithTransit[i + 1].lat!,
+      reorderedWithTransit[i + 1].lng!
     );
   }
 
-  // Ensure non-negative saved distance for display
   const distanceSavedKm = Math.max(0, originalDistanceKm - optimizedDistanceKm);
-  // Estimate travel time assuming average city transit speed of ~25 km/h
-  const estimatedTravelTimeMins = Math.round((optimizedDistanceKm / 25) * 60) + optimized.length * 5;
+  const estimatedTravelTimeMins = Math.round((optimizedDistanceKm / 25) * 60) + reorderedWithTransit.length * 5;
 
   return {
-    optimizedActivities: optimized,
+    optimizedActivities: reorderedWithTransit,
     originalDistanceKm: Number(originalDistanceKm.toFixed(1)),
     optimizedDistanceKm: Number(optimizedDistanceKm.toFixed(1)),
     distanceSavedKm: Number(distanceSavedKm.toFixed(1)),
     estimatedTravelTimeMins,
-    locationCount: optimized.length,
+    locationCount: reorderedWithTransit.length,
   };
 }

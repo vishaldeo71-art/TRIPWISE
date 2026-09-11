@@ -56,7 +56,17 @@ export default function TripWiseAIModal({ trip, isOpen, onClose }: TripWiseAIMod
             destination: trip.destination,
             durationDays: trip.durationDays,
             persona: trip.persona,
+            pace: trip.pace,
             weatherSummary: trip.weatherSummary,
+            itinerary: trip.days?.map((d) => ({
+              dayNumber: d.dayNumber,
+              activities: d.activities?.map((a) => ({
+                name: a.name,
+                placeName: a.placeName,
+                metro: a.nearestMetro?.stationName,
+                why: a.whySelectedReason,
+              })),
+            })),
           },
         }),
       });

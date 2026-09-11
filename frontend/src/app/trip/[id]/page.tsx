@@ -28,7 +28,9 @@ import WeatherAdvisorCard from '@/components/WeatherAdvisorCard';
 import SmartRouteCard from '@/components/SmartRouteCard';
 import TripWiseAIModal from '@/components/TripWiseAIModal';
 import TripReminderBanner from '@/components/TripReminderBanner';
+import DayRouteSummaryCard from '@/components/DayRouteSummaryCard';
 import { supabase } from '@/lib/supabase';
+import { ExternalLink, Navigation, Train } from 'lucide-react';
 
 export default function TripViewPage({ params }: { params: { id: string } }) {
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -281,6 +283,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           />
           <SmartRouteCard
             activities={currentDay.activities}
+            destinationName={trip.destination}
             baseLat={trip.latitude}
             baseLng={trip.longitude}
             onApplyOptimization={(reordered) => {
@@ -340,6 +343,14 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           )}
         </div>
 
+        {/* COMPACT DAY ROUTE SUMMARY */}
+        <DayRouteSummaryCard
+          destination={trip.destination}
+          dayNumber={currentDay.dayNumber}
+          routeSummary={currentDay.routeSummary}
+          activities={currentDay.activities}
+        />
+
         {/* ITINERARY ACTIVITIES TIMELINE */}
         <div className="space-y-4">
           <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
@@ -358,50 +369,88 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
               const isReplacedByPlanB = isCurrentPlanB && act.isOutdoor && act.indoorAlternative;
 
+              const mapsUrl = act.transitToNext?.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayActivityName + ' ' + trip.destination)}`;
+
               return (
-                <div
-                  key={act.id}
-                  className={`glass-panel rounded-3xl p-6 border transition-all relative ${
-                    isReplacedByPlanB
-                      ? 'border-purple-500/50 bg-purple-950/20 shadow-purple-500/10'
-                      : 'border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-xs font-semibold">
-                        <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 font-bold">
-                          {act.bestTime}
-                        </span>
-                        <span className="text-slate-500">•</span>
-                        <span className="text-slate-400">{act.durationMinutes} min</span>
-                        <span className="text-slate-500">•</span>
-                        <span className="text-slate-400 font-normal">{act.estimatedTravelTime}</span>
+                <div key={act.id || actIdx} className="space-y-3">
+                  <div
+                    className={`glass-panel rounded-3xl p-6 border transition-all relative ${
+                      isReplacedByPlanB
+                        ? 'border-purple-500/50 bg-purple-950/20 shadow-purple-500/10'
+                        : 'border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="space-y-2.5 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                          <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 font-bold">
+                            {act.bestTime}
+                          </span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-slate-400">{act.durationMinutes} min visit</span>
+                          
+                          {/* Nearest Metro Station Badge */}
+                          {act.nearestMetro && (
+                            <span className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-sky-300 font-medium flex items-center gap-1">
+                              <Train className="w-3 h-3 text-sky-400" />
+                              Near {act.nearestMetro.stationName} Metro ({act.nearestMetro.walkTimeMin} min walk)
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                          {displayActivityName}
+                          {isReplacedByPlanB && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
+                              Indoor Plan B
+                            </span>
+                          )}
+                        </h4>
+
+                        <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+                          {displayDescription}
+                        </p>
                       </div>
 
-                      <h4 className="text-xl font-bold text-white flex items-center gap-2">
-                        {displayActivityName}
-                        {isReplacedByPlanB && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
-                            Indoor Plan B
-                          </span>
-                        )}
-                      </h4>
+                      {/* Actions: "Why this?" & "Open Transit Route" */}
+                      <div className="flex sm:flex-col items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => setSelectedWhyActivity(act)}
+                          className="px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition shadow-sm w-full justify-center"
+                        >
+                          <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
+                          <span>Why this?</span>
+                        </button>
 
-                      <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-                        {displayDescription}
-                      </p>
+                        <a
+                          href={mapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center gap-1.5 transition w-full justify-center"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Open Route</span>
+                        </a>
+                      </div>
                     </div>
-
-                    {/* "Why this?" Button */}
-                    <button
-                      onClick={() => setSelectedWhyActivity(act)}
-                      className="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 shrink-0 transition shadow-sm"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
-                      <span>Why this?</span>
-                    </button>
                   </div>
+
+                  {/* Inter-Activity Transit Connector Card */}
+                  {act.transitToNext && actIdx < currentDay.activities.length - 1 && (
+                    <div className="mx-4 p-3 rounded-2xl bg-slate-900/40 border border-slate-800/80 flex items-center justify-between text-xs text-slate-400 shadow-inner">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sky-400 font-bold">🚇 Transit:</span>
+                        <span className="font-semibold text-slate-300">
+                          {act.transitToNext.fromStation} → {act.transitToNext.toStation}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <span>~{act.transitToNext.approxTransitMin} min metro</span>
+                        <span>•</span>
+                        <span>~{act.transitToNext.approxWalkMin} min walk</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

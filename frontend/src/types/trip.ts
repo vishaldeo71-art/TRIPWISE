@@ -15,12 +15,39 @@ export interface Activity {
   whySelectedReason?: string;
   lat?: number;
   lng?: number;
+  placeName?: string;
+  nearestMetro?: {
+    stationName: string;
+    line?: string;
+    distanceKm: number;
+    walkTimeMin: number;
+  };
+  transitToNext?: {
+    nextPlaceName: string;
+    fromStation: string;
+    toStation: string;
+    approxTransitMin: number;
+    approxWalkMin: number;
+    distanceKm: number;
+    mapsUrl: string;
+  };
   indoorAlternative?: {
     name: string;
     description: string;
     durationMinutes: number;
     category: string;
   };
+}
+
+export interface DayRouteSummary {
+  totalDistanceKm: number;
+  estTransitTimeMin: number;
+  estWalkTimeMin: number;
+  sequence: {
+    type: 'place' | 'metro' | 'walk';
+    label: string;
+    subLabel?: string;
+  }[];
 }
 
 export interface ItineraryDay {
@@ -35,6 +62,7 @@ export interface ItineraryDay {
     note?: string;
   };
   activities: Activity[];
+  routeSummary?: DayRouteSummary;
   isPlanBActive?: boolean;
   planBReason?: string;
 }

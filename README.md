@@ -2,201 +2,167 @@
 
 > *"Your itinerary doesn't just plan your trip. It adapts to it."*
 
-TRIPWISE is a full-stack, weather-adaptive travel planning application built for the GDG Society NSUT recruitment task. It generates tailored daily travel itineraries based on destination, duration, traveler persona, and real-time forecast data from the Open-Meteo API.
+TRIPWISE is a full-stack, weather-adaptive travel planning application built for the GDG Society NSUT recruitment task. It generates tailored daily travel itineraries with **real destination-specific places**, **nearest Metro/Public Transport stations**, **Nearest-Neighbor route optimization**, **weather adaptations**, and **zero cross-city contamination**.
 
 ---
 
 ## 📚 BEGINNER EXPLANATION FOR INTERVIEWS
 
-### 1. WHAT CHANGED
-
-| File | What changed | Why it was needed |
-| ---- | ------------ | ----------------- |
-| [backend/src/server.ts](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/backend/src/server.ts) | Added `/api/ai/ask` and `/api/admin/stats` endpoints | Provides secure backend AI assistant processing and admin dashboard analytics. |
-| [backend/supabase_schema.sql](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/backend/supabase_schema.sql) | Added `role` column to `profiles` table | Enables simple role-based access control (`'user'` vs `'admin'`). |
-| [frontend/src/lib/routeOptimizer.ts](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/lib/routeOptimizer.ts) | Created Haversine distance and Nearest-Neighbor algorithm | Reorders daily activities to minimize transit distance between stops. |
-| [frontend/src/components/TripWiseAIModal.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/TripWiseAIModal.tsx) | Created contextual Q&A chat assistant | Allows users to ask questions about their trip in real time. |
-| [frontend/src/components/WeatherAdvisorCard.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/WeatherAdvisorCard.tsx) | Created weather advisory card | Converts Open-Meteo forecast data into actionable travel advice. |
-| [frontend/src/components/SmartRouteCard.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/SmartRouteCard.tsx) | Created route optimization card | Displays distance metrics, km saved, and transit time estimates. |
-| [frontend/src/components/TripReminderBanner.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/TripReminderBanner.tsx) | Created simple in-app reminder banner | Reminds users about upcoming travel dates and forecasts. |
-| [frontend/src/app/admin/page.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/app/admin/page.tsx) | Created protected Admin Dashboard | Displays real user counts, trips created, AI usage, and popular destinations. |
-| [frontend/src/app/trip/[id]/page.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/app/trip/[id]/page.tsx) | Integrated AI modal, Weather Advisor, and Smart Route cards | Connects all new features into the core trip detail view. |
-| [frontend/src/components/Navbar.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/Navbar.tsx) | Added Admin navigation link | Allows signed-in users to navigate to the Admin Dashboard. |
-
----
-
-### 2. SIMPLE ARCHITECTURE
+### 1. TECHNICAL ARCHITECTURE & FLOW
 
 ```
                                   USER
                                    ↓
-                             NEXT.JS FRONTEND
-                             (React / Tailwind)
+                            NEXT.JS FRONTEND
+                        (Destination + Persona)
                                    ↓
-                           EXPRESS BACKEND API
-                          (/api/trips, /api/ai)
-                       ↙           ↓           ↘
-          OPEN-METEO API     SUPABASE DB       GEMINI AI API
-        (Weather Forecast)  (PostgreSQL Auth)   (Backend Only)
+                        DESTINATION-SPECIFIC DATA
+                   (Delhi Places vs London Places)
+                                   ↓
+                   OPEN-METEO WEATHER FORECAST API
+               (Rain Check → Outdoor vs Indoor Fallback)
+                                   ↓
+                       SMART ROUTE OPTIMIZATION
+                  (Haversine + Nearest-Neighbor Order)
+                                   ↓
+                    METRO & PUBLIC TRANSPORT ENGINE
+                  (Proximity Matching → Station Links)
+                                   ↓
+                      DAILY ADAPTIVE ITINERARY
+                                   ↓
+                           TRIPWISE AI API
+                    (Contextual Chat Assistant)
 ```
 
 ---
 
-### 3. FEATURE EXPLANATIONS
+### 2. DETAILED FEATURE BREAKDOWN (A TO J)
 
-#### Feature 1: TripWise AI
-* **WHAT is it?** A contextual chat assistant that answers questions about your trip.
-* **WHY did we add it?** To give travelers personalized advice about their itinerary.
-* **HOW does it work?** The frontend sends trip context + user question to `/api/ai/ask` on the backend, which securely queries the AI API.
-* **LIMITATIONS:** Requires an active backend connection and Gemini API key (with fallback rule-based answers if unconfigured).
+#### A. How Destination-Specific Itinerary Generation Works
+* When the user enters a city name (e.g. "Delhi", "London", "Paris", "Tokyo"), the system normalizes the city string and fetches curated, real place data from `destinationPlaces.ts`.
+* Each place contains real names (e.g., Red Fort, Humayun's Tomb, Big Ben, Tower Bridge), real descriptions, exact `lat`/`lng` coordinates, outdoor/indoor flags, and real indoor alternatives.
 
-#### Feature 2: Weather Advisor
-* **WHAT is it?** A smart recommendation card based on Open-Meteo weather forecast data.
-* **WHY did we add it?** To warn users about rain or high heat and suggest indoor alternatives.
-* **HOW does it work?** Reads precipitation risk and temperature from Open-Meteo, rendering simple advice.
-* **LIMITATIONS:** Dependent on forecast accuracy provided by Open-Meteo.
+#### B. How Cross-City Contamination is Prevented (Zero-Leak Rule)
+* Places are grouped inside `DESTINATION_REGISTRY[cityKey]`.
+* Destination selection strictly limits place selection to that specific city key.
+* A validation guard `validateZeroCrossContamination(city, activities)` runs before returning the itinerary. If any landmark from another city is detected, it is immediately stripped out.
 
-#### Feature 3: Smart Route Optimization
-* **WHAT is it?** A route reordering system for daily itinerary stops.
-* **WHY did we add it?** To reduce unnecessary back-and-forth transit between activities.
-* **HOW does it work?** Uses the Haversine formula to compute distances between latitude/longitude points and orders them using Nearest Neighbor.
-* **LIMITATIONS:** Estimates straight-line distance, not live road traffic.
+#### C. How Traveler Persona Affects Recommendations
+* Personas (Backpacker, Family, Luxury, Explorer, Solo Explorer) filter and score places.
+* For example:
+  * **Backpacker**: Prefers street food, handicraft bazaars, and walking heritage tours.
+  * **Luxury**: Prefers fine dining, iconic monuments, and comfortable pacing.
+  * **Family**: Prefers kid-friendly parks, museums, and manageable walking distances.
 
-#### Feature 4: Admin Dashboard (`/admin`)
-* **WHAT is it?** A protected dashboard showing real application metrics.
-* **WHY did we add it?** To monitor platform statistics (users, trips, AI queries).
-* **HOW does it work?** Checks user profile role (`admin`) in Supabase and queries aggregated backend stats.
-* **LIMITATIONS:** Access is restricted to authorized profiles.
+#### D. How Weather Affects Activity Selection
+* Live daily forecast data is fetched from the Open-Meteo API (precipitation probability, temperature, WMO weather codes).
+* If rain probability on a day exceeds 40-45%, outdoor attractions are automatically swapped with climate-controlled indoor alternatives (e.g., Red Fort → National Museum).
 
-#### Feature 5: Simple Trip Reminders
-* **WHAT is it?** An in-app notification banner for upcoming travel dates.
-* **WHY did we add it?** To help travelers prepare before departure.
-* **HOW does it work?** Displays a card at the top of Dashboard and Trip views.
-* **LIMITATIONS:** In-app notification card (does not require background push permissions).
+#### E. How Route Optimization Works
+* Activities are ordered using a **Nearest-Neighbor algorithm**.
+* The itinerary starts at the morning attraction, finds the unvisited attraction with the shortest distance, and sets it as the next stop to eliminate unnecessary travel back-and-forth.
 
----
+#### F. How Latitude and Longitude Are Used
+* Every attraction and metro station has exact `lat` and `lng` coordinates.
+* The system calculates the geographical straight-line distance between locations using the **Haversine formula**.
 
-### 4. CODE I MUST UNDERSTAND
+#### G. How the Nearest Metro Station is Found
+* For each attraction `(lat, lng)`, the system calculates the distance to all metro stations in that city's dataset using the Haversine formula.
+* The station with the smallest distance is assigned as `nearestMetro`.
 
-1. **[server.ts](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/backend/src/server.ts) (`app.post('/api/ai/ask')`)**: Receives trip context and user query, securely queries Gemini API on backend.
-2. **[server.ts](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/backend/src/server.ts) (`app.get('/api/admin/stats')`)**: Aggregates total users, trips, popular destinations, and AI query counts.
-3. **[routeOptimizer.ts](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/lib/routeOptimizer.ts) (`calculateHaversineDistance`)**: Computes distance in kilometers between two lat/lng coordinates.
-4. **[routeOptimizer.ts](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/lib/routeOptimizer.ts) (`optimizeDayRoute`)**: Applies Nearest Neighbor algorithm to reorder activities.
-5. **[WeatherAdvisorCard.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/WeatherAdvisorCard.tsx)**: Evaluates rain percentage and temperature to display travel advice.
-6. **[TripWiseAIModal.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/TripWiseAIModal.tsx)**: Manages chat state and communicates with backend `/api/ai/ask`.
-7. **[SmartRouteCard.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/SmartRouteCard.tsx)**: Renders route optimization trigger button and distance savings summary.
-8. **[admin/page.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/app/admin/page.tsx)**: Verifies admin role and renders database metrics.
-9. **[supabase_schema.sql](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/backend/supabase_schema.sql)**: Defines database tables (`trips`, `profiles`) and Row Level Security (RLS) policies.
-10. **[Navbar.tsx](file:///Users/apple/Desktop/GDG%20DEV%20TASK/TRIPWISE/frontend/src/components/Navbar.tsx)**: Main navigation component with smooth anchor scroll and role link.
+#### H. How the Metro & Public Transport Section Works
+* Displays `🚇 Near [Station Name] Metro` badges with estimated walking time.
+* Displays inter-activity transit connectors (e.g., `Lal Qila → Jama Masjid • ~10 min metro, ~5 min walk`).
+* Provides an `Open Route` button linking to Google Maps Transit view (`https://www.google.com/maps/dir/?api=1&origin=...&destination=...&travelmode=transit`).
 
----
+#### I. Calculated vs External APIs
+* **External APIs**: Open-Meteo Geocoding API (city coordinates) and Open-Meteo Weather Forecast API (weather risk).
+* **Calculated Locally**: Haversine distance, Nearest-Neighbor sorting, nearest metro station matching, travel time estimates, and Trip Health score.
 
-### 5. INTERVIEW QUESTIONS & ANSWERS
-
-1. **Explain your project:**
-   * *"TRIPWISE is a weather-adaptive travel itinerary application. It generates personalized travel itineraries based on destination, duration, traveler persona, and real-time weather forecasts."*
-2. **Why did you choose a travel itinerary application?**
-   * *"Travel plans often get ruined by sudden bad weather. I wanted to build an app that dynamically adjusts activities based on weather forecasts."*
-3. **How does the itinerary generator work?**
-   * *"It takes user inputs, fetches weather forecast data from Open-Meteo, filters activities matching the persona, and scores them based on weather suitability."*
-4. **How does the weather API work?**
-   * *"We use Open-Meteo, a free REST API. We pass latitude and longitude, and receive daily temperature and rain probabilities."*
-5. **What is an API?**
-   * *"API stands for Application Programming Interface. It allows two software applications to communicate and share data."*
-6. **How does TripWise AI work?**
-   * *"The user asks a question, the frontend sends it with trip context to our backend, which forwards it to Gemini API and returns the response."*
-7. **Why is the AI API called through the backend?**
-   * *"To keep the API key secure. If called directly from the browser, any user could view the secret key."*
-8. **Where is the API key stored?**
-   * *"In environment variables (`.env`) on the backend server, which is listed in `.gitignore`."*
-9. **Is AI responsible for generating weather data?**
-   * *"No. Open-Meteo is the source of truth for weather data. AI is only used to answer contextual questions."*
-10. **How does Smart Route Optimization work?**
-    * *"It takes the activities planned for a day and calculates distances between their coordinates using the Haversine formula, then reorders them."*
-11. **What algorithm did you use for route optimization?**
-    * *"The Nearest-Neighbor algorithm. It starts at the first location and repeatedly visits the closest unvisited location."*
-12. **Why did you choose that algorithm?**
-    * *"Because it is simple, fast, and easy to explain during interviews while delivering effective distance reductions."*
-13. **How do latitude and longitude help?**
-    * *"Latitude and longitude provide exact geographic coordinates on Earth, allowing accurate distance calculation."*
-14. **Does your route optimization account for traffic?**
-    * *"No. It calculates approximate straight-line geographical distance to keep the application fast and reliable."*
-15. **What are the limitations of your route optimization?**
-    * *"It approximates transit times using average city speeds rather than live GPS traffic data."*
-16. **Why did you create an admin dashboard?**
-    * *"To monitor real-time platform statistics like registered users, total trips created, and popular destinations."*
-17. **How do you prevent normal users from accessing it?**
-    * *"Using role-based access control. The database stores a `role` field (`admin` vs `user`), and `/admin` checks user authorization."*
-18. **How does your application use Supabase?**
-    * *"Supabase handles PostgreSQL database storage for trips/profiles and user authentication."*
-19. **What is authentication?**
-    * *"Authentication verifies who a user is (e.g., logging in with email and password)."*
-20. **What is authorization?**
-    * *"Authorization determines what permissions a verified user has (e.g., normal user vs admin access)."*
-21. **What happens when an API fails?**
-    * *"The application handles errors gracefully using fallback mechanisms so the user experience is never broken."*
-22. **What was the hardest part of the project?**
-    * *"Ensuring smooth integration between weather data scoring, itinerary generation, and frontend state management."*
-23. **What did you learn?**
-    * *"Full-stack development, API integration, backend security practices, and practical algorithm implementation."*
-24. **What would you improve in the future?**
-    * *"Adding interactive maps, live road travel times via Google Maps API, and offline caching."*
-25. **Why did you use AI-assisted development?**
-    * *"To accelerate modern UI design prototyping, maintain clean architecture patterns, and debug efficiently."*
+#### J. System Limitations
+* Transit travel times are calculated approximations based on distance and average urban transit speeds, not real-time train schedules.
+* For cities without curated place data, a safe fallback generator builds realistic city-anchored places using geocoded coordinates without showing wrong cities.
 
 ---
 
-### 6. FIVE-MINUTE PROJECT EXPLANATION SCRIPT
+## 💡 INTERVIEW QUESTIONS & ANSWERS (1 TO 17)
 
-* **Minute 1: Problem & Solution**
-  * *"Hello! I built TRIPWISE, a weather-aware adaptive travel itinerary app. Traditional travel itineraries are static, but bad weather can ruin outdoor plans. TRIPWISE solves this by combining weather forecast data with traveler personas."*
-* **Minute 2: Core Functionality & Weather Integration**
-  * *"When a user enters a destination and persona, TRIPWISE fetches real-time forecast data from the Open-Meteo API. It scores activities based on temperature and rain probability, creating a balanced day-by-day plan."*
-* **Minute 3: TripWise AI & Weather Advisor**
-  * *"We added TripWise AI—a contextual assistant. Users can ask questions like 'What if it rains on Day 2?'. The request goes to our Express backend, which securely queries the AI model. The Weather Advisor also displays automatic alerts."*
-* **Minute 4: Smart Route & Admin Dashboard**
-  * *"To reduce transit hassle, Smart Route uses the Haversine formula and Nearest-Neighbor algorithm to reorder activities. We also built a protected `/admin` dashboard displaying real user and trip stats from Supabase."*
-* **Minute 5: Architecture & Key Takeaway**
-  * *"Our stack uses Next.js for frontend, Express for backend, Supabase for PostgreSQL, and Open-Meteo for weather. Everything is modular and secure. Thank you!"*
+1. **"How does your itinerary generator work?"**
+   > *"When a user selects a destination, persona, and duration, TripWise fetches real curated places for that city, filters them by traveler persona, checks Open-Meteo forecast data to adjust for rain, orders them geographically using Nearest Neighbor, and links nearest metro stations."*
+
+2. **"How do you make recommendations specific to the destination?"**
+   > *"We maintain a destination-aware database (`destinationPlaces.ts`) mapped by city keys. Each city has curated real landmarks, coordinates, descriptions, and local metro station datasets."*
+
+3. **"How do you make sure Delhi places don't appear when someone selects London?"**
+   > *"Destination selection strictly gates place selection to that city's registry key. We also run a `validateZeroCrossContamination` guard function that verifies every place belongs to the selected city before rendering."*
+
+4. **"How does your route optimization work?"**
+   > *"We calculate the geographical distance between activities using the Haversine formula and reorder them using a Nearest-Neighbor algorithm so activities close to each other are grouped together."*
+
+5. **"Which algorithm did you use?"**
+   > *"We used the **Nearest-Neighbor algorithm** paired with the **Haversine distance formula**."*
+
+6. **"Why did you choose that algorithm?"**
+   > *"It is computationally efficient, simple to implement on the frontend, and easy to explain clearly in an interview without unnecessary complexity."*
+
+7. **"How do latitude and longitude help?"**
+   > *"Latitude and longitude provide exact spatial coordinates for attractions and metro stations, allowing us to calculate distances and order activities geographically."*
+
+8. **"How did you integrate metro routes?"**
+   > *"We match attraction coordinates to the nearest metro station in that city using Haversine proximity, calculate estimated transit/walk times, and provide Google Maps Transit links."*
+
+9. **"Are your metro travel times live?"**
+   > *"No, they are approximate planning estimates calculated using geographical distance and average urban transit speeds. We clearly label them as 'Estimated' in the UI."*
+
+10. **"What happens if a city doesn't have a metro?"**
+    > *"For cities without a metro, the system displays general public transport guidance and provides direct Google Maps transit route links."*
+
+11. **"How does weather affect the itinerary?"**
+    > *"We fetch precipitation risk from Open-Meteo. If rain risk exceeds 40%, outdoor activities automatically swap to indoor alternatives (Plan B Mode)."*
+
+12. **"How does the traveler persona affect the itinerary?"**
+    > *"Personas (e.g. Backpacker vs Luxury) filter place suitability. Backpackers get budget street food and walking tours, while Luxury travelers get premium dining and iconic spots."*
+
+13. **"What is the role of AI?"**
+    > *"TripWise AI serves as a contextual assistant. It takes the generated itinerary, places, weather, and transit data as context and answers user questions about why places were chosen or what to prepare."*
+
+14. **"Why didn't you let AI generate the entire itinerary?"**
+    > *"AI can hallucinate non-existent places or invent fake travel times. Using a deterministic place-selection and routing engine guarantees zero cross-city contamination, reliable metro stations, and consistent performance."*
+
+15. **"What are the limitations of your route optimization?"**
+    > *"It uses straight-line Haversine distance rather than live road traffic or subway schedules."*
+
+16. **"What was the hardest part of implementing this?"**
+    > *"Ensuring strict zero cross-city contamination while dynamically mapping real metro stations and weather fallbacks seamlessly across multi-day itineraries."*
+
+17. **"What would you improve in the future?"**
+    > *"I would integrate real-time public transit APIs (like GTFS feeds) and live traffic routing."*
 
 ---
 
-### 7. DEPLOYMENT PREPARATION CHECKLIST
+## 🛠️ LOCAL RUN & TESTING INSTRUCTIONS
 
-#### Vercel Environment Variables (Frontend)
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-NEXT_PUBLIC_BACKEND_URL=https://your-render-backend.onrender.com
-```
-
-#### Render Environment Variables (Backend)
-```env
-PORT=5000
-SUPABASE_URL=https://your-supabase-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-GEMINI_API_KEY=your-gemini-api-key
-```
-
-#### Commands
-* **Vercel Build Command:** `npm run build`
-* **Render Build Command:** `npm install && npm run build`
-* **Render Start Command:** `npm run start`
-
----
-
-## 🛠️ LOCAL SETUP INSTRUCTIONS
-
+### 1. Install Dependencies
 ```bash
-# 1. Start Frontend
-cd "TRIPWISE/frontend"
+# Frontend
+cd frontend
 npm install
+
+# Backend
+cd ../backend
+npm install
+```
+
+### 2. Run Local Development Servers
+```bash
+# Terminal 1 - Backend API (Port 5000)
+cd backend
 npm run dev
 
-# 2. Start Backend (in second terminal)
-cd "TRIPWISE/backend"
-npm install
+# Terminal 2 - Frontend Next.js (Port 3000)
+cd frontend
 npm run dev
 ```
 
-Visit **http://localhost:3000** to view the application!
+### 3. Open Application
+Open [http://localhost:3000](http://localhost:3000) in your browser.

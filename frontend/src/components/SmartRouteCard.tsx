@@ -7,6 +7,7 @@ import { Compass, Navigation, ArrowRight, CheckCircle2, RefreshCw, Clock } from 
 
 interface SmartRouteCardProps {
   activities: Activity[];
+  destinationName?: string;
   baseLat?: number;
   baseLng?: number;
   onApplyOptimization?: (optimizedActivities: Activity[]) => void;
@@ -14,6 +15,7 @@ interface SmartRouteCardProps {
 
 export default function SmartRouteCard({
   activities,
+  destinationName = 'Delhi',
   baseLat,
   baseLng,
   onApplyOptimization,
@@ -22,7 +24,7 @@ export default function SmartRouteCard({
   const [optimizedApplied, setOptimizedApplied] = useState(false);
 
   const handleOptimize = () => {
-    const result = optimizeDayRoute(activities, baseLat, baseLng);
+    const result = optimizeDayRoute(activities, destinationName, baseLat, baseLng);
     setOptimization(result);
     setOptimizedApplied(true);
     if (onApplyOptimization) {
