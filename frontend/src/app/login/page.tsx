@@ -33,12 +33,37 @@ export default function LoginPage() {
       });
 
       if (signInError) {
-        setError(signInError.message || 'Invalid email or password.');
+        const msg = signInError.message.toLowerCase();
+        if (msg.includes('email not confirmed')) {
+          setError(
+            'Your email address has not been confirmed yet. Please check your inbox for the confirmation link, or turn off "Confirm email" in Supabase Authentication settings.'
+          );
+        } else if (msg.includes('invalid login credentials')) {
+          setError(
+            'Invalid email or password. If you just created this account, please check if Supabase requires email confirmation, or verify your email and password.'
+          );
+        } else {
+          setError(signInError.message || 'Invalid email or password.');
+        }
         setLoading(false);
         return;
       }
 
       if (data.user) {
+        // Ensure profile row exists in public.profiles
+        try {
+          await supabase.from('profiles').upsert(
+            {
+              id: data.user.id,
+              full_name: data.user.user_metadata?.full_name || email.trim().split('@')[0],
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+          );
+        } catch (pErr) {
+          console.log('Profile sync fallback handled by DB');
+        }
+
         setSuccess('Welcome back! Redirecting to your dashboard...');
         setTimeout(() => {
           window.location.href = '/dashboard';

@@ -35,6 +35,10 @@ CREATE POLICY "Users can view their own profile"
   ON public.profiles FOR SELECT 
   USING (auth.uid() = id);
 
+CREATE POLICY "Users can insert their own profile" 
+  ON public.profiles FOR INSERT 
+  WITH CHECK (auth.uid() = id);
+
 CREATE POLICY "Users can update their own profile" 
   ON public.profiles FOR UPDATE 
   USING (auth.uid() = id);
@@ -61,3 +65,26 @@ CREATE POLICY "Users can delete their own trips"
 CREATE POLICY "Anyone can view shared trips via share_id" 
   ON public.trips FOR SELECT 
   USING (share_id IS NOT NULL);
+
+-- 6. Trigger to automatically create profile row when user signs up in auth.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, updated_at)
+  VALUES (
+    new.id,
+    COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
+    now()
+  )
+  ON CONFLICT (id) DO UPDATE 
+    SET full_name = EXCLUDED.full_name,
+        updated_at = now();
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Bind trigger to auth.users table
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

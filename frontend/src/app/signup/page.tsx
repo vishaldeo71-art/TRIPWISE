@@ -59,10 +59,28 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        setSuccess('Account created successfully! Redirecting to dashboard...');
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1200);
+        // Try creating profile record in public.profiles
+        try {
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            full_name: name.trim(),
+            updated_at: new Date().toISOString(),
+          });
+        } catch (pErr) {
+          console.log('Profile upsert fallback handled by database trigger');
+        }
+
+        if (data.session) {
+          setSuccess('Account created successfully! Redirecting to dashboard...');
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1200);
+        } else {
+          setSuccess(
+            'Account created! Please check your email to confirm your account before logging in (or disable "Confirm email" in Supabase Dashboard > Authentication > Settings for instant login).'
+          );
+          setLoading(false);
+        }
       }
     } catch (err: any) {
       setError(err?.message || 'An unexpected error occurred during signup.');
