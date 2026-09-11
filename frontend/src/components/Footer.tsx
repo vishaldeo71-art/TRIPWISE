@@ -18,8 +18,8 @@ export default function Footer() {
         <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
           <Link href="/plan" className="hover:text-sky-400 transition">Plan Trip</Link>
           <Link href="/dashboard" className="hover:text-sky-400 transition">My Trips</Link>
-          <a href="#how-it-works" className="hover:text-sky-400 transition">How It Works</a>
-          <a href="#features" className="hover:text-sky-400 transition">Features</a>
+          <Link href="/#how-it-works" className="hover:text-sky-400 transition">How It Works</Link>
+          <Link href="/#features" className="hover:text-sky-400 transition">Features</Link>
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-slate-500">

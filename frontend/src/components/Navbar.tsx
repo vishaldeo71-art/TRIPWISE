@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { Compass, CloudSun, User, LogOut, Menu, X, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -9,6 +10,8 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     // Check initial auth state
@@ -27,6 +30,21 @@ export default function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
+  };
+
+  const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+
+    if (pathname === '/') {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        window.history.pushState(null, '', `/#${sectionId}`);
+      }
+    } else {
+      router.push(`/#${sectionId}`);
+    }
   };
 
   return (
@@ -57,12 +75,20 @@ export default function Navbar() {
               My Trips
             </Link>
           )}
-          <a href="#how-it-works" className="hover:text-brand-300 transition">
+          <Link
+            href="/#how-it-works"
+            onClick={(e) => handleSectionClick(e, 'how-it-works')}
+            className="hover:text-brand-300 transition"
+          >
             How It Works
-          </a>
-          <a href="#features" className="hover:text-brand-300 transition">
+          </Link>
+          <Link
+            href="/#features"
+            onClick={(e) => handleSectionClick(e, 'features')}
+            className="hover:text-brand-300 transition"
+          >
             Features
-          </a>
+          </Link>
         </div>
 
         {/* Auth CTA Buttons */}
@@ -130,20 +156,20 @@ export default function Navbar() {
               My Saved Trips
             </Link>
           )}
-          <a
-            href="#how-it-works"
-            onClick={() => setIsMobileMenuOpen(false)}
+          <Link
+            href="/#how-it-works"
+            onClick={(e) => handleSectionClick(e, 'how-it-works')}
             className="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm"
           >
             How It Works
-          </a>
-          <a
-            href="#features"
-            onClick={() => setIsMobileMenuOpen(false)}
+          </Link>
+          <Link
+            href="/#features"
+            onClick={(e) => handleSectionClick(e, 'features')}
             className="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm"
           >
             Features
-          </a>
+          </Link>
           <div className="pt-2 border-t border-slate-800 flex flex-col gap-2">
             {user ? (
               <button

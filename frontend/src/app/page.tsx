@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -17,6 +20,17 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const id = window.location.hash.substring(1);
+      const el = document.getElementById(id);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, []);
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-brand-500 selection:text-white">
       <Navbar />
@@ -56,6 +70,11 @@ export default function LandingPage() {
               </Link>
               <a
                 href="#how-it-works"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  window.history.pushState(null, '', '/#how-it-works');
+                }}
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 font-semibold text-lg border border-slate-800 transition-all duration-300 flex items-center justify-center gap-2"
               >
                 Explore How It Works
@@ -106,7 +125,7 @@ export default function LandingPage() {
         </section>
 
         {/* VISUAL EXPLANATION (STEP FLOW) */}
-        <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
+        <section id="how-it-works" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-sky-400">Simple 4-Step Process</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">How TRIPWISE Adapts Your Journey</p>
@@ -165,7 +184,7 @@ export default function LandingPage() {
         </section>
 
         {/* FEATURE CARDS */}
-        <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
+        <section id="features" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-brand-400">Core Features</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">Built for Unpredictable Journeys</p>
