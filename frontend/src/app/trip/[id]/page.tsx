@@ -176,31 +176,31 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* TRIP HERO HEADER & WEATHER SUMMARY */}
-        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-800 relative overflow-hidden">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-700/80 relative overflow-hidden shadow-2xl">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-sky-400 uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-xs font-bold text-sky-400 uppercase tracking-wider">
                 <MapPin className="w-4 h-4" /> {trip.destination} • {trip.durationDays} Days Itinerary
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
                 {trip.destination} Adaptive Plan
               </h1>
               <div className="flex flex-wrap gap-2 pt-1 text-xs">
-                <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 font-medium flex items-center gap-1.5">
+                <span className="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-slate-300 font-semibold flex items-center gap-1.5 shadow-sm">
                   <User className="w-3.5 h-3.5 text-purple-400" /> {trip.persona}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 font-medium">
+                <span className="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-slate-300 font-semibold shadow-sm">
                   ⚡ Pace: {trip.pace}
                 </span>
               </div>
             </div>
 
             {/* Weather & Trip Health Badges */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-slate-900/90 p-4 rounded-2xl border border-slate-800 shadow-inner">
               {/* Weather Summary */}
               {trip.weatherSummary && (
                 <div className="pr-4 border-r border-slate-800">
-                  <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Forecast</span>
+                  <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider">Forecast</span>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-2xl">{currentDay.weatherForecast.icon}</span>
                     <div>
@@ -218,16 +218,16 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
               {/* Trip Health Score */}
               {trip.healthScore && (
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Trip Health</span>
+                  <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider">Trip Health</span>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-extrabold text-emerald-400 text-sm">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center font-extrabold text-emerald-400 text-sm shadow-sm">
                       {trip.healthScore.score}
                     </div>
                     <div>
                       <div className="font-bold text-white text-xs">
                         {trip.healthScore.label}
                       </div>
-                      <div className="text-[10px] text-slate-400">Deterministic Score</div>
+                      <div className="text-[10px] text-slate-400 font-medium">Deterministic Score</div>
                     </div>
                   </div>
                 </div>
@@ -237,36 +237,36 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* DAY SELECTOR TABS */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
           {trip.days.map((d, idx) => (
             <button
               key={d.dayNumber}
               onClick={() => setActiveDayIdx(idx)}
-              className={`px-5 py-3 rounded-2xl font-bold text-sm border whitespace-nowrap transition flex items-center gap-2 ${
+              className={`px-5 py-3.5 rounded-2xl font-extrabold text-sm border whitespace-nowrap transition-all ${
                 activeDayIdx === idx
-                  ? 'bg-brand-600 text-white border-brand-400 shadow-lg shadow-brand-500/20'
-                  : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-slate-700'
+                  ? 'bg-gradient-to-r from-brand-600 to-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20 scale-[1.02]'
+                  : 'bg-slate-900/90 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
               }`}
             >
               <span>Day {d.dayNumber}</span>
-              <span className="text-xs opacity-75">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
+              <span className="text-xs opacity-80 font-normal">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
             </button>
           ))}
         </div>
 
         {/* WEATHER ADAPTATION & PLAN B BANNER */}
-        <div className="glass-card rounded-2xl p-5 border border-slate-800 space-y-4">
+        <div className="glass-panel rounded-3xl p-5 border border-slate-800 space-y-4 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
-                <Sun className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-inner">
+                <Sun className="w-5.5 h-5.5" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-base">
+                <h3 className="font-extrabold text-white text-base">
                   Day {currentDay.dayNumber} Weather Outlook: {currentDay.weatherForecast.condition}
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Precipitation Risk: <span className="font-semibold text-slate-200">{currentDay.weatherForecast.rainProbability}%</span> • {currentDay.weatherForecast.note}
+                  Precipitation Risk: <span className="font-bold text-sky-300">{currentDay.weatherForecast.rainProbability}%</span> • {currentDay.weatherForecast.note}
                 </p>
               </div>
             </div>
@@ -274,10 +274,10 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             {/* 🔥 "🌧️ What if it rains?" Plan B Toggle Button */}
             <button
               onClick={() => togglePlanB(activeDayIdx)}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md ${
+              className={`px-4 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 transition-all border shadow-lg ${
                 isCurrentPlanB
-                  ? 'bg-purple-600 text-white border-purple-400 shadow-purple-500/20'
-                  : 'bg-slate-900 text-sky-300 border-sky-500/40 hover:bg-slate-800'
+                  ? 'bg-purple-600 text-white border-purple-400 shadow-purple-500/25 scale-[1.02]'
+                  : 'bg-slate-900/90 text-sky-300 border-sky-500/40 hover:bg-slate-800 hover:border-sky-400'
               }`}
             >
               <Umbrella className="w-4 h-4 text-purple-300" />
@@ -287,15 +287,15 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
           {/* Plan B Explanation Banner when active */}
           {isCurrentPlanB && (
-            <div className="p-4 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs space-y-2 animate-fadeIn">
-              <div className="flex items-center gap-2 font-bold text-purple-300">
+            <div className="p-4.5 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs space-y-2 animate-fadeIn shadow-inner">
+              <div className="flex items-center gap-2 font-extrabold text-purple-300">
                 <Info className="w-4 h-4 text-purple-400" />
                 <span>Why did we change this?</span>
               </div>
-              <p className="text-slate-300">
+              <p className="text-slate-300 leading-relaxed">
                 Rain risk is expected during peak afternoon hours ({currentDay.weatherForecast.rainProbability}% probability). Outdoor visits have been replaced with curated, climate-controlled indoor attractions.
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-purple-400 font-semibold pt-1">
+              <div className="flex items-center gap-2 text-[11px] text-purple-400 font-bold pt-1">
                 <span>PLAN A (Outdoor)</span> → <span className="text-emerald-400">PLAN B (Indoor Experience)</span>
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
         {/* ITINERARY ACTIVITIES TIMELINE */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
             <Clock className="w-5 h-5 text-sky-400" /> Scheduled Activities ({isCurrentPlanB ? 'Plan B Indoor Mode' : 'Plan A Original'})
           </h3>
 
@@ -323,16 +323,16 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
               return (
                 <div
                   key={act.id}
-                  className={`glass-card rounded-2xl p-6 border transition relative ${
+                  className={`glass-panel rounded-3xl p-6 border transition-all relative ${
                     isReplacedByPlanB
-                      ? 'border-purple-500/40 bg-purple-950/20'
+                      ? 'border-purple-500/50 bg-purple-950/20 shadow-purple-500/10'
                       : 'border-slate-800 hover:border-slate-700'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-xs font-semibold">
-                        <span className="px-2.5 py-0.5 rounded-full bg-brand-500/10 text-sky-400 border border-brand-500/20">
+                        <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 font-bold">
                           {act.bestTime}
                         </span>
                         <span className="text-slate-500">•</span>
@@ -344,7 +344,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                       <h4 className="text-xl font-bold text-white flex items-center gap-2">
                         {displayActivityName}
                         {isReplacedByPlanB && (
-                          <span className="px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
                             Indoor Plan B
                           </span>
                         )}
@@ -358,7 +358,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                     {/* "Why this?" Button */}
                     <button
                       onClick={() => setSelectedWhyActivity(act)}
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition"
+                      className="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 shrink-0 transition shadow-sm"
                     >
                       <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
                       <span>Why this?</span>
@@ -372,13 +372,13 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
         {/* TRIP HEALTH FACTORS */}
         {trip.healthScore && (
-          <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-3">
-            <h4 className="font-bold text-white text-base flex items-center gap-2">
+          <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-3 shadow-xl">
+            <h4 className="font-extrabold text-white text-base flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-400" /> Trip Health Factors ({trip.healthScore.score}/100)
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {trip.healthScore.factors.map((f, i) => (
-                <div key={i} className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300">
+                <div key={i} className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 text-xs text-slate-300 font-medium">
                   {f.text}
                 </div>
               ))}
@@ -389,26 +389,26 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
       {/* "WHY THIS ACTIVITY?" MODAL */}
       {selectedWhyActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="glass-card rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-800 space-y-4 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-700/80 space-y-4 relative shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 font-bold text-white text-lg">
-                <Sparkles className="w-5 h-5 text-sky-400" /> Why this activity?
+              <div className="flex items-center gap-2 font-extrabold text-white text-lg">
+                <Sparkles className="w-5 h-5 text-sky-400 animate-pulse" /> Why this activity?
               </div>
               <button
                 onClick={() => setSelectedWhyActivity(null)}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-white text-sm w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-800"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3 text-sm">
-              <h5 className="font-bold text-sky-300 text-base">{selectedWhyActivity.name}</h5>
-              <p className="text-slate-300 text-sm leading-relaxed bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+              <h5 className="font-extrabold text-sky-300 text-base">{selectedWhyActivity.name}</h5>
+              <p className="text-slate-300 text-sm leading-relaxed bg-slate-900/90 p-4.5 rounded-2xl border border-slate-800 shadow-inner">
                 {selectedWhyActivity.whySelectedReason || `Selected based on your ${trip.persona} traveler persona and ${trip.pace} pacing preferences.`}
               </p>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-400 pt-1">
+              <div className="flex flex-wrap gap-2 text-xs text-slate-400 pt-1 font-medium">
                 <span>Category: {selectedWhyActivity.category}</span>
                 <span>•</span>
                 <span>Outdoor: {selectedWhyActivity.isOutdoor ? 'Yes' : 'No'}</span>
@@ -419,7 +419,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
             <button
               onClick={() => setSelectedWhyActivity(null)}
-              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold text-sm"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-sky-500 text-white font-extrabold text-sm shadow-md"
             >
               Got it
             </button>

@@ -196,39 +196,39 @@ export default function CreateTripPage() {
           </div>
         )}
 
-        {/* Main Form */}
-        <div className="glass-card rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl relative">
+        {/* Main Form Container */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-slate-700/80 shadow-2xl relative overflow-hidden">
           {loading ? (
             /* Loading Experience Modal */
             <div className="py-12 text-center space-y-6">
-              <div className="w-16 h-16 rounded-2xl bg-brand-600/20 border border-brand-500/40 flex items-center justify-center mx-auto text-sky-400 animate-bounce">
-                <Compass className="w-8 h-8 animate-spin" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600/30 to-sky-500/30 border border-sky-500/40 flex items-center justify-center mx-auto text-sky-400 animate-bounce shadow-lg shadow-sky-500/20">
+                <Compass className="w-8 h-8 animate-spin text-sky-400" />
               </div>
 
               <div className="space-y-2">
                 <h3 className="text-2xl font-extrabold text-white">Generating Your Itinerary...</h3>
                 <p className="text-sm text-slate-400 max-w-md mx-auto">
-                  Connecting to weather APIs and structuring your persona recommendations.
+                  Fetching live weather forecasts from public APIs and building your personalized persona recommendations.
                 </p>
               </div>
 
               {/* Progress Steps */}
               <div className="max-w-md mx-auto space-y-3 pt-4 text-left text-xs font-semibold">
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition ${loadingStep >= 1 ? 'bg-brand-500/10 text-sky-300 border border-brand-500/30' : 'text-slate-600'}`}>
+                <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 1 ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-sm' : 'text-slate-600 border border-transparent'}`}>
                   <CheckCircle2 className={`w-4 h-4 ${loadingStep >= 1 ? 'text-sky-400' : 'text-slate-700'}`} />
-                  <span>Finding places in {destination}...</span>
+                  <span>Geocoding coordinates for {destination}...</span>
                 </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition ${loadingStep >= 2 ? 'bg-brand-500/10 text-sky-300 border border-brand-500/30' : 'text-slate-600'}`}>
+                <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 2 ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-sm' : 'text-slate-600 border border-transparent'}`}>
                   <CheckCircle2 className={`w-4 h-4 ${loadingStep >= 2 ? 'text-sky-400' : 'text-slate-700'}`} />
-                  <span>Checking weather forecast & rain probability...</span>
+                  <span>Analyzing weather forecast & rain probability...</span>
                 </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition ${loadingStep >= 3 ? 'bg-brand-500/10 text-sky-300 border border-brand-500/30' : 'text-slate-600'}`}>
+                <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 3 ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-sm' : 'text-slate-600 border border-transparent'}`}>
                   <CheckCircle2 className={`w-4 h-4 ${loadingStep >= 3 ? 'text-sky-400' : 'text-slate-700'}`} />
-                  <span>Building {persona} itinerary & Plan B backups...</span>
+                  <span>Constructing {persona} itinerary & Plan B fallbacks...</span>
                 </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition ${loadingStep >= 4 ? 'bg-brand-500/10 text-sky-300 border border-brand-500/30' : 'text-slate-600'}`}>
+                <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 4 ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-sm' : 'text-slate-600 border border-transparent'}`}>
                   <CheckCircle2 className={`w-4 h-4 ${loadingStep >= 4 ? 'text-sky-400' : 'text-slate-700'}`} />
-                  <span>Optimizing daily activities & travel pace...</span>
+                  <span>Optimizing daily flow & travel pace...</span>
                 </div>
               </div>
             </div>
@@ -247,11 +247,11 @@ export default function CreateTripPage() {
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     placeholder="e.g. Delhi, Tokyo, Paris, London, Goa"
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-500 text-base focus:outline-none focus:border-brand-500 transition shadow-inner"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-500 text-base focus:outline-none focus:border-sky-500 transition shadow-inner"
                   />
                 </div>
                 <p className="text-xs text-slate-500 mt-1.5">
-                  Enter any global city. Geocoding will resolve coordinates automatically.
+                  Enter any destination. Geocoding will resolve coordinates and fetch live forecasts.
                 </p>
               </div>
 
@@ -261,7 +261,7 @@ export default function CreateTripPage() {
                   <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                     Trip Duration
                   </label>
-                  <span className="text-xs font-bold text-brand-300 px-2.5 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30">
+                  <span className="text-xs font-extrabold text-sky-300 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/30">
                     {durationDays} {durationDays === 1 ? 'Day' : 'Days'}
                   </span>
                 </div>
@@ -271,10 +271,10 @@ export default function CreateTripPage() {
                       key={num}
                       type="button"
                       onClick={() => setDurationDays(num)}
-                      className={`py-2.5 rounded-xl font-bold text-sm border transition ${
+                      className={`py-3 rounded-xl font-extrabold text-sm border transition-all ${
                         durationDays === num
-                          ? 'bg-brand-600 text-white border-brand-400 shadow-md shadow-brand-500/20'
-                          : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-slate-700'
+                          ? 'bg-gradient-to-r from-brand-600 to-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/20 scale-[1.03]'
+                          : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
                       }`}
                     >
                       {num} {num === 1 ? 'Day' : 'D'}
@@ -294,17 +294,17 @@ export default function CreateTripPage() {
                       key={p.id}
                       type="button"
                       onClick={() => setPersona(p.id)}
-                      className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between ${
+                      className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                         persona === p.id
-                          ? 'bg-brand-500/10 border-brand-500/50 text-white shadow-lg shadow-brand-500/10'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-sky-500/15 border-sky-500/60 text-white shadow-lg shadow-sky-500/10 scale-[1.02]'
+                          : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:bg-slate-900/90'
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-xl">{p.icon}</span>
-                        <span className="font-bold text-sm text-slate-200">{p.label}</span>
+                        <span className="font-bold text-sm text-slate-100">{p.label}</span>
                       </div>
-                      <p className="text-xs text-slate-500 leading-snug">{p.desc}</p>
+                      <p className="text-xs text-slate-400 leading-snug">{p.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -321,14 +321,14 @@ export default function CreateTripPage() {
                       key={pc.id}
                       type="button"
                       onClick={() => setPace(pc.id)}
-                      className={`p-3.5 rounded-2xl border text-left transition ${
+                      className={`p-4 rounded-2xl border text-left transition-all ${
                         pace === pc.id
-                          ? 'bg-sky-500/10 border-sky-500/50 text-white'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-brand-500/15 border-brand-500/60 text-white shadow-md shadow-brand-500/10 scale-[1.02]'
+                          : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:bg-slate-900/90'
                       }`}
                     >
-                      <div className="font-bold text-sm text-slate-200 mb-0.5">{pc.label}</div>
-                      <p className="text-xs text-slate-500">{pc.desc}</p>
+                      <div className="font-bold text-sm text-slate-100 mb-0.5">{pc.label}</div>
+                      <p className="text-xs text-slate-400">{pc.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -348,10 +348,10 @@ export default function CreateTripPage() {
                         key={item.id}
                         type="button"
                         onClick={() => toggleInterest(item.id)}
-                        className={`px-4 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 transition ${
+                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all ${
                           isSelected
-                            ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300'
-                            : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                            ? 'bg-indigo-500/20 border-indigo-500/60 text-indigo-300 shadow-sm'
+                            : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
                         }`}
                       >
                         <IconComp className="w-3.5 h-3.5" />
@@ -365,9 +365,9 @@ export default function CreateTripPage() {
               {/* Generate CTA Button */}
               <button
                 type="submit"
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-extrabold text-lg shadow-xl shadow-brand-500/25 transition hover:scale-[1.01] flex items-center justify-center gap-3"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-extrabold text-lg shadow-xl shadow-sky-500/25 transition-all duration-300 hover:scale-[1.01] flex items-center justify-center gap-3"
               >
-                <Sparkles className="w-5 h-5" />
+                <Sparkles className="w-5 h-5 text-sky-200" />
                 <span>Generate My Adaptive Itinerary</span>
                 <ArrowRight className="w-5 h-5" />
               </button>

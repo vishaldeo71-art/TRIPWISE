@@ -112,10 +112,10 @@ export default function DashboardPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Top Header Banner */}
-        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-800 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-sky-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" /> Personal Travel Dashboard
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-700/80 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-2xl">
+          <div className="space-y-1 z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-pulse" /> Personal Travel Dashboard
             </div>
             <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
               Where are you going next?
@@ -127,41 +127,41 @@ export default function DashboardPage() {
 
           <Link
             href="/plan"
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-sm shadow-xl shadow-brand-500/20 transition hover:scale-105 flex items-center gap-2 shrink-0"
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-extrabold text-sm shadow-xl shadow-sky-500/20 transition-all duration-300 hover:scale-105 flex items-center gap-2 shrink-0 z-10"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-5 h-5 text-sky-200" />
             <span>Create New Trip</span>
           </Link>
         </div>
 
         {/* Section Heading */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
             <Compass className="w-5 h-5 text-sky-400" /> My Saved Trips
           </h2>
-          <span className="text-xs text-slate-500 font-medium">{trips.length} Saved</span>
+          <span className="text-xs text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20 font-bold">{trips.length} Saved</span>
         </div>
 
         {/* Loading State */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="glass-card p-6 rounded-2xl border border-slate-800 animate-pulse h-48" />
+              <div key={i} className="glass-panel p-6 rounded-3xl border border-slate-800 animate-pulse h-52" />
             ))}
           </div>
         ) : trips.length === 0 ? (
           /* Empty State */
-          <div className="glass-card rounded-3xl p-12 text-center border border-slate-800 max-w-lg mx-auto my-8">
-            <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mx-auto mb-4">
+          <div className="glass-panel rounded-3xl p-12 text-center border border-slate-800 max-w-lg mx-auto my-8 shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500/15 to-brand-600/15 border border-sky-500/30 flex items-center justify-center text-slate-500 mx-auto mb-4 shadow-inner">
               <CloudSun className="w-8 h-8 text-sky-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">You haven&apos;t planned a trip yet.</h3>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-slate-400 mb-6 leading-relaxed">
               Create your first weather-aware itinerary for any city in the world.
             </p>
             <Link
               href="/plan"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm transition"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-sm transition shadow-lg shadow-sky-500/20 hover:scale-105"
             >
               <Plus className="w-4 h-4" /> Create your first trip
             </Link>
@@ -172,51 +172,51 @@ export default function DashboardPage() {
             {trips.map((trip) => (
               <div
                 key={trip.id || Math.random()}
-                className="glass-card glass-card-hover rounded-2xl p-6 border border-slate-800 flex flex-col justify-between relative group"
+                className="glass-panel glass-card-hover rounded-3xl p-6 border border-slate-800 flex flex-col justify-between relative group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <div className="flex items-center gap-1.5 text-xs text-sky-400 font-semibold uppercase tracking-wider mb-0.5">
+                      <div className="flex items-center gap-1.5 text-xs text-sky-400 font-bold uppercase tracking-wider mb-1">
                         <MapPin className="w-3.5 h-3.5" /> {trip.destination}
                       </div>
-                      <h3 className="text-xl font-extrabold text-white group-hover:text-brand-300 transition">
+                      <h3 className="text-xl font-extrabold text-white group-hover:text-sky-300 transition-colors">
                         {trip.destination}
                       </h3>
                     </div>
 
-                    <span className="px-2.5 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-xs font-bold shrink-0">
+                    <span className="px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-extrabold shrink-0">
                       {trip.durationDays} {trip.durationDays === 1 ? 'Day' : 'Days'}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-4">
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-1">
+                    <span className="px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-1 font-medium">
                       <User className="w-3 h-3 text-purple-400" /> {trip.persona}
                     </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-800 font-medium">
                       ⚡ {trip.pace}
                     </span>
                     {trip.healthScore && (
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-semibold">
+                      <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold">
                         Score {trip.healthScore.score}/100
                       </span>
                     )}
                   </div>
 
                   {trip.weatherSummary && (
-                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 mb-4 text-xs text-slate-300 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
+                    <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 mb-4 text-xs text-slate-300 flex items-center justify-between shadow-inner">
+                      <span className="flex items-center gap-1.5 font-medium">
                         <Sun className="w-4 h-4 text-amber-400" />
                         {trip.weatherSummary.avgTempC}°C • {trip.weatherSummary.overallCondition}
                       </span>
-                      <span className="text-slate-500">Outdoor: {trip.weatherSummary.suitabilityScore}</span>
+                      <span className="text-slate-400 font-semibold">Outdoor: {trip.weatherSummary.suitabilityScore}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 flex items-center gap-1">
+                  <span className="text-slate-500 flex items-center gap-1 font-medium">
                     <Calendar className="w-3 h-3" />
                     {trip.createdAt ? new Date(trip.createdAt).toLocaleDateString() : 'Recent'}
                   </span>
@@ -224,16 +224,16 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDeleteTrip(trip.id)}
-                      className="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                      className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition"
                       title="Delete Trip"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <Link
                       href={`/trip/${trip.shareId || trip.id}`}
-                      className="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold flex items-center gap-1 transition shadow"
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 text-white font-bold flex items-center gap-1.5 transition shadow-md shadow-sky-500/20 hover:scale-105"
                     >
-                      Open <ExternalLink className="w-3 h-3" />
+                      Open <ExternalLink className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>

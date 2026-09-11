@@ -47,13 +47,13 @@ export default function LandingPage() {
         {/* HERO SECTION */}
         <section className="relative pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
           {/* Ambient Glows */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-brand-600/20 via-sky-500/15 to-purple-600/20 blur-[120px] rounded-full pointer-events-none -z-10" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-brand-600/30 via-sky-500/20 to-indigo-600/25 blur-[140px] rounded-full pointer-events-none -z-10 animate-pulse-glow" />
 
           <div className="text-center max-w-4xl mx-auto space-y-8">
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-sky-300 text-xs sm:text-sm font-medium backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-sky-500/30 text-sky-300 text-xs sm:text-sm font-semibold shadow-lg shadow-sky-500/10 backdrop-blur-xl">
               <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" />
-              <span>Next-Gen Travel Engine • Weather-Aware Adaptation</span>
+              <span>Next-Gen Travel Engine • Real-Time Weather Adaptation</span>
             </div>
 
             {/* Main Headline */}
@@ -64,14 +64,14 @@ export default function LandingPage() {
 
             {/* Supporting Subtitle */}
             <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-              Build smarter trips around your destination, travel style, and the weather — with an itinerary that adapts when conditions change.
+              Build smarter trips around your destination, travel pace, and live forecast — with an itinerary that automatically adapts when weather changes.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link
                 href="/plan"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-lg shadow-xl shadow-brand-500/25 transition-all duration-300 hover:scale-[1.03] flex items-center justify-center gap-3 group"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-lg shadow-xl shadow-sky-500/25 transition-all duration-300 hover:scale-[1.03] flex items-center justify-center gap-3 group"
               >
                 <span>Plan My Trip</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -83,7 +83,7 @@ export default function LandingPage() {
                   document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
                   window.history.pushState(null, '', '/#how-it-works');
                 }}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 font-semibold text-lg border border-slate-800 transition-all duration-300 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-semibold text-lg border border-slate-700/60 shadow-md transition-all duration-300 flex items-center justify-center gap-2"
               >
                 Explore How It Works
               </a>
@@ -91,10 +91,10 @@ export default function LandingPage() {
 
             {/* Interactive Preview Card Mockup */}
             <div className="pt-12">
-              <div className="glass-card rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto border border-slate-800/90 shadow-2xl relative">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6 text-left">
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-3xl mx-auto border border-slate-700/80 shadow-2xl relative group">
+                <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-4 mb-6 text-left gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 font-bold">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500/20 to-brand-600/20 border border-sky-500/30 flex items-center justify-center text-sky-400 font-extrabold text-sm shadow-inner">
                       DEL
                     </div>
                     <div>
@@ -102,29 +102,29 @@ export default function LandingPage() {
                       <p className="text-xs text-slate-400">Backpacker Persona • Balanced Pace</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-                    <Sun className="w-3.5 h-3.5" /> Outdoor Suitability: High
+                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold shadow-sm">
+                    <Sun className="w-4 h-4 text-emerald-400" /> Outdoor Suitability: High (88/100)
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-                  <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                    <span className="text-xs font-semibold text-sky-400 uppercase tracking-wider">Morning</span>
+                  <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/30 transition">
+                    <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">Morning</span>
                     <h4 className="font-bold text-sm text-slate-100 mt-1">Humayun&apos;s Tomb & Gardens</h4>
                     <p className="text-xs text-slate-400 mt-1">🚶 15 min walk • Outdoor Heritage</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                    <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Afternoon</span>
+                  <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/30 transition">
+                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Afternoon</span>
                     <h4 className="font-bold text-sm text-slate-100 mt-1">Old Delhi Food & Spice Tour</h4>
                     <p className="text-xs text-slate-400 mt-1">🍲 Persona Match: Backpacker</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-slate-900/60 border border-brand-500/40 bg-brand-500/5 relative">
-                    <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider flex items-center justify-between">
+                  <div className="p-4 rounded-2xl bg-slate-900/80 border border-brand-500/40 bg-brand-500/10 relative">
+                    <span className="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center justify-between">
                       Evening
-                      <span className="text-[10px] bg-brand-500/20 px-1.5 py-0.5 rounded text-brand-300">Plan B Ready</span>
+                      <span className="text-[10px] bg-purple-500/20 px-2 py-0.5 rounded-md text-purple-300 border border-purple-500/30">Plan B Ready</span>
                     </span>
                     <h4 className="font-bold text-sm text-slate-100 mt-1">Akshardham Light Show</h4>
-                    <p className="text-xs text-slate-400 mt-1">🌧️ Rain protection backup</p>
+                    <p className="text-xs text-slate-400 mt-1">🌧️ Indoor Backup: Crafts Museum</p>
                   </div>
                 </div>
               </div>
@@ -142,11 +142,11 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
             {/* Step 1 */}
-            <div className="glass-card glass-card-hover p-6 rounded-2xl flex flex-col items-start relative group">
-              <div className="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform">
+            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group">
+              <div className="w-12 h-12 rounded-2xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center text-sky-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform shadow-inner">
                 01
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-brand-400 mb-1">Step 1</div>
+              <div className="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1">Step 1</div>
               <h3 className="text-xl font-bold text-white mb-2">PLAN</h3>
               <p className="text-sm text-slate-400 leading-relaxed">
                 Choose your destination, dates (1–7 days), travel pace, and persona (Backpacker, Family, Luxury, Explorer).
@@ -154,11 +154,11 @@ export default function LandingPage() {
             </div>
 
             {/* Step 2 */}
-            <div className="glass-card glass-card-hover p-6 rounded-2xl flex flex-col items-start relative group">
-              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform">
+            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group">
+              <div className="w-12 h-12 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-300 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform shadow-inner">
                 02
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-sky-400 mb-1">Step 2</div>
+              <div className="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1">Step 2</div>
               <h3 className="text-xl font-bold text-white mb-2">CHECK WEATHER</h3>
               <p className="text-sm text-slate-400 leading-relaxed">
                 We fetch real-time public weather forecasts for your destination to evaluate outdoor suitability and rain risks.
@@ -166,11 +166,11 @@ export default function LandingPage() {
             </div>
 
             {/* Step 3 */}
-            <div className="glass-card glass-card-hover p-6 rounded-2xl flex flex-col items-start relative group">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform">
+            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform shadow-inner">
                 03
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1">Step 3</div>
+              <div className="text-xs font-extrabold uppercase tracking-wider text-indigo-400 mb-1">Step 3</div>
               <h3 className="text-xl font-bold text-white mb-2">ADAPT</h3>
               <p className="text-sm text-slate-400 leading-relaxed">
                 Activities are dynamically scheduled. Rain expected in the afternoon? Outdoor visits move to morning with indoor Plan B.
@@ -178,11 +178,11 @@ export default function LandingPage() {
             </div>
 
             {/* Step 4 */}
-            <div className="glass-card glass-card-hover p-6 rounded-2xl flex flex-col items-start relative group">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform">
+            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-extrabold text-lg mb-4 group-hover:scale-110 transition-transform shadow-inner">
                 04
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">Step 4</div>
+              <div className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-1">Step 4</div>
               <h3 className="text-xl font-bold text-white mb-2">TRAVEL</h3>
               <p className="text-sm text-slate-400 leading-relaxed">
                 Save your itinerary to your personal dashboard, share with trip partners, and switch between days seamlessly.
@@ -194,15 +194,15 @@ export default function LandingPage() {
         {/* FEATURE CARDS */}
         <section id="features" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-brand-400">Core Features</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-sky-400">Core Features</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-white">Built for Unpredictable Journeys</p>
             <p className="text-slate-400 text-base">Everything you need to plan memorable, stress-free travel.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1 */}
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 hover:border-brand-500/40 transition">
-              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 mb-5">
+            <div className="glass-panel p-6 rounded-3xl border border-slate-800 hover:border-sky-500/40 transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 mb-5 shadow-inner">
                 <CloudRain className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Weather-Aware Planning</h3>
@@ -212,8 +212,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 hover:border-brand-500/40 transition">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-5">
+            <div className="glass-panel p-6 rounded-3xl border border-slate-800 hover:border-purple-500/40 transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-5 shadow-inner">
                 <UserCheck className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Personalized Itineraries</h3>
@@ -223,8 +223,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 hover:border-brand-500/40 transition">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-5">
+            <div className="glass-panel p-6 rounded-3xl border border-slate-800 hover:border-amber-500/40 transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-5 shadow-inner">
                 <Zap className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Instant Plan B</h3>
@@ -234,8 +234,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 4 */}
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 hover:border-brand-500/40 transition">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5">
+            <div className="glass-panel p-6 rounded-3xl border border-slate-800 hover:border-emerald-500/40 transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5 shadow-inner">
                 <Share2 className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Save & Share Trips</h3>
@@ -248,8 +248,8 @@ export default function LandingPage() {
 
         {/* BOTTOM CTA BANNER */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
-          <div className="glass-card rounded-3xl p-10 sm:p-14 border border-brand-500/30 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 blur-[90px] rounded-full pointer-events-none" />
+          <div className="glass-panel rounded-3xl p-10 sm:p-14 border border-sky-500/30 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-sky-500/20 to-brand-600/10 blur-[100px] rounded-full pointer-events-none" />
 
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
               Ready to create your adaptive itinerary?
@@ -259,7 +259,7 @@ export default function LandingPage() {
             </p>
             <Link
               href="/plan"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-lg shadow-xl shadow-brand-500/25 transition hover:scale-105"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-lg shadow-xl shadow-sky-500/25 transition-all hover:scale-105"
             >
               <span>Start Planning Now</span>
               <ArrowRight className="w-5 h-5" />
