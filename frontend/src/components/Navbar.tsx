@@ -3,9 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, CloudSun, User, LogOut, Menu, X, Sparkles } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import {
+  CompassIcon,
+  SparklesIcon,
+  UserIcon,
+  LogOutIcon,
+  CloseIcon
+} from '@/components/Icons';
 
 export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -14,12 +20,10 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check initial auth state
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
     });
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -48,70 +52,70 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 sm:px-8 py-3.5 transition-all">
+    <nav className="sticky top-0 z-50 glass-panel border-b border-white/[0.07] px-4 sm:px-8 py-3.5 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-sky-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:scale-105 group-hover:shadow-sky-500/40 transition-all duration-300">
-            <Compass className="w-5 h-5 text-white animate-spin-slow" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 via-amber-600/30 to-sky-600/20 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/10 group-hover:scale-105 group-hover:border-amber-400/50 transition-all duration-300">
+            <CompassIcon size={20} className="text-amber-400" />
           </div>
           <div className="flex flex-col text-left">
-            <span className="font-extrabold text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">
+            <span className="font-extrabold text-lg tracking-tight text-white group-hover:text-amber-200 transition-colors">
               TRIPWISE
             </span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-sky-400 -mt-1 flex items-center gap-1">
-              <CloudSun className="w-2.5 h-2.5 text-amber-400" /> Adaptive Travel
+            <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 -mt-0.5 flex items-center gap-1">
+              Adaptive Travel Platform
             </span>
           </div>
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-7 text-xs font-semibold tracking-wide text-slate-300">
           <Link
             href="/plan"
-            className={`transition flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${
+            className={`transition-all flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border ${
               pathname === '/plan'
-                ? 'bg-sky-500/10 text-sky-300 border-sky-500/30 font-semibold'
-                : 'border-transparent hover:text-sky-300 hover:bg-slate-900/60'
+                ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 font-bold shadow-sm'
+                : 'border-transparent hover:text-white hover:bg-slate-900/60'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" /> Plan Trip
+            <SparklesIcon size={15} className="text-amber-400" /> Plan Trip
           </Link>
-          {user && (
-            <>
-              <Link
-                href="/dashboard"
-                className={`transition px-3 py-1.5 rounded-xl border ${
-                  pathname === '/dashboard'
-                    ? 'bg-brand-500/10 text-sky-300 border-brand-500/30 font-semibold'
-                    : 'border-transparent hover:text-sky-300 hover:bg-slate-900/60'
-                }`}
-              >
-                My Trips
-              </Link>
-              <Link
-                href="/admin"
-                className={`transition px-3 py-1.5 rounded-xl border ${
-                  pathname === '/admin'
-                    ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30 font-semibold'
-                    : 'border-transparent hover:text-sky-300 hover:bg-slate-900/60'
-                }`}
-              >
-                Admin
-              </Link>
-            </>
-          )}
+
+          <Link
+            href="/dashboard"
+            className={`transition-all px-3 py-1.5 rounded-xl border ${
+              pathname === '/dashboard'
+                ? 'bg-slate-800/80 text-white border-slate-700 font-bold'
+                : 'border-transparent hover:text-white hover:bg-slate-900/60'
+            }`}
+          >
+            My Trips
+          </Link>
+
+          <Link
+            href="/admin"
+            className={`transition-all px-3 py-1.5 rounded-xl border ${
+              pathname === '/admin'
+                ? 'bg-slate-800/80 text-white border-slate-700 font-bold'
+                : 'border-transparent hover:text-white hover:bg-slate-900/60'
+            }`}
+          >
+            Admin
+          </Link>
+
           <Link
             href="/#how-it-works"
             onClick={(e) => handleSectionClick(e, 'how-it-works')}
-            className="hover:text-sky-300 transition px-2 py-1"
+            className="hover:text-white transition px-2 py-1"
           >
             How It Works
           </Link>
+
           <Link
             href="/#features"
             onClick={(e) => handleSectionClick(e, 'features')}
-            className="hover:text-sky-300 transition px-2 py-1"
+            className="hover:text-white transition px-2 py-1"
           >
             Features
           </Link>
@@ -120,33 +124,33 @@ export default function Navbar() {
         {/* Auth CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-sm font-medium border border-slate-700/60 transition shadow-sm"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-800 transition shadow-sm"
               >
-                <User className="w-4 h-4 text-sky-400" />
+                <UserIcon size={14} className="text-amber-400" />
                 <span className="max-w-[120px] truncate">{user.email?.split('@')[0]}</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-xl bg-slate-900/60 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 text-sm border border-slate-800 transition"
+                className="p-2 rounded-xl bg-slate-900/80 hover:bg-rose-500/10 hover:text-rose-400 text-slate-400 text-xs border border-slate-800 transition"
                 title="Log Out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOutIcon size={14} />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2.5">
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl text-slate-300 hover:text-white text-sm font-semibold transition hover:bg-slate-900/50"
+                className="px-4 py-2 rounded-xl text-slate-300 hover:text-white text-xs font-semibold transition hover:bg-slate-900/50"
               >
                 Log In
               </Link>
               <Link
                 href="/signup"
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 via-sky-500 to-indigo-600 hover:from-brand-500 hover:to-sky-400 text-white text-sm font-semibold shadow-lg shadow-sky-500/20 transition-all hover:scale-[1.02]"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs shadow-md shadow-amber-500/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 Get Started
               </Link>
@@ -159,40 +163,45 @@ export default function Navbar() {
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="md:hidden p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-900"
         >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isMobileMenuOpen ? <CloseIcon size={20} /> : <div className="space-y-1.5 w-5"><div className="h-0.5 bg-white rounded"></div><div className="h-0.5 bg-white rounded"></div></div>}
         </button>
       </div>
 
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
-        <div className="md:hidden mt-3 pt-3 border-t border-slate-800/80 flex flex-col gap-3 pb-2 animate-fadeIn">
+        <div className="md:hidden mt-3 pt-3 border-t border-white/[0.08] flex flex-col gap-2.5 pb-2 animate-fade-in">
           <Link
             href="/plan"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500/10 text-sky-300 text-sm font-medium border border-sky-500/20"
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/20"
           >
-            <Sparkles className="w-4 h-4 text-sky-400" /> Plan My Trip
+            <SparklesIcon size={16} className="text-amber-400" /> Plan My Trip
           </Link>
-          {user && (
-            <Link
-              href="/dashboard"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium"
-            >
-              My Saved Trips
-            </Link>
-          )}
+          <Link
+            href="/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-3.5 py-2 rounded-xl hover:bg-slate-900 text-slate-200 text-xs font-semibold"
+          >
+            My Saved Trips
+          </Link>
+          <Link
+            href="/admin"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-3.5 py-2 rounded-xl hover:bg-slate-900 text-slate-200 text-xs font-semibold"
+          >
+            Admin Dashboard
+          </Link>
           <Link
             href="/#how-it-works"
             onClick={(e) => handleSectionClick(e, 'how-it-works')}
-            className="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm"
+            className="px-3.5 py-2 rounded-xl hover:bg-slate-900 text-slate-300 text-xs"
           >
             How It Works
           </Link>
           <Link
             href="/#features"
             onClick={(e) => handleSectionClick(e, 'features')}
-            className="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm"
+            className="px-3.5 py-2 rounded-xl hover:bg-slate-900 text-slate-300 text-xs"
           >
             Features
           </Link>
@@ -200,23 +209,23 @@ export default function Navbar() {
             {user ? (
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-500/10 text-rose-400 text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 text-rose-400 text-xs font-semibold"
               >
-                <LogOut className="w-4 h-4" /> Log Out ({user.email?.split('@')[0]})
+                <LogOutIcon size={14} /> Log Out ({user.email?.split('@')[0]})
               </button>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-center py-2 rounded-lg bg-slate-900 text-slate-200 text-sm font-semibold border border-slate-800"
+                  className="text-center py-2 rounded-xl bg-slate-900 text-slate-200 text-xs font-semibold border border-slate-800"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/signup"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-center py-2 rounded-lg bg-gradient-to-r from-brand-600 to-sky-500 text-white text-sm font-semibold shadow-md"
+                  className="text-center py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-extrabold shadow-md"
                 >
                   Sign Up
                 </Link>

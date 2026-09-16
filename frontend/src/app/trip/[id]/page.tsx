@@ -5,32 +5,29 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Trip, Activity } from '@/types/trip';
-import {
-  Compass,
-  MapPin,
-  Calendar,
-  Sun,
-  CloudRain,
-  Share2,
-  Check,
-  Zap,
-  HelpCircle,
-  ArrowLeft,
-  Info,
-  ShieldCheck,
-  User,
-  Clock,
-  Sparkles,
-  RefreshCw,
-  Umbrella
-} from 'lucide-react';
 import WeatherAdvisorCard from '@/components/WeatherAdvisorCard';
 import SmartRouteCard from '@/components/SmartRouteCard';
 import TripWiseAIModal from '@/components/TripWiseAIModal';
 import TripReminderBanner from '@/components/TripReminderBanner';
 import DayRouteSummaryCard from '@/components/DayRouteSummaryCard';
 import { supabase } from '@/lib/supabase';
-import { ExternalLink, Navigation, Train } from 'lucide-react';
+import {
+  CompassIcon,
+  MapPinIcon,
+  UserIcon,
+  SunIcon,
+  UmbrellaIcon,
+  ClockIcon,
+  SparklesIcon,
+  ShareIcon,
+  CheckIcon,
+  ArrowLeftIcon,
+  HelpIcon,
+  ExternalLinkIcon,
+  TrainIcon,
+  ShieldIcon,
+  CloseIcon
+} from '@/components/Icons';
 
 export default function TripViewPage({ params }: { params: { id: string } }) {
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -111,12 +108,12 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+      <div className="min-h-screen flex flex-col bg-[#080B10] text-slate-100">
         <Navbar />
         <main className="flex-1 flex items-center justify-center p-8">
           <div className="text-center space-y-4">
-            <Compass className="w-10 h-10 text-sky-400 animate-spin mx-auto" />
-            <p className="text-slate-400 text-sm">Loading your itinerary...</p>
+            <CompassIcon size={32} className="text-amber-400 animate-spin mx-auto" />
+            <p className="text-slate-400 text-xs font-semibold">Loading your itinerary...</p>
           </div>
         </main>
         <Footer />
@@ -126,19 +123,19 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
   if (!trip) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+      <div className="min-h-screen flex flex-col bg-[#080B10] text-slate-100">
         <Navbar />
-        <main className="flex-1 max-w-xl mx-auto px-4 py-16 text-center">
-          <div className="glass-card rounded-3xl p-8 border border-slate-800 space-y-4">
-            <h2 className="text-2xl font-bold text-white">Trip Not Found</h2>
-            <p className="text-slate-400 text-sm">
-              The itinerary you requested does not exist or may have been removed.
+        <main className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center space-y-4 max-w-md">
+            <h2 className="text-2xl font-extrabold text-white">Trip Not Found</h2>
+            <p className="text-xs text-slate-400">
+              This itinerary link may be invalid or was deleted from local storage.
             </p>
             <Link
               href="/plan"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-bold text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-extrabold"
             >
-              Plan a New Trip
+              Plan A New Trip
             </Link>
           </div>
         </main>
@@ -151,10 +148,10 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
   const isCurrentPlanB = !!planBActive[activeDayIdx];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#080B10] text-slate-100 font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7">
         {/* Trip Reminder Banner */}
         <TripReminderBanner destination={trip.destination} startDateText="Soon" tripId={trip.id} />
 
@@ -162,32 +159,32 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         <div className="flex items-center justify-between">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition font-medium"
+            className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-200 transition"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to My Trips
+            <ArrowLeftIcon size={14} /> Back to My Trips
           </Link>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsAIModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition shadow-md"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold flex items-center gap-2 transition shadow-md"
             >
-              <Sparkles className="w-4 h-4 text-sky-200 animate-pulse" />
+              <SparklesIcon size={14} className="text-slate-950" />
               <span>Ask TripWise AI</span>
             </button>
 
             <button
               onClick={copyShareUrl}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-semibold flex items-center gap-2 transition"
+              className="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold flex items-center gap-2 transition"
             >
               {copied ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-400" />
+                  <CheckIcon size={14} className="text-emerald-400" />
                   <span className="text-emerald-400">Link Copied!</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="w-4 h-4 text-sky-400" />
+                  <ShareIcon size={14} className="text-amber-400" />
                   <span>Share Trip</span>
                 </>
               )}
@@ -196,38 +193,37 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* TRIP HERO HEADER & WEATHER SUMMARY */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-700/80 relative overflow-hidden shadow-2xl">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/[0.08] relative overflow-hidden shadow-2xl">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-sky-400 uppercase tracking-wider">
-                <MapPin className="w-4 h-4" /> {trip.destination} • {trip.durationDays} Days Itinerary
+              <div className="flex items-center gap-2 text-xs font-extrabold text-amber-400 uppercase tracking-wider">
+                <MapPinIcon size={16} /> {trip.destination} • {trip.durationDays} Days Itinerary
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
                 {trip.destination} Adaptive Plan
               </h1>
               <div className="flex flex-wrap gap-2 pt-1 text-xs">
-                <span className="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-slate-300 font-semibold flex items-center gap-1.5 shadow-sm">
-                  <User className="w-3.5 h-3.5 text-purple-400" /> {trip.persona}
+                <span className="px-3 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-slate-300 font-semibold flex items-center gap-1.5 shadow-sm">
+                  <UserIcon size={14} className="text-amber-400" /> {trip.persona}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-slate-300 font-semibold shadow-sm">
+                <span className="px-3 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-slate-300 font-semibold shadow-sm">
                   ⚡ Pace: {trip.pace}
                 </span>
               </div>
             </div>
 
             {/* Weather & Trip Health Badges */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-slate-900/90 p-4 rounded-2xl border border-slate-800 shadow-inner">
-              {/* Weather Summary */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 shadow-inner">
               {trip.weatherSummary && (
                 <div className="pr-4 border-r border-slate-800">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider">Forecast</span>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Forecast</span>
+                  <div className="flex items-center gap-2.5 mt-0.5">
                     <span className="text-2xl">{currentDay.weatherForecast.icon}</span>
                     <div>
                       <div className="font-extrabold text-white text-base">
                         {currentDay.weatherForecast.tempC}°C
                       </div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-slate-400 font-medium">
                         {currentDay.weatherForecast.condition}
                       </div>
                     </div>
@@ -235,12 +231,11 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                 </div>
               )}
 
-              {/* Trip Health Score */}
               {trip.healthScore && (
                 <div>
-                  <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider">Trip Health</span>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center font-extrabold text-emerald-400 text-sm shadow-sm">
+                  <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Trip Health</span>
+                  <div className="flex items-center gap-2.5 mt-0.5">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-extrabold text-emerald-300 text-sm shadow-sm">
                       {trip.healthScore.score}
                     </div>
                     <div>
@@ -262,14 +257,14 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             <button
               key={d.dayNumber}
               onClick={() => setActiveDayIdx(idx)}
-              className={`px-5 py-3.5 rounded-2xl font-extrabold text-sm border whitespace-nowrap transition-all ${
+              className={`px-5 py-3 rounded-2xl font-extrabold text-xs border whitespace-nowrap transition-all ${
                 activeDayIdx === idx
-                  ? 'bg-gradient-to-r from-brand-600 to-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20 scale-[1.02]'
-                  : 'bg-slate-900/90 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-extrabold scale-[1.02]'
+                  : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
               }`}
             >
               <span>Day {d.dayNumber}</span>
-              <span className="text-xs opacity-80 font-normal">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
+              <span className="text-xs opacity-80 font-normal ml-1.5">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
             </button>
           ))}
         </div>
@@ -287,7 +282,6 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             baseLat={trip.latitude}
             baseLng={trip.longitude}
             onApplyOptimization={(reordered) => {
-              // Update local active day activities with optimized route sequence
               const updatedDays = [...trip.days];
               updatedDays[activeDayIdx].activities = reordered;
               setTrip({ ...trip, days: updatedDays });
@@ -296,47 +290,44 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* WEATHER ADAPTATION & PLAN B BANNER */}
-        <div className="glass-panel rounded-3xl p-5 border border-slate-800 space-y-4 shadow-xl">
+        <div className="glass-panel rounded-3xl p-5 border border-white/[0.07] space-y-4 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-inner">
-                <Sun className="w-5.5 h-5.5" />
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-inner">
+                <SunIcon size={20} />
               </div>
               <div>
-                <h3 className="font-extrabold text-white text-base">
+                <h3 className="font-extrabold text-white text-sm">
                   Day {currentDay.dayNumber} Weather Outlook: {currentDay.weatherForecast.condition}
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Precipitation Risk: <span className="font-bold text-sky-300">{currentDay.weatherForecast.rainProbability}%</span> • {currentDay.weatherForecast.note}
+                <p className="text-xs text-slate-400 font-medium">
+                  Precipitation Risk: <span className="font-bold text-amber-300">{currentDay.weatherForecast.rainProbability}%</span> • {currentDay.weatherForecast.note}
                 </p>
               </div>
             </div>
 
-            {/* 🔥 "🌧️ What if it rains?" Plan B Toggle Button */}
             <button
               onClick={() => togglePlanB(activeDayIdx)}
-              className={`px-4 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 transition-all border shadow-lg ${
+              className={`px-4 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 transition-all border shadow-md ${
                 isCurrentPlanB
-                  ? 'bg-purple-600 text-white border-purple-400 shadow-purple-500/25 scale-[1.02]'
-                  : 'bg-slate-900/90 text-sky-300 border-sky-500/40 hover:bg-slate-800 hover:border-sky-400'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 scale-[1.02]'
+                  : 'bg-slate-900/90 text-amber-300 border-amber-500/30 hover:bg-slate-800'
               }`}
             >
-              <Umbrella className="w-4 h-4 text-purple-300" />
+              <UmbrellaIcon size={16} />
               <span>{isCurrentPlanB ? '🌧️ Plan B Active (Indoor Mode)' : '🌧️ What if it rains?'}</span>
             </button>
           </div>
 
-          {/* Plan B Explanation Banner when active */}
           {isCurrentPlanB && (
-            <div className="p-4.5 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-xs space-y-2 animate-fadeIn shadow-inner">
-              <div className="flex items-center gap-2 font-extrabold text-purple-300">
-                <Info className="w-4 h-4 text-purple-400" />
+            <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-2 animate-fade-in shadow-inner">
+              <div className="flex items-center gap-2 font-extrabold text-amber-300">
                 <span>Why did we change this?</span>
               </div>
-              <p className="text-slate-300 leading-relaxed">
-                Rain risk is expected during peak afternoon hours ({currentDay.weatherForecast.rainProbability}% probability). Outdoor visits have been replaced with curated, climate-controlled indoor attractions.
+              <p className="text-slate-300 leading-relaxed font-medium">
+                Rain risk is expected during peak afternoon hours ({currentDay.weatherForecast.rainProbability}% probability). Outdoor visits have been replaced with curated indoor alternatives.
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-purple-400 font-bold pt-1">
+              <div className="flex items-center gap-2 text-[11px] text-amber-400 font-bold pt-1">
                 <span>PLAN A (Outdoor)</span> → <span className="text-emerald-400">PLAN B (Indoor Experience)</span>
               </div>
             </div>
@@ -353,8 +344,8 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
         {/* ITINERARY ACTIVITIES TIMELINE */}
         <div className="space-y-4">
-          <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
-            <Clock className="w-5 h-5 text-sky-400" /> Scheduled Activities ({isCurrentPlanB ? 'Plan B Indoor Mode' : 'Plan A Original'})
+          <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+            <ClockIcon size={18} className="text-amber-400" /> Scheduled Activities ({isCurrentPlanB ? 'Plan B Indoor Mode' : 'Plan A Original'})
           </h3>
 
           <div className="grid grid-cols-1 gap-4">
@@ -368,7 +359,6 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                 : act.description;
 
               const isReplacedByPlanB = isCurrentPlanB && act.isOutdoor && act.indoorAlternative;
-
               const mapsUrl = act.transitToNext?.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayActivityName + ' ' + trip.destination)}`;
 
               return (
@@ -376,49 +366,48 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                   <div
                     className={`glass-panel rounded-3xl p-6 border transition-all relative ${
                       isReplacedByPlanB
-                        ? 'border-purple-500/50 bg-purple-950/20 shadow-purple-500/10'
-                        : 'border-slate-800 hover:border-slate-700'
+                        ? 'border-amber-500/40 bg-amber-950/10'
+                        : 'border-white/[0.07] hover:border-white/[0.12]'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="space-y-2.5 flex-1">
+                      <div className="space-y-2 flex-1">
                         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                          <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 font-bold">
+                          <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold text-[11px]">
                             {act.bestTime}
                           </span>
                           <span className="text-slate-500">•</span>
-                          <span className="text-slate-400">{act.durationMinutes} min visit</span>
+                          <span className="text-slate-400 text-xs">{act.durationMinutes} min visit</span>
                           
-                          {/* Nearest Metro Station Badge */}
                           {act.nearestMetro && (
-                            <span className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-sky-300 font-medium flex items-center gap-1">
-                              <Train className="w-3 h-3 text-sky-400" />
+                            <span className="px-2.5 py-1 rounded-full bg-slate-950 border border-slate-800 text-sky-300 font-medium flex items-center gap-1 text-[11px]">
+                              <TrainIcon size={12} className="text-sky-400" />
                               Near {act.nearestMetro.stationName} Metro ({act.nearestMetro.walkTimeMin} min walk)
                             </span>
                           )}
                         </div>
 
-                        <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                        <h4 className="text-lg font-bold text-white flex items-center gap-2">
                           {displayActivityName}
                           {isReplacedByPlanB && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
                               Indoor Plan B
                             </span>
                           )}
                         </h4>
 
-                        <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-slate-300 max-w-2xl leading-relaxed font-medium">
                           {displayDescription}
                         </p>
                       </div>
 
-                      {/* Actions: "Why this?" & "Open Transit Route" */}
+                      {/* Actions */}
                       <div className="flex sm:flex-col items-center gap-2 shrink-0">
                         <button
                           onClick={() => setSelectedWhyActivity(act)}
-                          className="px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition shadow-sm w-full justify-center"
+                          className="px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition shadow-sm w-full justify-center"
                         >
-                          <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
+                          <HelpIcon size={14} className="text-amber-400" />
                           <span>Why this?</span>
                         </button>
 
@@ -426,9 +415,9 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                           href={mapsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center gap-1.5 transition w-full justify-center"
+                          className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-xs font-semibold flex items-center gap-1.5 transition w-full justify-center"
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <ExternalLinkIcon size={14} />
                           <span>Open Route</span>
                         </a>
                       </div>
@@ -437,14 +426,14 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
                   {/* Inter-Activity Transit Connector Card */}
                   {act.transitToNext && actIdx < currentDay.activities.length - 1 && (
-                    <div className="mx-4 p-3 rounded-2xl bg-slate-900/40 border border-slate-800/80 flex items-center justify-between text-xs text-slate-400 shadow-inner">
+                    <div className="mx-4 p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sky-400 font-bold">🚇 Transit:</span>
+                        <span className="text-amber-400 font-bold">🚇 Transit:</span>
                         <span className="font-semibold text-slate-300">
                           {act.transitToNext.fromStation} → {act.transitToNext.toStation}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-slate-400">
+                      <div className="flex items-center gap-3 text-slate-400 text-[11px] font-medium">
                         <span>~{act.transitToNext.approxTransitMin} min metro</span>
                         <span>•</span>
                         <span>~{act.transitToNext.approxWalkMin} min walk</span>
@@ -459,13 +448,13 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
         {/* TRIP HEALTH FACTORS */}
         {trip.healthScore && (
-          <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-3 shadow-xl">
-            <h4 className="font-extrabold text-white text-base flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" /> Trip Health Factors ({trip.healthScore.score}/100)
+          <div className="glass-panel rounded-3xl p-6 border border-white/[0.07] space-y-3 shadow-xl">
+            <h4 className="font-extrabold text-white text-sm flex items-center gap-2">
+              <ShieldIcon size={18} className="text-emerald-400" /> Trip Health Factors ({trip.healthScore.score}/100)
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {trip.healthScore.factors.map((f, i) => (
-                <div key={i} className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 text-xs text-slate-300 font-medium">
+                <div key={i} className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 font-medium">
                   {f.text}
                 </div>
               ))}
@@ -476,26 +465,26 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
       {/* "WHY THIS ACTIVITY?" MODAL */}
       {selectedWhyActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-700/80 space-y-4 relative shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 font-extrabold text-white text-lg">
-                <Sparkles className="w-5 h-5 text-sky-400 animate-pulse" /> Why this activity?
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/85 backdrop-blur-md animate-fade-in">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-white/[0.09] space-y-4 relative shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div className="flex items-center gap-2 font-extrabold text-white text-base">
+                <SparklesIcon size={18} className="text-amber-400" /> Why this activity?
               </div>
               <button
                 onClick={() => setSelectedWhyActivity(null)}
-                className="text-slate-400 hover:text-white text-sm w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-800"
+                className="text-slate-400 hover:text-white text-xs p-1.5 rounded-xl hover:bg-slate-800"
               >
-                ✕
+                <CloseIcon size={16} />
               </button>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <h5 className="font-extrabold text-sky-300 text-base">{selectedWhyActivity.name}</h5>
-              <p className="text-slate-300 text-sm leading-relaxed bg-slate-900/90 p-4.5 rounded-2xl border border-slate-800 shadow-inner">
+            <div className="space-y-3 text-xs">
+              <h5 className="font-extrabold text-amber-300 text-sm">{selectedWhyActivity.name}</h5>
+              <p className="text-slate-300 text-xs leading-relaxed bg-slate-950/90 p-4 rounded-2xl border border-slate-800 font-medium">
                 {selectedWhyActivity.whySelectedReason || `Selected based on your ${trip.persona} traveler persona and ${trip.pace} pacing preferences.`}
               </p>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-400 pt-1 font-medium">
+              <div className="flex flex-wrap gap-2 text-[11px] text-slate-400 pt-1 font-medium">
                 <span>Category: {selectedWhyActivity.category}</span>
                 <span>•</span>
                 <span>Outdoor: {selectedWhyActivity.isOutdoor ? 'Yes' : 'No'}</span>
@@ -506,7 +495,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
             <button
               onClick={() => setSelectedWhyActivity(null)}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-sky-500 text-white font-extrabold text-sm shadow-md"
+              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-md"
             >
               Got it
             </button>
