@@ -75,32 +75,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080B10] text-[#E2E8F0] selection:bg-amber-400/20 selection:text-amber-200">
+    <div className="min-h-screen flex flex-col bg-[#FAF9F5] dark:bg-[#080B10] text-slate-900 dark:text-[#E2E8F0] selection:bg-amber-400/20 selection:text-amber-800 dark:selection:text-amber-200 transition-colors">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-10">
-        <div className="w-full max-w-md bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-[#1E2638] shadow-2xl relative overflow-hidden">
+        <div className="w-full max-w-md bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-[#1E2638] shadow-2xl relative overflow-hidden">
           <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 mx-auto flex items-center justify-center text-amber-400 mb-4 shadow-inner">
+            <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-500/20 mx-auto flex items-center justify-center text-amber-500 dark:text-amber-400 mb-4 shadow-inner">
               <CompassIcon className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">Log In to TRIPWISE</h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Log In to TRIPWISE</h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
               Access your saved trips and weather-adaptive itineraries
             </p>
           </div>
 
           {/* Feedback Banners */}
           {error && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
-              <AlertIcon className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
+              <AlertIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
-              <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
+              <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <span>{success}</span>
             </div>
           )}
@@ -108,36 +108,36 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <MailIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <MailIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-[#121620] border border-[#1E2638] rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400/50 transition shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-stone-100 dark:bg-[#121620] border border-stone-200 dark:border-[#1E2638] rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400/60 transition shadow-inner"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <LockIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <LockIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-4 py-3 bg-[#121620] border border-[#1E2638] rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400/50 transition shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-stone-100 dark:bg-[#121620] border border-stone-200 dark:border-[#1E2638] rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400/60 transition shadow-inner"
                 />
               </div>
             </div>
@@ -162,9 +162,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
+          <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-6">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-amber-400 font-medium hover:underline">
+            <Link href="/signup" className="text-amber-600 dark:text-amber-400 font-semibold hover:underline">
               Create one now
             </Link>
           </p>
