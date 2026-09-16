@@ -35,9 +35,13 @@ export default function LoginPage() {
       if (signInError) {
         const msg = signInError.message.toLowerCase();
         if (msg.includes('email not confirmed')) {
-          setError('Your email has not been confirmed yet. Check your inbox for the confirmation link.');
+          setError(
+            'Your email address has not been confirmed yet. Please check your inbox for the confirmation link, or turn off "Confirm email" in Supabase Authentication settings.'
+          );
         } else if (msg.includes('invalid login credentials')) {
-          setError('Invalid email or password. Please check your credentials and try again.');
+          setError(
+            'Invalid email or password. If you just created this account, please check if Supabase requires email confirmation, or verify your email and password.'
+          );
         } else {
           setError(signInError.message || 'Invalid email or password.');
         }
@@ -55,118 +59,115 @@ export default function LoginPage() {
             },
             { onConflict: 'id' }
           );
-        } catch {
+        } catch (pErr) {
           console.log('Profile sync fallback handled by DB');
         }
 
         setSuccess('Welcome back! Redirecting to your dashboard...');
-        setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
       }
-    } catch (err: unknown) {
-      setError((err as Error)?.message || 'An unexpected error occurred during login.');
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred during login.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F7F5F0] dark:bg-[#07090F] text-slate-900 dark:text-[#F0F4FF] transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#FAF9F5] dark:bg-[#080B10] text-slate-900 dark:text-[#E2E8F0] selection:bg-amber-400/20 selection:text-amber-800 dark:selection:text-amber-200 transition-colors">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 py-16">
-        <div className="w-full max-w-md animate-fade-in-up">
-          {/* Card */}
-          <div className="tw-card p-7 sm:p-9 relative overflow-hidden">
-            {/* Subtle glow */}
-            <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-amber-400/10 dark:bg-amber-400/8 blur-3xl pointer-events-none" />
-
-            <div className="relative text-center mb-7">
-              <div className="w-13 h-13 rounded-2xl bg-amber-500/10 border border-amber-500/20 mx-auto flex items-center justify-center text-amber-500 mb-4 shadow-inner" style={{ width: 52, height: 52 }}>
-                <CompassIcon size={24} />
-              </div>
-              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Welcome back</h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5">
-                Log in to access your saved itineraries
-              </p>
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-10">
+        <div className="w-full max-w-md bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-[#1E2638] shadow-2xl relative overflow-hidden">
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-500/20 mx-auto flex items-center justify-center text-amber-500 dark:text-amber-400 mb-4 shadow-inner">
+              <CompassIcon className="w-6 h-6" />
             </div>
-
-            {/* Feedback */}
-            {error && (
-              <div className="mb-5 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-fade-in-up">
-                <AlertIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
-            {success && (
-              <div className="mb-5 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs flex items-start gap-2.5 animate-fade-in-up">
-                <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>{success}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4 relative">
-              {/* Email */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <MailIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="alex@example.com"
-                    className="tw-input w-full pl-10 pr-4 py-3 rounded-xl text-sm placeholder-slate-400"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Password
-                </label>
-                <div className="relative">
-                  <LockIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="tw-input w-full pl-10 pr-4 py-3 rounded-xl text-sm placeholder-slate-400"
-                  />
-                </div>
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="tw-btn-primary w-full py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
-                    <span>Logging In...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Log In</span>
-                    <ArrowRightIcon className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-6 relative">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-amber-600 dark:text-amber-400 font-semibold hover:underline">
-                Create one now
-              </Link>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Log In to TRIPWISE</h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Access your saved trips and weather-adaptive itineraries
             </p>
           </div>
+
+          {/* Feedback Banners */}
+          {error && (
+            <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
+              <AlertIcon className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
+              <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span>{success}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <MailIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="alex@example.com"
+                  className="w-full pl-10 pr-4 py-3 bg-stone-100 dark:bg-[#121620] border border-stone-200 dark:border-[#1E2638] rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400/60 transition shadow-inner"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <LockIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full pl-10 pr-4 py-3 bg-stone-100 dark:bg-[#121620] border border-stone-200 dark:border-[#1E2638] rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:border-amber-400/60 transition shadow-inner"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow-lg shadow-amber-400/10 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <span>Logging In...</span>
+                </>
+              ) : (
+                <>
+                  <span>Log In</span>
+                  <ArrowRightIcon className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-6">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="text-amber-600 dark:text-amber-400 font-semibold hover:underline">
+              Create one now
+            </Link>
+          </p>
         </div>
       </main>
 
