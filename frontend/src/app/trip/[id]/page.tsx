@@ -38,82 +38,55 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
-  useEffect(() => {
-    loadTripData();
-  }, [params.id]);
+  useEffect(() => { loadTripData(); }, [params.id]);
 
   const loadTripData = async () => {
     setLoading(true);
-
-    // Check LocalStorage
     try {
       const stored = localStorage.getItem('tripwise_saved_trips');
       if (stored) {
         const parsed: Trip[] = JSON.parse(stored);
         const match = parsed.find((t) => t.id === params.id || t.shareId === params.id);
-        if (match) {
-          setTrip(match);
-          setLoading(false);
-          return;
-        }
+        if (match) { setTrip(match); setLoading(false); return; }
       }
-    } catch (e) {}
+    } catch { /* empty */ }
 
-    // Check Supabase database
     try {
-      const { data, error } = await supabase
-        .from('trips')
-        .select('*')
-        .or(`id.eq.${params.id},share_id.eq.${params.id}`)
-        .single();
-
+      const { data, error } = await supabase.from('trips').select('*').or(`id.eq.${params.id},share_id.eq.${params.id}`).single();
       if (!error && data) {
-        const fetchedTrip: Trip = {
-          id: data.id,
-          shareId: data.share_id,
-          destination: data.destination,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          durationDays: data.duration,
-          persona: data.persona,
-          pace: data.travel_pace,
-          interests: data.interests || [],
-          weatherSummary: data.weather_summary,
-          days: data.itinerary,
-          healthScore: data.trip_score,
-          createdAt: data.created_at,
-        };
-        setTrip(fetchedTrip);
+        setTrip({
+          id: data.id, shareId: data.share_id, destination: data.destination,
+          latitude: data.latitude, longitude: data.longitude, durationDays: data.duration,
+          persona: data.persona, pace: data.travel_pace, interests: data.interests || [],
+          weatherSummary: data.weather_summary, days: data.itinerary,
+          healthScore: data.trip_score, createdAt: data.created_at,
+        });
         setLoading(false);
         return;
       }
-    } catch (e) {}
+    } catch { /* empty */ }
 
     setLoading(false);
   };
 
   const togglePlanB = (dayIdx: number) => {
-    setPlanBActive((prev) => ({
-      ...prev,
-      [dayIdx]: !prev[dayIdx],
-    }));
+    setPlanBActive((prev) => ({ ...prev, [dayIdx]: !prev[dayIdx] }));
   };
 
   const copyShareUrl = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#FAF9F5] dark:bg-[#080B10] text-slate-900 dark:text-slate-100">
+      <div className="min-h-screen flex flex-col bg-[#F7F5F0] dark:bg-[#07090F]">
         <Navbar />
         <main className="flex-1 flex items-center justify-center p-8">
           <div className="text-center space-y-4">
-            <CompassIcon size={32} className="text-amber-500 dark:text-amber-400 animate-spin mx-auto" />
-            <p className="text-slate-600 dark:text-slate-400 text-xs font-semibold">Loading your itinerary...</p>
+            <CompassIcon size={32} className="text-amber-500 animate-spin-smooth mx-auto" />
+            <p className="text-slate-600 dark:text-slate-400 text-xs font-semibold">Loading your itinerary…</p>
           </div>
         </main>
         <Footer />
@@ -123,18 +96,15 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
 
   if (!trip) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#FAF9F5] dark:bg-[#080B10] text-slate-900 dark:text-slate-100">
+      <div className="min-h-screen flex flex-col bg-[#F7F5F0] dark:bg-[#07090F]">
         <Navbar />
         <main className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center space-y-4 max-w-md">
+          <div className="tw-card p-10 text-center space-y-4 max-w-sm w-full">
             <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Trip Not Found</h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               This itinerary link may be invalid or was deleted from local storage.
             </p>
-            <Link
-              href="/plan"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 text-xs font-extrabold"
-            >
+            <Link href="/plan" className="tw-btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs">
               Plan A New Trip
             </Link>
           </div>
@@ -148,43 +118,42 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
   const isCurrentPlanB = !!planBActive[activeDayIdx];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F5] dark:bg-[#080B10] text-slate-900 dark:text-slate-100 font-sans transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#F7F5F0] dark:bg-[#07090F] text-slate-900 dark:text-[#F0F4FF] transition-colors">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7">
-        {/* Trip Reminder Banner */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Reminder Banner */}
         <TripReminderBanner destination={trip.destination} startDateText="Soon" tripId={trip.id} />
 
-        {/* Navigation Toolbar */}
+        {/* Toolbar */}
         <div className="flex items-center justify-between">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition"
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
           >
-            <ArrowLeftIcon size={14} /> Back to My Trips
+            <ArrowLeftIcon size={14} />
+            Back to My Trips
           </Link>
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setIsAIModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold flex items-center gap-2 transition shadow-md"
+              className="tw-btn-primary px-4 py-2 rounded-xl text-xs flex items-center gap-2"
             >
-              <SparklesIcon size={14} className="text-slate-950" />
+              <SparklesIcon size={13} />
               <span>Ask TripWise AI</span>
             </button>
-
             <button
               onClick={copyShareUrl}
-              className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900/90 hover:bg-stone-100 dark:hover:bg-slate-800 border border-stone-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-2 transition shadow-sm"
+              className="tw-btn-ghost px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border"
             >
               {copied ? (
                 <>
-                  <CheckIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-emerald-600 dark:text-emerald-400">Link Copied!</span>
+                  <CheckIcon size={13} className="text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
                 </>
               ) : (
                 <>
-                  <ShareIcon size={14} className="text-amber-500 dark:text-amber-400" />
+                  <ShareIcon size={13} className="text-amber-500" />
                   <span>Share Trip</span>
                 </>
               )}
@@ -192,57 +161,53 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* TRIP HERO HEADER & WEATHER SUMMARY */}
-        <div className="bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-[#1E2638] relative overflow-hidden shadow-2xl">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        {/* Hero Header */}
+        <div className="tw-card p-6 sm:p-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-72 h-72 rounded-full bg-amber-400/8 dark:bg-amber-400/5 blur-3xl pointer-events-none" />
+          <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                <MapPinIcon size={16} /> {trip.destination} • {trip.durationDays} Days Itinerary
+                <MapPinIcon size={14} />
+                {trip.destination} · {trip.durationDays} Days Itinerary
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
                 {trip.destination} Adaptive Plan
               </h1>
-              <div className="flex flex-wrap gap-2 pt-1 text-xs">
-                <span className="px-3 py-1 rounded-full bg-stone-100 dark:bg-slate-950/80 border border-stone-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5 shadow-sm">
-                  <UserIcon size={14} className="text-amber-500 dark:text-amber-400" /> {trip.persona}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="tw-badge tw-badge-amber flex items-center gap-1.5">
+                  <UserIcon size={11} />
+                  {trip.persona}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-stone-100 dark:bg-slate-950/80 border border-stone-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-semibold shadow-sm">
-                  ⚡ Pace: {trip.pace}
+                <span className="px-3 py-1 rounded-full bg-stone-100 dark:bg-white/[0.06] border border-stone-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 text-[11px] font-semibold">
+                  ⚡ {trip.pace}
                 </span>
               </div>
             </div>
 
-            {/* Weather & Trip Health Badges */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-stone-100 dark:bg-slate-950/80 p-4 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-inner">
+            {/* Weather + Health badges */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 bg-stone-100 dark:bg-white/[0.04] p-4 rounded-2xl border border-stone-200 dark:border-white/[0.07]">
               {trip.weatherSummary && (
-                <div className="pr-4 border-r border-stone-300 dark:border-slate-800">
-                  <span className="text-[10px] uppercase font-extrabold text-slate-500 dark:text-slate-400 tracking-wider">Forecast</span>
+                <div className="pr-4 border-r border-stone-300 dark:border-white/[0.08]">
+                  <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider">Forecast</span>
                   <div className="flex items-center gap-2.5 mt-0.5">
                     <span className="text-2xl">{currentDay.weatherForecast.icon}</span>
                     <div>
-                      <div className="font-extrabold text-slate-900 dark:text-white text-base">
-                        {currentDay.weatherForecast.tempC}°C
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        {currentDay.weatherForecast.condition}
-                      </div>
+                      <div className="font-extrabold text-slate-900 dark:text-white text-base">{currentDay.weatherForecast.tempC}°C</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">{currentDay.weatherForecast.condition}</div>
                     </div>
                   </div>
                 </div>
               )}
-
               {trip.healthScore && (
                 <div>
-                  <span className="text-[10px] uppercase font-extrabold text-slate-500 dark:text-slate-400 tracking-wider">Trip Health</span>
+                  <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-wider">Trip Health</span>
                   <div className="flex items-center gap-2.5 mt-0.5">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-extrabold text-emerald-700 dark:text-emerald-300 text-sm shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-extrabold text-emerald-700 dark:text-emerald-300 text-sm">
                       {trip.healthScore.score}
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-white text-xs">
-                        {trip.healthScore.label}
-                      </div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Deterministic Score</div>
+                      <div className="font-bold text-slate-900 dark:text-white text-xs">{trip.healthScore.label}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">Deterministic Score</div>
                     </div>
                   </div>
                 </div>
@@ -251,31 +216,27 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* DAY SELECTOR TABS */}
-        <div id="itinerary-section" className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none scroll-mt-6">
+        {/* Day Tabs */}
+        <div id="itinerary-section" className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none scroll-mt-6">
           {trip.days.map((d, idx) => (
             <button
               key={d.dayNumber}
               onClick={() => setActiveDayIdx(idx)}
               className={`px-5 py-3 rounded-2xl font-extrabold text-xs border whitespace-nowrap transition-all ${
                 activeDayIdx === idx
-                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-md font-extrabold scale-[1.02]'
-                  : 'bg-white dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 border-stone-200 dark:border-slate-800 hover:border-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-md scale-[1.03]'
+                  : 'tw-btn-ghost border text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <span>Day {d.dayNumber}</span>
-              <span className="text-xs opacity-80 font-normal ml-1.5">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
+              Day {d.dayNumber}
+              <span className="opacity-75 font-normal ml-1.5">{d.weatherForecast.icon} {d.weatherForecast.tempC}°C</span>
             </button>
           ))}
         </div>
 
-        {/* WEATHER ADVISOR & SMART ROUTE CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <WeatherAdvisorCard
-            weatherSummary={trip.weatherSummary}
-            activeDay={currentDay}
-            onAskAI={() => setIsAIModalOpen(true)}
-          />
+        {/* Weather Advisor + Smart Route */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <WeatherAdvisorCard weatherSummary={trip.weatherSummary} activeDay={currentDay} onAskAI={() => setIsAIModalOpen(true)} />
           <SmartRouteCard
             activities={currentDay.activities}
             destinationName={trip.destination}
@@ -289,52 +250,52 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           />
         </div>
 
-        {/* WEATHER ADAPTATION & PLAN B BANNER */}
-        <div className="bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-5 border border-stone-200/80 dark:border-[#1E2638] space-y-4 shadow-xl">
+        {/* Plan B Banner */}
+        <div className="tw-card p-5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-inner">
-                <SunIcon size={20} />
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <SunIcon size={19} className="text-amber-500" />
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
-                  Day {currentDay.dayNumber} Weather Outlook: {currentDay.weatherForecast.condition}
+                  Day {currentDay.dayNumber}: {currentDay.weatherForecast.condition}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                  Precipitation Risk: <span className="font-bold text-amber-600 dark:text-amber-300">{currentDay.weatherForecast.rainProbability}%</span> • {currentDay.weatherForecast.note}
+                  Rain risk: <span className="font-bold text-amber-600 dark:text-amber-300">{currentDay.weatherForecast.rainProbability}%</span>
+                  {' '}· {currentDay.weatherForecast.note}
                 </p>
               </div>
             </div>
-
             <button
               onClick={() => togglePlanB(activeDayIdx)}
-              className={`px-4 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 transition-all border shadow-md ${
+              className={`px-4 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 transition-all border ${
                 isCurrentPlanB
-                  ? 'bg-amber-400 text-slate-950 border-amber-400 scale-[1.02]'
-                  : 'bg-stone-100 dark:bg-slate-900/90 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-stone-200 dark:hover:bg-slate-800'
+                  ? 'bg-amber-400 text-slate-950 border-amber-400 scale-[1.02] shadow-md'
+                  : 'tw-btn-ghost border-amber-500/25 text-amber-700 dark:text-amber-300 hover:border-amber-500/40'
               }`}
             >
-              <UmbrellaIcon size={16} />
-              <span>{isCurrentPlanB ? '🌧️ Plan B Active (Indoor Mode)' : '🌧️ What if it rains?'}</span>
+              <UmbrellaIcon size={15} />
+              {isCurrentPlanB ? '🌧️ Plan B Active (Indoor Mode)' : '🌧️ What if it rains?'}
             </button>
           </div>
 
           {isCurrentPlanB && (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-2 animate-fade-in shadow-inner">
-              <div className="flex items-center gap-2 font-extrabold text-amber-800 dark:text-amber-300">
-                <span>Why did we change this?</span>
-              </div>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                Rain risk is expected during peak afternoon hours ({currentDay.weatherForecast.rainProbability}% probability). Outdoor visits have been replaced with curated indoor alternatives.
+            <div className="p-4 rounded-2xl bg-amber-500/8 border border-amber-500/25 text-xs space-y-2 animate-fade-in-up">
+              <div className="font-extrabold text-amber-800 dark:text-amber-300">Outdoor visits replaced with indoor alternatives</div>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                Rain risk expected during peak hours ({currentDay.weatherForecast.rainProbability}% probability). Monuments replaced with curated indoor experiences.
               </p>
               <div className="flex items-center gap-2 text-[11px] text-amber-700 dark:text-amber-400 font-bold pt-1">
-                <span>PLAN A (Outdoor)</span> → <span className="text-emerald-700 dark:text-emerald-400">PLAN B (Indoor Experience)</span>
+                <span>PLAN A (Outdoor)</span>
+                <span>→</span>
+                <span className="text-emerald-700 dark:text-emerald-400">PLAN B (Indoor)</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* COMPACT DAY ROUTE SUMMARY */}
+        {/* Day Route Summary */}
         <DayRouteSummaryCard
           destination={trip.destination}
           dayNumber={currentDay.dayNumber}
@@ -342,100 +303,84 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           activities={currentDay.activities}
         />
 
-        {/* ITINERARY ACTIVITIES TIMELINE */}
+        {/* Activities Timeline */}
         <div className="space-y-4">
-          <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <ClockIcon size={18} className="text-amber-500 dark:text-amber-400" /> Scheduled Activities ({isCurrentPlanB ? 'Plan B Indoor Mode' : 'Plan A Original'})
+          <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <ClockIcon size={16} className="text-amber-500" />
+            Scheduled Activities
+            <span className="tw-badge tw-badge-amber ml-1">
+              {isCurrentPlanB ? 'Plan B · Indoor Mode' : 'Plan A · Original'}
+            </span>
           </h3>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-3">
             {currentDay.activities.map((act, actIdx) => {
-              const displayActivityName = isCurrentPlanB && act.isOutdoor && act.indoorAlternative
-                ? act.indoorAlternative.name
-                : act.name;
-
-              const displayDescription = isCurrentPlanB && act.isOutdoor && act.indoorAlternative
-                ? act.indoorAlternative.description
-                : act.description;
-
+              const displayName = isCurrentPlanB && act.isOutdoor && act.indoorAlternative ? act.indoorAlternative.name : act.name;
+              const displayDesc = isCurrentPlanB && act.isOutdoor && act.indoorAlternative ? act.indoorAlternative.description : act.description;
               const isReplacedByPlanB = isCurrentPlanB && act.isOutdoor && act.indoorAlternative;
-              const mapsUrl = act.transitToNext?.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayActivityName + ' ' + trip.destination)}`;
+              const mapsUrl = act.transitToNext?.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayName + ' ' + trip.destination)}`;
 
               return (
-                <div key={act.id || actIdx} className="space-y-3">
-                  <div
-                    className={`bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 border transition-all relative ${
-                      isReplacedByPlanB
-                        ? 'border-amber-500/40 bg-amber-50 dark:bg-amber-950/10'
-                        : 'border-stone-200/80 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/[0.12]'
-                    }`}
-                  >
+                <div key={act.id || actIdx} className="space-y-2">
+                  <div className={`tw-card p-5 sm:p-6 transition-all ${isReplacedByPlanB ? 'border-amber-500/30 dark:border-amber-500/25' : ''}`}>
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                          <span className="px-3 py-1 rounded-full bg-amber-400/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 font-bold text-[11px]">
-                            {act.bestTime}
-                          </span>
-                          <span className="text-slate-400">•</span>
-                          <span className="text-slate-500 dark:text-slate-400 text-xs">{act.durationMinutes} min visit</span>
-                          
+                      <div className="space-y-2 flex-1 min-w-0">
+                        {/* Meta row */}
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="tw-badge tw-badge-amber">{act.bestTime}</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-medium">{act.durationMinutes} min</span>
                           {act.nearestMetro && (
-                            <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-slate-950 border border-stone-200 dark:border-slate-800 text-sky-700 dark:text-sky-300 font-medium flex items-center gap-1 text-[11px]">
-                              <TrainIcon size={12} className="text-sky-500 dark:text-sky-400" />
-                              Near {act.nearestMetro.stationName} Metro ({act.nearestMetro.walkTimeMin} min walk)
+                            <span className="px-2.5 py-1 rounded-full bg-sky-500/8 border border-sky-500/20 text-sky-700 dark:text-sky-300 text-[11px] font-medium flex items-center gap-1">
+                              <TrainIcon size={11} className="text-sky-500" />
+                              {act.nearestMetro.stationName} Metro ({act.nearestMetro.walkTimeMin} min walk)
                             </span>
+                          )}
+                          {isReplacedByPlanB && (
+                            <span className="tw-badge tw-badge-amber">Indoor Plan B</span>
                           )}
                         </div>
 
-                        <h4 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                          {displayActivityName}
-                          {isReplacedByPlanB && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-bold">
-                              Indoor Plan B
-                            </span>
-                          )}
-                        </h4>
+                        {/* Name */}
+                        <h4 className="text-base font-bold text-slate-900 dark:text-white">{displayName}</h4>
 
-                        <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed font-medium">
-                          {displayDescription}
+                        {/* Description */}
+                        <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                          {displayDesc}
                         </p>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex sm:flex-col items-center gap-2 shrink-0">
+                      <div className="flex sm:flex-col gap-2 shrink-0">
                         <button
                           onClick={() => setSelectedWhyActivity(act)}
-                          className="px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-slate-950 hover:bg-stone-200 dark:hover:bg-slate-900 border border-stone-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5 transition shadow-sm w-full justify-center"
+                          className="tw-btn-ghost px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border justify-center"
                         >
-                          <HelpIcon size={14} className="text-amber-500 dark:text-amber-400" />
-                          <span>Why this?</span>
+                          <HelpIcon size={13} className="text-amber-500" />
+                          Why this?
                         </button>
-
                         <a
                           href={mapsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-500/20 text-xs font-semibold flex items-center gap-1.5 transition w-full justify-center"
+                          className="px-3.5 py-2 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-500/20 text-xs font-semibold flex items-center gap-1.5 transition justify-center"
                         >
-                          <ExternalLinkIcon size={14} />
-                          <span>Open Route</span>
+                          <ExternalLinkIcon size={13} />
+                          Open Map
                         </a>
                       </div>
                     </div>
                   </div>
 
-                  {/* Inter-Activity Transit Connector Card */}
+                  {/* Transit connector */}
                   {act.transitToNext && actIdx < currentDay.activities.length - 1 && (
-                    <div className="mx-4 p-3 rounded-2xl bg-stone-100 dark:bg-slate-950/60 border border-stone-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-amber-600 dark:text-amber-400 font-bold">🚇 Transit:</span>
-                        <span className="font-semibold text-slate-800 dark:text-slate-300">
-                          {act.transitToNext.fromStation} → {act.transitToNext.toStation}
-                        </span>
+                    <div className="mx-5 p-3 rounded-xl bg-stone-100 dark:bg-white/[0.03] border border-stone-200 dark:border-white/[0.06] flex flex-wrap items-center justify-between text-xs gap-2">
+                      <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">🚇</span>
+                        <span className="font-semibold">{act.transitToNext.fromStation} → {act.transitToNext.toStation}</span>
                       </div>
                       <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-[11px] font-medium">
                         <span>~{act.transitToNext.approxTransitMin} min metro</span>
-                        <span>•</span>
+                        <span>·</span>
                         <span>~{act.transitToNext.approxWalkMin} min walk</span>
                       </div>
                     </div>
@@ -446,15 +391,16 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* TRIP HEALTH FACTORS */}
+        {/* Trip Health Factors */}
         {trip.healthScore && (
-          <div className="bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 border border-stone-200/80 dark:border-[#1E2638] space-y-3 shadow-xl">
+          <div className="tw-card p-6 space-y-4">
             <h4 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-              <ShieldIcon size={18} className="text-emerald-600 dark:text-emerald-400" /> Trip Health Factors ({trip.healthScore.score}/100)
+              <ShieldIcon size={16} className="text-emerald-500" />
+              Trip Health Factors ({trip.healthScore.score}/100)
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {trip.healthScore.factors.map((f, i) => (
-                <div key={i} className="p-3.5 rounded-2xl bg-stone-100 dark:bg-slate-950/60 border border-stone-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 font-medium">
+                <div key={i} className="p-3.5 rounded-2xl bg-stone-100 dark:bg-white/[0.04] border border-stone-200 dark:border-white/[0.07] text-xs text-slate-700 dark:text-slate-300 font-medium">
                   {f.text}
                 </div>
               ))}
@@ -463,39 +409,38 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         )}
       </main>
 
-      {/* "WHY THIS ACTIVITY?" MODAL */}
+      {/* Why This Activity Modal */}
       {selectedWhyActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-[#080B10]/85 backdrop-blur-md animate-fade-in">
-          <div className="bg-white dark:bg-[#0F141E] rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-stone-200 dark:border-[#1E2638] space-y-4 relative shadow-2xl">
-            <div className="flex items-center justify-between border-b border-stone-200 dark:border-white/[0.06] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 tw-modal-overlay animate-fade-in-up">
+          <div className="tw-card p-6 sm:p-8 max-w-lg w-full space-y-4 relative">
+            <div className="flex items-center justify-between border-b tw-divider pb-3">
               <div className="flex items-center gap-2 font-extrabold text-slate-900 dark:text-white text-base">
-                <SparklesIcon size={18} className="text-amber-500 dark:text-amber-400" /> Why this activity?
+                <SparklesIcon size={17} className="text-amber-500" />
+                Why this activity?
               </div>
               <button
                 onClick={() => setSelectedWhyActivity(null)}
-                className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-slate-800"
+                className="tw-btn-ghost p-1.5 rounded-xl border text-slate-400 hover:text-slate-900 dark:hover:text-white"
               >
-                <CloseIcon size={16} />
+                <CloseIcon size={15} />
               </button>
             </div>
-
             <div className="space-y-3 text-xs">
               <h5 className="font-extrabold text-amber-700 dark:text-amber-300 text-sm">{selectedWhyActivity.name}</h5>
-              <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed bg-stone-100 dark:bg-slate-950/90 p-4 rounded-2xl border border-stone-200 dark:border-slate-800 font-medium">
-                {selectedWhyActivity.whySelectedReason || `Selected based on your ${trip.persona} traveler persona and ${trip.pace} pacing preferences.`}
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed bg-stone-100 dark:bg-white/[0.04] p-4 rounded-2xl border border-stone-200 dark:border-white/[0.07] font-medium">
+                {selectedWhyActivity.whySelectedReason || `Selected based on your ${trip.persona} persona and ${trip.pace} pacing preferences.`}
               </p>
-              <div className="flex flex-wrap gap-2 text-[11px] text-slate-500 dark:text-slate-400 pt-1 font-medium">
+              <div className="flex flex-wrap gap-3 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 <span>Category: {selectedWhyActivity.category}</span>
-                <span>•</span>
+                <span>·</span>
                 <span>Outdoor: {selectedWhyActivity.isOutdoor ? 'Yes' : 'No'}</span>
-                <span>•</span>
-                <span>Weather Suitability: {selectedWhyActivity.weatherSuitability}</span>
+                <span>·</span>
+                <span>Weather Fit: {selectedWhyActivity.weatherSuitability}</span>
               </div>
             </div>
-
             <button
               onClick={() => setSelectedWhyActivity(null)}
-              className="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-md"
+              className="tw-btn-primary w-full py-3 rounded-xl text-xs"
             >
               Got it
             </button>
@@ -503,13 +448,9 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      {/* TripWise AI Assistant Modal */}
+      {/* TripWise AI Modal */}
       {trip && (
-        <TripWiseAIModal
-          trip={trip}
-          isOpen={isAIModalOpen}
-          onClose={() => setIsAIModalOpen(false)}
-        />
+        <TripWiseAIModal trip={trip} isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} />
       )}
 
       <Footer />
