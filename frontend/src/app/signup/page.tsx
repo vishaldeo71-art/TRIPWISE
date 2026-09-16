@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { CompassIcon, UserIcon, MailIcon, LockIcon, AlertIcon, CheckIcon, ArrowRightIcon } from '@/components/Icons';
+import { UserIcon, MailIcon, LockIcon, AlertIcon, CheckIcon, ArrowRightIcon } from '@/components/Icons';
 import { supabase } from '@/lib/supabase';
 
 export default function SignupPage() {
@@ -88,32 +88,32 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080B10] text-[#E2E8F0] selection:bg-amber-400/20 selection:text-amber-200">
+    <div className="min-h-screen flex flex-col bg-white text-[#131314] font-sans">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-10">
-        <div className="w-full max-w-md bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-[#1E2638] shadow-2xl relative overflow-hidden">
+        <div className="w-full max-w-md tw-card p-6 sm:p-8 relative overflow-hidden">
           <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 mx-auto flex items-center justify-center text-amber-400 mb-4 shadow-inner">
-              <CompassIcon className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-[#131314] text-white mx-auto flex items-center justify-center font-extrabold text-xl font-display mb-4 shadow-sm">
+              T
             </div>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">Create Your Account</h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <h1 className="text-2xl font-extrabold font-display text-[#131314]">Create Your Account</h1>
+            <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
               Start planning weather-aware adaptive travel itineraries
             </p>
           </div>
 
           {/* Feedback Banners */}
           {error && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
-              <AlertIcon className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+              <AlertIcon size={16} className="text-rose-600 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs sm:text-sm flex items-start gap-2.5 animate-fadeIn">
-              <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5">
+              <CheckIcon size={16} className="text-emerald-600 shrink-0 mt-0.5" />
               <span>{success}</span>
             </div>
           )}
@@ -121,72 +121,72 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block tw-eyebrow mb-1.5">
                 Full Name
               </label>
               <div className="relative">
-                <UserIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <UserIcon size={16} className="text-[var(--muted)] absolute left-3.5 top-3.5" />
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Alex Sharma"
-                  className="w-full pl-10 pr-4 py-3 bg-[#121620] border border-[#1E2638] rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400/50 transition shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--border)] rounded-xl text-[#131314] placeholder:text-[var(--muted)] text-sm font-semibold focus:outline-none focus:border-[#131314] transition"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block tw-eyebrow mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <MailIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <MailIcon size={16} className="text-[var(--muted)] absolute left-3.5 top-3.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-[#121620] border border-[#1E2638] rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400/50 transition shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--border)] rounded-xl text-[#131314] placeholder:text-[var(--muted)] text-sm font-semibold focus:outline-none focus:border-[#131314] transition"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block tw-eyebrow mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <LockIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <LockIcon size={16} className="text-[var(--muted)] absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full pl-10 pr-4 py-3 bg-[#121620] border border-[#1E2638] rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400/50 transition shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--border)] rounded-xl text-[#131314] placeholder:text-[var(--muted)] text-sm font-semibold focus:outline-none focus:border-[#131314] transition"
                 />
               </div>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block tw-eyebrow mb-1.5">
                 Confirm Password
               </label>
               <div className="relative">
-                <LockIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <LockIcon size={16} className="text-[var(--muted)] absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
-                  className="w-full pl-10 pr-4 py-3 bg-[#121620] border border-[#1E2638] rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400/50 transition shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--border)] rounded-xl text-[#131314] placeholder:text-[var(--muted)] text-sm font-semibold focus:outline-none focus:border-[#131314] transition"
                 />
               </div>
             </div>
@@ -195,25 +195,25 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow-lg shadow-amber-400/10 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+              className="tw-btn-primary w-full !py-3.5 text-sm"
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Creating Account...</span>
                 </>
               ) : (
                 <>
                   <span>Sign Up</span>
-                  <ArrowRightIcon className="w-4 h-4" />
+                  <ArrowRightIcon size={16} />
                 </>
               )}
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
+          <p className="text-center text-xs text-[var(--muted)] mt-6">
             Already have an account?{' '}
-            <Link href="/login" className="text-amber-400 font-medium hover:underline">
+            <Link href="/login" className="text-[#131314] font-extrabold hover:underline">
               Log in here
             </Link>
           </p>

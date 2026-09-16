@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Persona, TravelPace, Trip } from '@/types/trip';
@@ -43,8 +44,11 @@ const INTERESTS = [
   { id: 'Adventure', label: 'Adventure', icon: FlameIcon },
 ];
 
-export default function CreateTripPage() {
-  const [destination, setDestination] = useState('');
+function PlanTripForm() {
+  const searchParams = useSearchParams();
+  const initialCity = searchParams?.get('city') || '';
+
+  const [destination, setDestination] = useState(initialCity);
   const [durationDays, setDurationDays] = useState(3);
   const [persona, setPersona] = useState<Persona>('Explorer');
   const [pace, setPace] = useState<TravelPace>('Balanced');
@@ -53,6 +57,12 @@ export default function CreateTripPage() {
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialCity && !destination) {
+      setDestination(initialCity);
+    }
+  }, [initialCity]);
 
   const toggleInterest = (interest: string) => {
     if (selectedInterests.includes(interest)) {
@@ -167,212 +177,224 @@ export default function CreateTripPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080B10] text-slate-100 font-sans">
-      <Navbar />
+    <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Title Header */}
+      <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+        <span className="tw-badge tw-badge-amber">
+          <SparklesIcon size={14} className="text-amber-600" /> Real Places & Weather Engine
+        </span>
+        <h1 className="text-3xl sm:text-5xl font-extrabold font-display text-[#131314]">
+          Create Adaptive Itinerary
+        </h1>
+        <p className="text-[var(--muted)] text-xs sm:text-sm">
+          Select your destination city to build a custom travel plan with Open-Meteo weather intelligence and nearest metro routing.
+        </p>
+      </div>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Title Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-extrabold border border-amber-500/20">
-            <SparklesIcon size={14} className="text-amber-400" /> Weather & Persona Engine
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white">
-            Build Your <span className="gradient-text-amber">Adaptive Trip</span>
-          </h1>
-          <p className="text-slate-400 text-xs sm:text-sm">
-            Enter your destination and we&apos;ll construct a weather-adapted, destination-specific itinerary.
-          </p>
+      {/* Error Banner */}
+      {error && (
+        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-start gap-3">
+          <span className="text-base">⚠️</span>
+          <span>{error}</span>
         </div>
+      )}
 
-        {/* Error Banner */}
-        {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-start gap-3">
-            <span className="text-base">⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
+      {/* Main Form Container */}
+      <div className="tw-card p-6 sm:p-10 relative overflow-hidden">
+        {loading ? (
+          /* Animated Step Progress Loader */
+          <div className="py-12 text-center space-y-6">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mx-auto text-[#131314] shadow-md">
+              <CompassIcon size={28} className="animate-spin text-[#131314]" />
+            </div>
 
-        {/* Main Form Container */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-white/[0.08] shadow-2xl relative overflow-hidden">
-          {loading ? (
-            /* Animated Step Progress Loader */
-            <div className="py-12 text-center space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400 shadow-xl">
-                <CompassIcon size={28} className="animate-spin text-amber-400" />
+            <div className="space-y-1.5">
+              <h3 className="text-xl font-extrabold font-display text-[#131314]">Constructing Itinerary...</h3>
+              <p className="text-xs text-[var(--muted)] max-w-md mx-auto">
+                Processing Open-Meteo weather forecasts, real place landmarks, and nearest metro stations.
+              </p>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-2 pt-3 text-left text-xs font-semibold">
+              <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 1 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
+                <CheckIcon size={16} className={loadingStep >= 1 ? 'text-emerald-600' : 'text-slate-400'} />
+                <span>Geocoding coordinates for {destination}...</span>
               </div>
-
-              <div className="space-y-1.5">
-                <h3 className="text-xl font-extrabold text-white">Constructing Your Adaptive Itinerary...</h3>
-                <p className="text-xs text-slate-400 max-w-md mx-auto">
-                  Processing Open-Meteo forecasts, destination landmarks, and metro station links.
-                </p>
+              <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 2 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
+                <CheckIcon size={16} className={loadingStep >= 2 ? 'text-emerald-600' : 'text-slate-400'} />
+                <span>Analyzing rain risk & Open-Meteo weather forecast...</span>
               </div>
-
-              <div className="max-w-md mx-auto space-y-2.5 pt-3 text-left text-xs font-semibold">
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 1 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 1 ? 'text-amber-400' : 'text-slate-700'} />
-                  <span>Geocoding coordinates for {destination}...</span>
-                </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 2 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 2 ? 'text-amber-400' : 'text-slate-700'} />
-                  <span>Analyzing precipitation risk & Open-Meteo forecast...</span>
-                </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 3 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 3 ? 'text-amber-400' : 'text-slate-700'} />
-                  <span>Matching real {destination} places & metro stations...</span>
-                </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 4 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 4 ? 'text-amber-400' : 'text-slate-700'} />
-                  <span>Applying Nearest-Neighbor route optimization...</span>
-                </div>
+              <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 3 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
+                <CheckIcon size={16} className={loadingStep >= 3 ? 'text-emerald-600' : 'text-slate-400'} />
+                <span>Matching real {destination} places & metro transit...</span>
+              </div>
+              <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 4 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
+                <CheckIcon size={16} className={loadingStep >= 4 ? 'text-emerald-600' : 'text-slate-400'} />
+                <span>Applying Nearest-Neighbor route optimization...</span>
               </div>
             </div>
-          ) : (
-            <form onSubmit={handleGenerate} className="space-y-8">
-              {/* Field 1: Destination */}
-              <div>
-                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
-                  Destination City
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-3.5 text-amber-400">
-                    <MapPinIcon size={20} />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="e.g. Delhi, London, Paris, Tokyo, New York"
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-amber-500/40 transition shadow-inner"
-                  />
+          </div>
+        ) : (
+          <form onSubmit={handleGenerate} className="space-y-8">
+            {/* Field 1: Destination */}
+            <div>
+              <label className="block tw-eyebrow mb-2">
+                Destination City
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-3.5 text-amber-600">
+                  <MapPinIcon size={20} />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1.5 font-medium">
-                  Supports major global cities with curated place landmarks and metro station mapping.
-                </p>
+                <input
+                  type="text"
+                  required
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  placeholder="e.g. Delhi, London, Paris, Tokyo, New York"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-[var(--border)] rounded-xl text-[#131314] placeholder:text-[var(--muted)] text-sm font-semibold focus:outline-none focus:border-[#131314] transition"
+                />
               </div>
+              <p className="text-[11px] text-[var(--muted)] mt-1.5 font-medium">
+                Supports Delhi, Tokyo, Paris, London, Kyoto, New York, Rome, Barcelona and major global destinations.
+              </p>
+            </div>
 
-              {/* Field 2: Duration */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
-                    Trip Duration
-                  </label>
-                  <span className="text-xs font-extrabold text-amber-300 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-                    {durationDays} {durationDays === 1 ? 'Day' : 'Days'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-7 gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+            {/* Field 2: Duration */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="tw-eyebrow">
+                  Trip Duration
+                </label>
+                <span className="tw-badge tw-badge-amber">
+                  {durationDays} {durationDays === 1 ? 'Day' : 'Days'}
+                </span>
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setDurationDays(num)}
+                    className={`py-3 rounded-xl font-bold text-xs border transition-all ${
+                      durationDays === num
+                        ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
+                        : 'bg-[var(--surface)] text-[#131314] border-[var(--border)] hover:bg-[var(--surface-2)]'
+                    }`}
+                  >
+                    {num} {num === 1 ? 'Day' : 'D'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Field 3: Traveler Persona */}
+            <div>
+              <label className="block tw-eyebrow mb-2">
+                Traveler Persona
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {PERSONAS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPersona(p.id)}
+                    className={`p-4 rounded-2xl border text-left transition-all ${
+                      persona === p.id
+                        ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
+                        : 'bg-[var(--surface)] border-[var(--border)] text-[#131314] hover:bg-[var(--surface-2)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">{p.icon}</span>
+                      <span className="font-extrabold text-xs font-display">{p.label}</span>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${persona === p.id ? 'text-slate-300' : 'text-[var(--muted)]'}`}>
+                      {p.desc}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Field 4: Travel Pace */}
+            <div>
+              <label className="block tw-eyebrow mb-2">
+                Travel Pace
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {PACES.map((pc) => (
+                  <button
+                    key={pc.id}
+                    type="button"
+                    onClick={() => setPace(pc.id)}
+                    className={`p-4 rounded-2xl border text-left transition-all ${
+                      pace === pc.id
+                        ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
+                        : 'bg-[var(--surface)] border-[var(--border)] text-[#131314] hover:bg-[var(--surface-2)]'
+                    }`}
+                  >
+                    <div className="font-extrabold text-xs font-display mb-0.5">{pc.label}</div>
+                    <p className={`text-[11px] ${pace === pc.id ? 'text-slate-300' : 'text-[var(--muted)]'}`}>
+                      {pc.desc}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Field 5: Optional Interests */}
+            <div>
+              <label className="block tw-eyebrow mb-2">
+                Travel Interests
+              </label>
+              <div className="flex flex-wrap gap-2.5">
+                {INTERESTS.map((item) => {
+                  const IconComp = item.icon;
+                  const isSelected = selectedInterests.includes(item.id);
+                  return (
                     <button
-                      key={num}
+                      key={item.id}
                       type="button"
-                      onClick={() => setDurationDays(num)}
-                      className={`py-3 rounded-xl font-extrabold text-xs border transition-all ${
-                        durationDays === num
-                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-extrabold scale-[1.03]'
-                          : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
+                      onClick={() => toggleInterest(item.id)}
+                      className={`px-4 py-2.5 rounded-full border text-xs font-bold flex items-center gap-2 transition-all ${
+                        isSelected
+                          ? 'bg-[#131314] text-white border-[#131314]'
+                          : 'bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[#131314]'
                       }`}
                     >
-                      {num} {num === 1 ? 'Day' : 'D'}
+                      <IconComp size={14} className={isSelected ? 'text-amber-400' : 'text-[var(--muted)]'} />
+                      <span>{item.label}</span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Field 3: Traveler Persona */}
-              <div>
-                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
-                  Traveler Persona
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {PERSONAS.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setPersona(p.id)}
-                      className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between ${
-                        persona === p.id
-                          ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-md scale-[1.02]'
-                          : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-900/80'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">{p.icon}</span>
-                        <span className="font-extrabold text-xs text-slate-100">{p.label}</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed font-medium">{p.desc}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {/* Generate CTA Button */}
+            <button
+              type="submit"
+              className="tw-btn-primary w-full !py-4 text-sm"
+            >
+              <SparklesIcon size={18} />
+              <span>Generate Adaptive Itinerary</span>
+              <ArrowRightIcon size={18} />
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
-              {/* Field 4: Travel Pace */}
-              <div>
-                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
-                  Travel Pace
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {PACES.map((pc) => (
-                    <button
-                      key={pc.id}
-                      type="button"
-                      onClick={() => setPace(pc.id)}
-                      className={`p-4 rounded-2xl border text-left transition-all ${
-                        pace === pc.id
-                          ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-md scale-[1.02]'
-                          : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-900/80'
-                      }`}
-                    >
-                      <div className="font-extrabold text-xs text-slate-100 mb-0.5">{pc.label}</div>
-                      <p className="text-[11px] text-slate-400 font-medium">{pc.desc}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Field 5: Optional Interests */}
-              <div>
-                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
-                  Travel Interests
-                </label>
-                <div className="flex flex-wrap gap-2.5">
-                  {INTERESTS.map((item) => {
-                    const IconComp = item.icon;
-                    const isSelected = selectedInterests.includes(item.id);
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => toggleInterest(item.id)}
-                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all ${
-                          isSelected
-                            ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 shadow-sm'
-                            : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                        }`}
-                      >
-                        <IconComp size={14} className="text-sky-400" />
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Generate CTA Button */}
-              <button
-                type="submit"
-                className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-base shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5"
-              >
-                <SparklesIcon size={18} />
-                <span>Generate Adaptive Itinerary</span>
-                <ArrowRightIcon size={18} />
-              </button>
-            </form>
-          )}
-        </div>
+export default function CreateTripPage() {
+  return (
+    <div className="min-h-screen flex flex-col bg-white text-[#131314] font-sans">
+      <Navbar />
+      <main className="flex-1">
+        <Suspense fallback={<div className="py-20 text-center text-xs font-bold">Loading planner...</div>}>
+          <PlanTripForm />
+        </Suspense>
       </main>
-
       <Footer />
     </div>
   );

@@ -1,25 +1,27 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
   SparklesIcon,
   CloudRainIcon,
-  UserIcon,
-  ShareIcon,
   ArrowRightIcon,
-  CompassIcon,
   SunIcon,
   ShieldIcon,
-  CalendarIcon,
   NavigationIcon,
   TrainIcon,
+  CompassIcon,
+  MapPinIcon,
   CheckIcon
 } from '@/components/Icons';
 
 export default function LandingPage() {
+  const [cityInput, setCityInput] = useState('');
+  const router = useRouter();
+
   useEffect(() => {
     const scrollToHash = () => {
       if (typeof window !== 'undefined' && window.location.hash) {
@@ -40,220 +42,342 @@ export default function LandingPage() {
     };
   }, []);
 
+  const handleHeroSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cityInput.trim()) {
+      router.push(`/plan?city=${encodeURIComponent(cityInput.trim())}`);
+    } else {
+      router.push('/plan');
+    }
+  };
+
+  const fillCity = (cityName: string) => {
+    setCityInput(cityName);
+    router.push(`/plan?city=${encodeURIComponent(cityName)}`);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#080B10] text-slate-100 font-sans selection:bg-amber-500/20 selection:text-amber-200">
+    <div className="min-h-screen flex flex-col bg-white text-[#131314] font-sans">
       <Navbar />
 
       <main className="flex-1">
         {/* HERO SECTION */}
-        <section className="relative pt-16 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
-          {/* Subtle Ambient Lighting (No AI Slop Glow) */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-amber-500/10 via-amber-600/5 to-sky-600/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+        <section className="pt-12 sm:pt-16 pb-20 px-4 sm:px-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-xs font-semibold text-[#131314]">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>TRIPWISE INTELLIGENT TRAVEL ENGINE</span>
+              </div>
 
-          <div className="text-center max-w-4xl mx-auto space-y-7">
-            {/* Architectural Pill Badge */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/90 border border-amber-500/20 text-amber-300 text-xs sm:text-sm font-semibold shadow-xl backdrop-blur-xl">
-              <SparklesIcon size={16} className="text-amber-400" />
-              <span>Weather-Aware Adaptive Travel Platform</span>
-            </div>
+              <h1 className="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-[#131314] leading-[1.08]">
+                Travel planning that adapts to the <span className="underline decoration-amber-400 decoration-4 underline-offset-4">real world</span>.
+              </h1>
 
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1]">
-              Your itinerary doesn&apos;t just plan your trip.{' '}
-              <span className="gradient-text-amber">It adapts to it.</span>
-            </h1>
+              <p className="text-base sm:text-lg text-[var(--muted)] leading-relaxed max-w-xl">
+                Build destination-specific itineraries using real places from Delhi, Tokyo, Paris, London, and beyond. Weather-aware with instant rain Plan B fallbacks.
+              </p>
 
-            {/* Subtitle */}
-            <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-              Build destination-specific travel plans with live Open-Meteo weather forecasts, nearest metro stations, and Nearest-Neighbor route optimization.
-            </p>
+              {/* Destination Pills */}
+              <div className="space-y-2">
+                <span className="text-[11px] uppercase font-bold text-[var(--muted)] tracking-wider">Popular Destinations:</span>
+                <div className="flex flex-wrap gap-2">
+                  {['Delhi', 'Tokyo', 'Paris', 'London', 'Kyoto'].map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => fillCity(c)}
+                      className="px-3 py-1 rounded-full bg-[var(--surface)] hover:bg-[var(--surface-2)] border border-[var(--border)] text-xs font-semibold transition-all hover:scale-105 flex items-center gap-1"
+                    >
+                      <MapPinIcon size={12} className="text-amber-600" />
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <Link
-                href="/plan"
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-base shadow-xl shadow-amber-500/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 group"
-              >
-                <span>Plan My Trip</span>
-                <ArrowRightIcon size={18} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a
-                href="#how-it-works"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '/#how-it-works');
-                }}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-semibold text-base border border-slate-800 shadow-md transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                Explore How It Works
-              </a>
-            </div>
-
-            {/* Interactive Preview Card Mockup */}
-            <div className="pt-10">
-              <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-3xl mx-auto border border-white/[0.08] shadow-2xl relative group text-left">
-                <div className="flex flex-wrap items-center justify-between border-b border-white/[0.06] pb-4 mb-6 gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-extrabold text-xs shadow-inner">
-                      DEL
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-base text-white">Delhi • 3 Days Itinerary</h3>
-                      <p className="text-xs text-slate-400">Explorer Persona • Balanced Pace</p>
-                    </div>
+              {/* Main Action Input */}
+              <form onSubmit={handleHeroSubmit} className="pt-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 bg-[var(--surface)] border border-[var(--border)] rounded-2xl sm:rounded-full shadow-sm max-w-xl">
+                  <div className="flex items-center gap-2 px-4 py-2 flex-1">
+                    <CompassIcon size={18} className="text-[var(--muted)]" />
+                    <input
+                      type="text"
+                      placeholder="Where do you want to go? (e.g. Delhi, Tokyo)"
+                      value={cityInput}
+                      onChange={(e) => setCityInput(e.target.value)}
+                      className="w-full bg-transparent border-none text-sm font-medium text-[#131314] placeholder:text-[var(--muted)] focus:outline-none"
+                    />
                   </div>
-                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold shadow-sm">
-                    <SunIcon size={14} className="text-emerald-400" /> Outdoor Suitability: High (95/100)
+                  <button
+                    type="submit"
+                    className="tw-btn-primary text-xs !py-3 !px-6"
+                  >
+                    <span>Plan Itinerary</span>
+                    <ArrowRightIcon size={14} />
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Right Visual Stage */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative rounded-[28px] overflow-hidden border border-[var(--border)] shadow-2xl bg-slate-900 group">
+                <img
+                  src="https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1000&q=80"
+                  alt="Delhi Humayun's Tomb"
+                  className="w-full h-[420px] object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                {/* Floating Badge 1: Weather Suitability */}
+                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/20 shadow-lg flex items-center gap-2 text-xs font-bold text-[#131314]">
+                  <SunIcon size={16} className="text-amber-500" />
+                  <div>
+                    <div className="text-[10px] text-[var(--muted)] uppercase">Outdoor Score</div>
+                    <div>94/100 • Clear Sky</div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition">
-                    <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Morning</span>
-                    <h4 className="font-extrabold text-xs text-slate-100 mt-1">Red Fort & Heritage Walk</h4>
-                    <p className="text-[11px] text-slate-400 mt-1">🚇 Near Lal Qila Metro</p>
+                {/* Floating Badge 2: Real Place Card */}
+                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl space-y-2 text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="tw-badge tw-badge-amber">Delhi Heritage Stop</span>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">🚇 Lal Qila Metro</span>
                   </div>
-                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition">
-                    <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Afternoon</span>
-                    <h4 className="font-extrabold text-xs text-slate-100 mt-1">Humayun’s Tomb Gardens</h4>
-                    <p className="text-[11px] text-slate-400 mt-1">🚇 Near JL Nehru Stadium</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-amber-500/30 bg-amber-500/5 relative">
-                    <span className="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider flex items-center justify-between">
-                      Evening
-                      <span className="text-[9px] bg-amber-500/10 px-2 py-0.5 rounded-md text-amber-300 border border-amber-500/20 font-bold">Plan B Ready</span>
-                    </span>
-                    <h4 className="font-extrabold text-xs text-slate-100 mt-1">Chandni Chowk Food Tour</h4>
-                    <p className="text-[11px] text-slate-400 mt-1">🌧️ Indoor Alt: Haveli Dharampura</p>
-                  </div>
+                  <h4 className="font-extrabold text-sm font-display text-[#131314]">Red Fort & Jama Masjid Walk</h4>
+                  <p className="text-xs text-[var(--muted)] line-clamp-1">Real historical landmark with indoor rain alternative ready.</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* VISUAL EXPLANATION (STEP FLOW) */}
-        <section id="how-it-works" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/[0.06]">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-amber-400">Simple 4-Step Process</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-white">How TRIPWISE Adapts Your Journey</p>
-            <p className="text-slate-400 text-sm sm:text-base">From destination selection to live weather adjustments in seconds.</p>
+        {/* MARQUEE DESTINATIONS STRIP */}
+        <div className="py-6 bg-[var(--surface)] border-y border-[var(--border)] overflow-hidden">
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-8 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
+            {['Delhi', 'Tokyo', 'Paris', 'London', 'Kyoto', 'Rome', 'New York', 'Sydney', 'Dubai', 'Barcelona', 'Delhi', 'Tokyo', 'Paris', 'London', 'Kyoto', 'Rome'].map((c, i) => (
+              <span key={i} className="flex items-center gap-8">
+                <span className="hover:text-[#131314] cursor-pointer transition" onClick={() => fillCity(c)}>
+                  {c}
+                </span>
+                <span className="text-amber-500 font-extrabold">•</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* HOW IT WORKS */}
+        <section id="how-it-works" className="scroll-mt-24 py-20 px-4 sm:px-8 max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <span className="tw-eyebrow">Seamless Process</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-[#131314]">
+              How TRIPWISE Powers Your Journey
+            </h2>
+            <p className="text-sm text-[var(--muted)]">
+              Real places, live Open-Meteo weather forecasts, and smart metro routing in 4 simple steps.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group border border-white/[0.07]">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-extrabold text-sm mb-4">
+            <div className="tw-card p-6 flex flex-col justify-between space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center font-extrabold text-sm font-display">
                 01
               </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 mb-1">Step 1</div>
-              <h3 className="text-lg font-extrabold text-white mb-2">DESTINATION & PERSONA</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Choose your city (Delhi, London, Paris, Tokyo, etc.), travel dates, pace, and persona (Backpacker, Family, Luxury, Explorer).
-              </p>
+              <div>
+                <span className="tw-badge tw-badge-amber mb-2">Destination & Persona</span>
+                <h3 className="font-extrabold text-base font-display text-[#131314] mt-1 mb-2">Real Local Places</h3>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">
+                  Select your destination city. TRIPWISE queries authentic, verified attractions specific to that location.
+                </p>
+              </div>
             </div>
 
-            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group border border-white/[0.07]">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 font-extrabold text-sm mb-4">
+            <div className="tw-card p-6 flex flex-col justify-between space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center font-extrabold text-sm font-display">
                 02
               </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-wider text-sky-400 mb-1">Step 2</div>
-              <h3 className="text-lg font-extrabold text-white mb-2">OPEN-METEO WEATHER</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                We query Open-Meteo live forecasts to evaluate precipitation probabilities and outdoor suitability.
-              </p>
+              <div>
+                <span className="tw-badge tw-badge-sky mb-2">Open-Meteo API</span>
+                <h3 className="font-extrabold text-base font-display text-[#131314] mt-1 mb-2">Live Weather Intelligence</h3>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">
+                  Queries real-time temperature, rain probability, and outdoor suitability scores for your travel dates.
+                </p>
+              </div>
             </div>
 
-            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group border border-white/[0.07]">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-300 font-extrabold text-sm mb-4">
+            <div className="tw-card p-6 flex flex-col justify-between space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center font-extrabold text-sm font-display">
                 03
               </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-wider text-purple-300 mb-1">Step 3</div>
-              <h3 className="text-lg font-extrabold text-white mb-2">NEAREST NEIGHBOR ROUTE</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Activities are ordered by geographical proximity, and matched to nearest city metro stations.
-              </p>
+              <div>
+                <span className="tw-badge tw-badge-emerald mb-2">Metro & Transit</span>
+                <h3 className="font-extrabold text-base font-display text-[#131314] mt-1 mb-2">Smart Route Optimiser</h3>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">
+                  Nearest-Neighbor distance calculation groups nearby stops and links directly to city metro stations.
+                </p>
+              </div>
             </div>
 
-            <div className="glass-panel glass-card-hover p-6 rounded-3xl flex flex-col items-start relative group border border-white/[0.07]">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-extrabold text-sm mb-4">
+            <div className="tw-card p-6 flex flex-col justify-between space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center font-extrabold text-sm font-display">
                 04
               </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 mb-1">Step 4</div>
-              <h3 className="text-lg font-extrabold text-white mb-2">PLAN B & AI ASSISTANT</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Toggle Plan B rain mode for indoor museum fallbacks and ask TripWise AI contextual questions.
-              </p>
+              <div>
+                <span className="tw-badge mb-2">Plan B Rain Swap</span>
+                <h3 className="font-extrabold text-base font-display text-[#131314] mt-1 mb-2">Instant Indoor Swap</h3>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">
+                  If rain is detected, toggle Plan B with 1-click to swap outdoor parks with indoor museums and galleries.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* CORE FEATURES */}
-        <section id="features" className="scroll-mt-24 py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/[0.06]">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-amber-400">Core Features</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-white">Engineered for Unpredictable Journeys</p>
-            <p className="text-slate-400 text-sm sm:text-base">Everything needed to plan structured, weather-adaptive itineraries.</p>
+        {/* BENTO GRID FEATURES */}
+        <section id="features" className="scroll-mt-24 py-20 px-4 sm:px-8 max-w-7xl mx-auto border-t border-[var(--border)]">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <span className="tw-eyebrow">Engineered Architecture</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-[#131314]">
+              Built for Real Travelers
+            </h2>
+            <p className="text-sm text-[var(--muted)]">
+              No generic template placeholders. Every place is real, verified, and mapped.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="glass-panel p-6 rounded-3xl border border-white/[0.07] hover:border-amber-500/30 transition-all hover:-translate-y-1">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="tw-card-sand p-8 md:col-span-2 space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-[var(--border)] flex items-center justify-center text-amber-600">
+                <MapPinIcon size={20} />
+              </div>
+              <h3 className="text-xl font-extrabold font-display text-[#131314]">Destination-Specific Real Places</h3>
+              <p className="text-xs text-[var(--muted)] leading-relaxed max-w-lg">
+                Whether you select Delhi (Red Fort, Qutub Minar, Chandni Chowk), London (Tower Bridge, British Museum), or Tokyo (Senso-ji, Shibuya Crossing), TRIPWISE returns authentic places with zero cross-city errors.
+              </p>
+            </div>
+
+            <div className="tw-card-dark p-8 space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400">
                 <CloudRainIcon size={20} />
               </div>
-              <h3 className="text-base font-extrabold text-white mb-2">Real Destination Places</h3>
+              <h3 className="text-xl font-extrabold font-display text-white">Weather Adaptive Score</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Zero generic templates. Places are specific to your selected city with zero cross-city contamination.
+                Open-Meteo forecast API generates an outdoor suitability score (0-100) and warning alerts for extreme weather.
               </p>
             </div>
 
-            <div className="glass-panel p-6 rounded-3xl border border-white/[0.07] hover:border-amber-500/30 transition-all hover:-translate-y-1">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-4">
+            <div className="tw-card-dark p-8 space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-emerald-400">
                 <TrainIcon size={20} />
               </div>
-              <h3 className="text-base font-extrabold text-white mb-2">Metro & Transit Engine</h3>
+              <h3 className="text-xl font-extrabold font-display text-white">Nearest Metro Stations</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Matches attractions to nearest metro stations and provides direct Google Maps transit route links.
+                Every stop features nearest metro connections (e.g. Lal Qila, JL Nehru Stadium) with direct Google Maps route links.
               </p>
             </div>
 
-            <div className="glass-panel p-6 rounded-3xl border border-white/[0.07] hover:border-amber-500/30 transition-all hover:-translate-y-1">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-300 mb-4">
-                <NavigationIcon size={20} />
-              </div>
-              <h3 className="text-base font-extrabold text-white mb-2">Smart Route Optimization</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Nearest-Neighbor distance calculation groups nearby stops together to reduce transit back-and-forth.
-              </p>
-            </div>
-
-            <div className="glass-panel p-6 rounded-3xl border border-white/[0.07] hover:border-amber-500/30 transition-all hover:-translate-y-1">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
+            <div className="tw-card-sand p-8 md:col-span-2 space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-[var(--border)] flex items-center justify-center text-sky-600">
                 <ShieldIcon size={20} />
               </div>
-              <h3 className="text-base font-extrabold text-white mb-2">Trip Health & Plan B</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Deterministic Trip Health score (0-100) and instant Plan B rain toggle for indoor museum fallbacks.
+              <h3 className="text-xl font-extrabold font-display text-[#131314]">1-Click Rain Plan B Fallbacks</h3>
+              <p className="text-xs text-[var(--muted)] leading-relaxed max-w-lg">
+                Rainy day? Toggle Plan B to immediately replace outdoor walking tours with indoor food halls, art galleries, and historic havelis without recalculating your entire day.
               </p>
             </div>
           </div>
         </section>
 
-        {/* BOTTOM CTA BANNER */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
-          <div className="glass-panel rounded-3xl p-10 sm:p-14 border border-amber-500/20 relative overflow-hidden shadow-2xl">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-              Ready to create your adaptive itinerary?
+        {/* POPULAR DESTINATIONS COVERFLOW CAROUSEL */}
+        <section className="py-20 px-4 sm:px-8 max-w-7xl mx-auto border-t border-[var(--border)]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
+            <div>
+              <span className="tw-eyebrow">Explore Destinaton Catalogs</span>
+              <h2 className="text-3xl font-extrabold font-display text-[#131314] mt-1">
+                Featured World Cities
+              </h2>
+            </div>
+            <Link href="/plan" className="tw-btn-secondary text-xs">
+              View All Cities →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="tw-card-lift overflow-hidden group cursor-pointer" onClick={() => fillCity('Delhi')}>
+              <div className="h-48 relative overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80"
+                  alt="Delhi"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-3 right-3 tw-badge tw-badge-amber">Delhi, India</div>
+              </div>
+              <div className="p-5 space-y-2">
+                <h3 className="font-extrabold text-base font-display text-[#131314]">Delhi Heritage & Spice Trails</h3>
+                <p className="text-xs text-[var(--muted)]">Red Fort, Humayun’s Tomb, Qutub Minar, Akshardham, Chandni Chowk</p>
+                <div className="pt-2 text-xs font-bold text-[#131314] flex items-center gap-1">
+                  <span>Generate Plan</span>
+                  <ArrowRightIcon size={12} />
+                </div>
+              </div>
+            </div>
+
+            <div className="tw-card-lift overflow-hidden group cursor-pointer" onClick={() => fillCity('Tokyo')}>
+              <div className="h-48 relative overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80"
+                  alt="Tokyo"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-3 right-3 tw-badge tw-badge-sky">Tokyo, Japan</div>
+              </div>
+              <div className="p-5 space-y-2">
+                <h3 className="font-extrabold text-base font-display text-[#131314]">Tokyo Future & Culture</h3>
+                <p className="text-xs text-[var(--muted)]">Senso-ji, Shibuya Crossing, Meiji Shrine, Akihabara, teamLab</p>
+                <div className="pt-2 text-xs font-bold text-[#131314] flex items-center gap-1">
+                  <span>Generate Plan</span>
+                  <ArrowRightIcon size={12} />
+                </div>
+              </div>
+            </div>
+
+            <div className="tw-card-lift overflow-hidden group cursor-pointer" onClick={() => fillCity('Paris')}>
+              <div className="h-48 relative overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80"
+                  alt="Paris"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute top-3 right-3 tw-badge tw-badge-emerald">Paris, France</div>
+              </div>
+              <div className="p-5 space-y-2">
+                <h3 className="font-extrabold text-base font-display text-[#131314]">Paris Art & Architecture</h3>
+                <p className="text-xs text-[var(--muted)]">Eiffel Tower, Louvre Museum, Montmartre, Notre-Dame, Seine Cruise</p>
+                <div className="pt-2 text-xs font-bold text-[#131314] flex items-center gap-1">
+                  <span>Generate Plan</span>
+                  <ArrowRightIcon size={12} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* BOTTOM DARK PANEL CTA */}
+        <section className="py-16 px-4 sm:px-8 max-w-5xl mx-auto">
+          <div className="tw-card-dark p-10 sm:p-14 text-center space-y-6 relative overflow-hidden shadow-2xl">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-white">
+              Ready to plan your adaptive trip?
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto mb-8 leading-relaxed">
-              Build your destination-specific, weather-aware travel plan in seconds.
+            <p className="text-slate-300 text-sm max-w-xl mx-auto leading-relaxed">
+              Create weather-adaptive itineraries with real local places, metro routes, and instant rain backups in seconds.
             </p>
             <Link
               href="/plan"
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-base shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-[#131314] font-extrabold text-sm hover:bg-slate-100 transition-all hover:scale-105 shadow-lg"
             >
-              <span>Start Planning Now</span>
-              <ArrowRightIcon size={18} />
+              <span>Create Your Trip Now</span>
+              <ArrowRightIcon size={16} />
             </Link>
           </div>
         </section>

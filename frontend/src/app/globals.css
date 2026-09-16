@@ -1,116 +1,231 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+:root {
+  --bg: #ffffff;
+  --surface: #f4f3ef;
+  --surface-2: #eceae4;
+  --fg: #131314;
+  --muted: #62666d;
+  --border: #e7e4dc;
+  --accent: #131314;
+  --accent-fg: #ffffff;
+  --sky: #0c8ee9;
+  --emerald: #0e9f6e;
+  --amber: #e8930c;
+  --radius: 24px;
+  --radius-sm: 16px;
+  --radius-pill: 999px;
+  --font-display: "Space Grotesk", Inter, system-ui, -apple-system, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: 0 20px 60px -20px rgba(19, 19, 20, 0.18);
+  --shadow-sm: 0 4px 12px rgba(19, 19, 20, 0.05);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @layer base {
+  * {
+    border-color: var(--border);
+  }
   html {
     scroll-behavior: smooth;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body);
+    background-color: var(--bg);
+    color: var(--fg);
   }
   body {
-    background-color: #080B10;
-    color: #F1F5F9;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
   ::selection {
-    background-color: rgba(2, 132, 199, 0.3);
-    color: #38BDF8;
+    background-color: #131314;
+    color: #ffffff;
   }
 }
 
-/* Impeccable Design System Glassmorphism */
-.glass-card {
-  background: rgba(18, 22, 32, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+/* Custom Design System Components */
+.tw-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s var(--ease);
 }
 
-.glass-panel {
-  background: rgba(15, 20, 30, 0.85);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
+.tw-card-lift {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s var(--ease);
+}
+.tw-card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: #c9c5ba;
 }
 
-.glass-card-hover {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.tw-card-sand {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
-.glass-card-hover:hover {
-  background: rgba(26, 33, 48, 0.85);
-  border-color: rgba(56, 189, 248, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 16px 40px -10px rgba(2, 132, 199, 0.18);
+.tw-card-dark {
+  background-color: var(--fg);
+  color: #ffffff;
+  border-radius: var(--radius);
 }
 
-/* Sophisticated Refined Typography Gradients (No AI Slop Neon) */
-.gradient-text {
-  background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 40%, #94A3B8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.tw-btn-primary {
+  background-color: var(--accent);
+  color: var(--accent-fg);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.tw-btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-.gradient-text-amber {
-  background: linear-gradient(135deg, #FEF08A 0%, #F59E0B 50%, #D97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.tw-btn-secondary {
+  background-color: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.tw-btn-secondary:hover {
+  background-color: var(--surface-2);
 }
 
-.gradient-text-azure {
-  background: linear-gradient(135deg, #BAE6FD 0%, #38BDF8 50%, #0284C7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.tw-btn-ghost {
+  color: var(--fg);
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s var(--ease);
+}
+.tw-btn-ghost:hover {
+  background-color: var(--surface);
 }
 
-.gradient-text-emerald {
-  background: linear-gradient(135deg, #A7F3D0 0%, #10B981 50%, #059669 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.tw-input {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--fg);
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+}
+.tw-input:focus {
+  border-color: var(--fg);
 }
 
-/* Subtle Micro-Animations */
+.tw-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+}
+
+.tw-badge-amber {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.tw-badge-emerald {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.tw-badge-sky {
+  background-color: #e0f2fe;
+  color: #075985;
+  border-color: #bae6fd;
+}
+
+.tw-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Animations & 3D Tilt Utilities */
 @keyframes floatSlow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
 }
 
-@keyframes subtleFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-.animate-float-slow {
-  animation: floatSlow 7s ease-in-out infinite;
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
 }
 
-.animate-fade-in {
-  animation: subtleFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
-/* Custom Refined Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080B10;
+  background: var(--surface);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
-  border-radius: 9999px;
+  background: #c9c5ba;
+  border-radius: var(--radius-pill);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--muted);
 }
 
 .scrollbar-none::-webkit-scrollbar {
