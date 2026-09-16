@@ -16,7 +16,7 @@ import {
   CameraIcon,
   TreesIcon,
   ShoppingIcon,
-  FlameIcon,
+  FlameIcon
 } from '@/components/Icons';
 import { supabase } from '@/lib/supabase';
 
@@ -167,62 +167,62 @@ export default function CreateTripPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F5] dark:bg-[#080B10] text-slate-900 dark:text-slate-100 font-sans transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#080B10] text-slate-100 font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Title Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/10 text-amber-700 dark:text-amber-300 text-xs font-extrabold border border-amber-500/20">
-            <SparklesIcon size={14} className="text-amber-500 dark:text-amber-400" /> Weather & Persona Engine
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-extrabold border border-amber-500/20">
+            <SparklesIcon size={14} className="text-amber-400" /> Weather & Persona Engine
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Build Your Adaptive Trip
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white">
+            Build Your <span className="gradient-text-amber">Adaptive Trip</span>
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
+          <p className="text-slate-400 text-xs sm:text-sm">
             Enter your destination and we&apos;ll construct a weather-adapted, destination-specific itinerary.
           </p>
         </div>
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-start gap-3">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-start gap-3">
             <span className="text-base">⚠️</span>
             <span>{error}</span>
           </div>
         )}
 
         {/* Main Form Container */}
-        <div className="bg-white/90 dark:bg-[#0F141E]/90 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-stone-200/80 dark:border-[#1E2638] shadow-2xl relative overflow-hidden">
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-white/[0.08] shadow-2xl relative overflow-hidden">
           {loading ? (
             /* Animated Step Progress Loader */
             <div className="py-12 text-center space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-500 dark:text-amber-400 shadow-xl">
-                <CompassIcon size={28} className="animate-spin text-amber-500 dark:text-amber-400" />
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400 shadow-xl">
+                <CompassIcon size={28} className="animate-spin text-amber-400" />
               </div>
 
               <div className="space-y-1.5">
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">Constructing Your Adaptive Itinerary...</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+                <h3 className="text-xl font-extrabold text-white">Constructing Your Adaptive Itinerary...</h3>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
                   Processing Open-Meteo forecasts, destination landmarks, and metro station links.
                 </p>
               </div>
 
               <div className="max-w-md mx-auto space-y-2.5 pt-3 text-left text-xs font-semibold">
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 1 ? 'bg-amber-400/10 text-amber-800 dark:text-amber-300 border border-amber-500/20' : 'text-slate-400 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300'} />
+                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 1 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
+                  <CheckIcon size={16} className={loadingStep >= 1 ? 'text-amber-400' : 'text-slate-700'} />
                   <span>Geocoding coordinates for {destination}...</span>
                 </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 2 ? 'bg-amber-400/10 text-amber-800 dark:text-amber-300 border border-amber-500/20' : 'text-slate-400 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 2 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300'} />
+                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 2 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
+                  <CheckIcon size={16} className={loadingStep >= 2 ? 'text-amber-400' : 'text-slate-700'} />
                   <span>Analyzing precipitation risk & Open-Meteo forecast...</span>
                 </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 3 ? 'bg-amber-400/10 text-amber-800 dark:text-amber-300 border border-amber-500/20' : 'text-slate-400 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 3 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300'} />
+                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 3 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
+                  <CheckIcon size={16} className={loadingStep >= 3 ? 'text-amber-400' : 'text-slate-700'} />
                   <span>Matching real {destination} places & metro stations...</span>
                 </div>
-                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 4 ? 'bg-amber-400/10 text-amber-800 dark:text-amber-300 border border-amber-500/20' : 'text-slate-400 border border-transparent'}`}>
-                  <CheckIcon size={16} className={loadingStep >= 4 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300'} />
+                <div className={`p-3 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 4 ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'text-slate-600 border border-transparent'}`}>
+                  <CheckIcon size={16} className={loadingStep >= 4 ? 'text-amber-400' : 'text-slate-700'} />
                   <span>Applying Nearest-Neighbor route optimization...</span>
                 </div>
               </div>
@@ -231,11 +231,11 @@ export default function CreateTripPage() {
             <form onSubmit={handleGenerate} className="space-y-8">
               {/* Field 1: Destination */}
               <div>
-                <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
                   Destination City
                 </label>
                 <div className="relative">
-                  <div className="absolute left-4 top-3.5 text-amber-500 dark:text-amber-400">
+                  <div className="absolute left-4 top-3.5 text-amber-400">
                     <MapPinIcon size={20} />
                   </div>
                   <input
@@ -244,7 +244,7 @@ export default function CreateTripPage() {
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     placeholder="e.g. Delhi, London, Paris, Tokyo, New York"
-                    className="w-full pl-12 pr-4 py-3.5 bg-stone-100 dark:bg-slate-950/80 border border-stone-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm font-medium focus:outline-none focus:border-amber-400/60 transition shadow-inner"
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-amber-500/40 transition shadow-inner"
                   />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1.5 font-medium">
@@ -255,10 +255,10 @@ export default function CreateTripPage() {
               {/* Field 2: Duration */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-extrabold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                  <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
                     Trip Duration
                   </label>
-                  <span className="text-xs font-extrabold text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-500/20">
+                  <span className="text-xs font-extrabold text-amber-300 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
                     {durationDays} {durationDays === 1 ? 'Day' : 'Days'}
                   </span>
                 </div>
@@ -270,8 +270,8 @@ export default function CreateTripPage() {
                       onClick={() => setDurationDays(num)}
                       className={`py-3 rounded-xl font-extrabold text-xs border transition-all ${
                         durationDays === num
-                          ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-md font-extrabold scale-[1.03]'
-                          : 'bg-stone-100 dark:bg-slate-950/80 text-slate-700 dark:text-slate-400 border-stone-200 dark:border-slate-800 hover:border-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-extrabold scale-[1.03]'
+                          : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
                       }`}
                     >
                       {num} {num === 1 ? 'Day' : 'D'}
@@ -282,7 +282,7 @@ export default function CreateTripPage() {
 
               {/* Field 3: Traveler Persona */}
               <div>
-                <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
                   Traveler Persona
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -293,15 +293,15 @@ export default function CreateTripPage() {
                       onClick={() => setPersona(p.id)}
                       className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                         persona === p.id
-                          ? 'bg-amber-400/10 border-amber-500/40 text-slate-900 dark:text-white shadow-md scale-[1.02]'
-                          : 'bg-stone-100 dark:bg-slate-950/60 border-stone-200 dark:border-slate-800/80 text-slate-600 dark:text-slate-400 hover:border-slate-400 hover:bg-white dark:hover:bg-slate-900/80'
+                          ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-md scale-[1.02]'
+                          : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-900/80'
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-lg">{p.icon}</span>
-                        <span className="font-extrabold text-xs text-slate-900 dark:text-slate-100">{p.label}</span>
+                        <span className="font-extrabold text-xs text-slate-100">{p.label}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{p.desc}</p>
+                      <p className="text-[11px] text-slate-400 leading-relaxed font-medium">{p.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -309,7 +309,7 @@ export default function CreateTripPage() {
 
               {/* Field 4: Travel Pace */}
               <div>
-                <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
                   Travel Pace
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -320,12 +320,12 @@ export default function CreateTripPage() {
                       onClick={() => setPace(pc.id)}
                       className={`p-4 rounded-2xl border text-left transition-all ${
                         pace === pc.id
-                          ? 'bg-amber-400/10 border-amber-500/40 text-slate-900 dark:text-white shadow-md scale-[1.02]'
-                          : 'bg-stone-100 dark:bg-slate-950/60 border-stone-200 dark:border-slate-800/80 text-slate-600 dark:text-slate-400 hover:border-slate-400 hover:bg-white dark:hover:bg-slate-900/80'
+                          ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-md scale-[1.02]'
+                          : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-900/80'
                       }`}
                     >
-                      <div className="font-extrabold text-xs text-slate-900 dark:text-slate-100 mb-0.5">{pc.label}</div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{pc.desc}</p>
+                      <div className="font-extrabold text-xs text-slate-100 mb-0.5">{pc.label}</div>
+                      <p className="text-[11px] text-slate-400 font-medium">{pc.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -333,7 +333,7 @@ export default function CreateTripPage() {
 
               {/* Field 5: Optional Interests */}
               <div>
-                <label className="block text-xs font-extrabold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-2">
                   Travel Interests
                 </label>
                 <div className="flex flex-wrap gap-2.5">
@@ -347,11 +347,11 @@ export default function CreateTripPage() {
                         onClick={() => toggleInterest(item.id)}
                         className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all ${
                           isSelected
-                            ? 'bg-sky-500/15 border-sky-500/40 text-sky-800 dark:text-sky-300 shadow-sm'
-                            : 'bg-stone-100 dark:bg-slate-950/60 border-stone-200 dark:border-slate-800/80 text-slate-600 dark:text-slate-400 hover:border-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                            ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 shadow-sm'
+                            : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
                         }`}
                       >
-                        <IconComp size={14} className="text-sky-500 dark:text-sky-400" />
+                        <IconComp size={14} className="text-sky-400" />
                         <span>{item.label}</span>
                       </button>
                     );
@@ -362,7 +362,7 @@ export default function CreateTripPage() {
               {/* Generate CTA Button */}
               <button
                 type="submit"
-                className="w-full py-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-base shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5"
+                className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-base shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5"
               >
                 <SparklesIcon size={18} />
                 <span>Generate Adaptive Itinerary</span>
