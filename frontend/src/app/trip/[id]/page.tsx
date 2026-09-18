@@ -10,6 +10,7 @@ import SmartRouteCard from '@/components/SmartRouteCard';
 import TripWiseAIModal from '@/components/TripWiseAIModal';
 import TripReminderBanner from '@/components/TripReminderBanner';
 import DayRouteSummaryCard from '@/components/DayRouteSummaryCard';
+import RecommendationsSection from '@/components/RecommendationsSection';
 import { supabase } from '@/lib/supabase';
 import {
   CompassIcon,
@@ -26,7 +27,8 @@ import {
   ExternalLinkIcon,
   TrainIcon,
   ShieldIcon,
-  CloseIcon
+  CloseIcon,
+  HeartIcon
 } from '@/components/Icons';
 
 export default function TripViewPage({ params }: { params: { id: string } }) {
@@ -37,15 +39,22 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(12);
+
+  // Lightweight Comments State
+  const [comments, setComments] = useState<{ id: string; userName: string; comment: string; createdAt: string }[]>([]);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [commenterName, setCommenterName] = useState('');
 
   useEffect(() => {
     loadTripData();
+    loadComments();
   }, [params.id]);
 
   const loadTripData = async () => {
     setLoading(true);
 
-    // Check LocalStorage
     try {
       const stored = localStorage.getItem('tripwise_saved_trips');
       if (stored) {
@@ -59,7 +68,6 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
       }
     } catch (e) {}
 
-    // Check Supabase database
     try {
       const { data, error } = await supabase
         .from('trips')
@@ -92,6 +100,16 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
     setLoading(false);
   };
 
+  const loadComments = async () => {
+    try {
+      const res = await fetch(`/api/trips/${params.id}/comments`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.comments) setComments(data.comments);
+      }
+    } catch (e) {}
+  };
+
   const togglePlanB = (dayIdx: number) => {
     setPlanBActive((prev) => ({
       ...prev,
@@ -104,6 +122,57 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleAddRecommendedActivity = (newActivity: Activity) => {
+    if (!trip) return;
+
+    const updatedDays = [...trip.days];
+    if (updatedDays[activeDayIdx]) {
+      updatedDays[activeDayIdx].activities.push(newActivity);
+
+      const updatedTrip = { ...trip, days: updatedDays };
+      setTrip(updatedTrip);
+
+      // Save to LocalStorage
+      try {
+        const stored = localStorage.getItem('tripwise_saved_trips');
+        let existing: Trip[] = stored ? JSON.parse(stored) : [];
+        const index = existing.findIndex((t) => t.id === trip.id || t.shareId === trip.shareId);
+        if (index >= 0) existing[index] = updatedTrip;
+        else existing.unshift(updatedTrip);
+        localStorage.setItem('tripwise_saved_trips', JSON.stringify(existing));
+      } catch (e) {}
+
+      // Save to Supabase
+      try {
+        supabase.from('trips').update({ itinerary: updatedDays }).eq('id', trip.id);
+      } catch (e) {}
+    }
+  };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCommentText.trim()) return;
+
+    const nameToUse = commenterName.trim() || 'Explorer';
+    const cmtObj = {
+      id: `cmt-${Date.now()}`,
+      userName: nameToUse,
+      comment: newCommentText.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    setComments([cmtObj, ...comments]);
+    setNewCommentText('');
+
+    try {
+      await fetch(`/api/trips/${params.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName: nameToUse, comment: cmtObj.comment })
+      });
+    } catch (e) {}
   };
 
   if (loading) {
@@ -131,10 +200,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             <p className="text-xs text-[var(--muted)]">
               This itinerary link may be invalid or was deleted from local storage.
             </p>
-            <Link
-              href="/plan"
-              className="tw-btn-primary text-xs"
-            >
+            <Link href="/plan" className="tw-btn-primary text-xs">
               Plan A New Trip
             </Link>
           </div>
@@ -165,6 +231,19 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </Link>
 
           <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                setLiked(!liked);
+                setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+              }}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1.5 transition ${
+                liked ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-[var(--surface)] border-[var(--border)] text-[var(--muted)]'
+              }`}
+            >
+              <HeartIcon size={14} className={liked ? 'text-rose-600 fill-rose-600' : 'text-[var(--muted)]'} />
+              <span>{likeCount} Likes</span>
+            </button>
+
             <button
               onClick={() => setIsAIModalOpen(true)}
               className="tw-btn-primary text-xs !py-2 !px-4"
@@ -444,21 +523,58 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* TRIP HEALTH FACTORS */}
-        {trip.healthScore && (
-          <div className="tw-card p-6 space-y-3">
-            <h4 className="font-extrabold font-display text-[#131314] text-sm flex items-center gap-2">
-              <ShieldIcon size={18} className="text-emerald-600" /> Trip Health Factors ({trip.healthScore.score}/100)
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {trip.healthScore.factors.map((f, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs text-[var(--muted)] font-medium">
-                  {f.text}
+        {/* FEATURE 2: TAILORED GEOAPIFY + GEMINI RECOMMENDATIONS SECTION */}
+        <RecommendationsSection
+          destination={trip.destination}
+          persona={trip.persona}
+          lat={trip.latitude}
+          lon={trip.longitude}
+          onAddActivity={handleAddRecommendedActivity}
+        />
+
+        {/* FEATURE 4: LIGHTWEIGHT TRIP COLLABORATION & COMMENTS SECTION */}
+        <div className="tw-card p-6 space-y-4">
+          <h4 className="font-extrabold font-display text-[#131314] text-base">
+            Trip Discussion & Traveler Suggestions
+          </h4>
+
+          <form onSubmit={handleAddComment} className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input
+                type="text"
+                placeholder="Your Name (e.g. Rahul)"
+                value={commenterName}
+                onChange={(e) => setCommenterName(e.target.value)}
+                className="tw-input text-xs"
+              />
+              <input
+                type="text"
+                required
+                placeholder="Leave a comment or tip for this itinerary..."
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                className="tw-input text-xs sm:col-span-2"
+              />
+            </div>
+            <button type="submit" className="tw-btn-primary text-xs !py-2 !px-4">
+              Post Comment
+            </button>
+          </form>
+
+          {comments.length > 0 && (
+            <div className="space-y-2 pt-2">
+              {comments.map((cmt) => (
+                <div key={cmt.id} className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs space-y-1">
+                  <div className="flex items-center justify-between font-bold text-[#131314]">
+                    <span>{cmt.userName}</span>
+                    <span className="text-[10px] text-[var(--muted)] font-normal">{new Date(cmt.createdAt).toLocaleTimeString()}</span>
+                  </div>
+                  <p className="text-[var(--muted)]">{cmt.comment}</p>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       {/* "WHY THIS ACTIVITY?" MODAL */}
@@ -482,19 +598,9 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
               <p className="text-[var(--muted)] text-xs leading-relaxed bg-[var(--surface)] p-4 rounded-xl border border-[var(--border)] font-medium">
                 {selectedWhyActivity.whySelectedReason || `Selected based on your ${trip.persona} traveler persona and ${trip.pace} pacing preferences.`}
               </p>
-              <div className="flex flex-wrap gap-2 text-[11px] text-[var(--muted)] pt-1 font-medium">
-                <span>Category: {selectedWhyActivity.category}</span>
-                <span>•</span>
-                <span>Outdoor: {selectedWhyActivity.isOutdoor ? 'Yes' : 'No'}</span>
-                <span>•</span>
-                <span>Weather Suitability: {selectedWhyActivity.weatherSuitability}</span>
-              </div>
             </div>
 
-            <button
-              onClick={() => setSelectedWhyActivity(null)}
-              className="tw-btn-primary w-full text-xs"
-            >
+            <button onClick={() => setSelectedWhyActivity(null)} className="tw-btn-primary w-full text-xs">
               Got it
             </button>
           </div>

@@ -1,168 +1,150 @@
-# TRIPWISE — Weather-Aware Adaptive Travel Itinerary Platform
+# TRIPWISE — Weather-Aware Adaptive Travel Planning Platform
 
 > *"Your itinerary doesn't just plan your trip. It adapts to it."*
 
-TRIPWISE is a full-stack, weather-adaptive travel planning application built for the GDG Society NSUT recruitment task. It generates tailored daily travel itineraries with **real destination-specific places**, **nearest Metro/Public Transport stations**, **Nearest-Neighbor route optimization**, **weather adaptations**, and **zero cross-city contamination**.
+TRIPWISE is a full-stack, weather-adaptive travel planning application built for the GDG Society NSUT recruitment task. It generates tailored daily travel itineraries with **real destination-specific places**, **Geoapify places API**, **Gemini AI personalized ranking & receipt document extraction**, **Supabase database & storage**, **nearest Metro/Public Transport stations**, and **instant rain Plan B fallbacks**.
 
 ---
 
-## 📚 BEGINNER EXPLANATION FOR INTERVIEWS
+## 🚀 NEW IMPRESSIVE PRODUCT FEATURES (P0 + P1)
 
-### 1. TECHNICAL ARCHITECTURE & FLOW
+1. **TripWise Inspiration Library (`/inspiration`)**
+   - Browse curated destination itineraries (Delhi, London, Paris, Tokyo, Dubai).
+   - **`Use This Trip`**: 1-click clone itinerary to user's saved trips.
+   - **`Make It My Own`**: Uses Gemini AI to re-pace and customize activities based on traveler persona (Backpacker, Family, Luxury, Explorer).
+
+2. **Geoapify + Gemini Tailored Recommendations (`/plan`, `/trip/[id]`)**
+   - Real place recommendations powered by **Geoapify Places API** (tourism sights, restaurants, parks, leisure).
+   - **Gemini AI** ranks recommendations and explains *why* the spot is recommended for the selected persona.
+   - **`[ + Add to Trip ]`**: 1-click add any recommended place directly into the user's active day itinerary.
+
+3. **Travel Vault & AI Receipt Extraction (`/vault`)**
+   - Authenticated document vault storing hotel bookings, food bills, and ticket receipts in **Supabase Storage**.
+   - **Multimodal Gemini AI Extraction**: Automatically parses uploaded receipt images/PDFs into structured JSON: Title, Category Type, Date, Location, Total Amount, Currency, and Booking Reference #.
+   - Filterable UI (All, Hotels, Food, Tickets, Transport, Other) with delete button and secure user isolation (RLS).
+
+4. **Lightweight Collaboration & Activity Likes (`/trip/[id]`)**
+   - Share public trip links with friends (`/trip/[shareId]`).
+   - Like activities and leave traveler comments/tips on shared itineraries.
+
+---
+
+## 🛠️ ARCHITECTURE & TECH STACK
+
+- **Frontend**: Next.js 14 / TypeScript / Vanilla CSS Design Tokens (Vercel)
+- **Backend**: Express.js / Node.js TypeScript REST API (Render)
+- **Database, Auth & Storage**: Supabase (PostgreSQL, Supabase Auth, Supabase Storage)
+- **AI Engine**: Google Gemini API (`gemini-1.5-flash` Multimodal)
+- **Geospatial & Places**: Geoapify Places API v2 + Open-Meteo Weather API
 
 ```
-                                  USER
-                                   ↓
-                            NEXT.JS FRONTEND
-                        (Destination + Persona)
-                                   ↓
-                        DESTINATION-SPECIFIC DATA
-                   (Delhi Places vs London Places)
-                                   ↓
-                   OPEN-METEO WEATHER FORECAST API
-               (Rain Check → Outdoor vs Indoor Fallback)
-                                   ↓
-                       SMART ROUTE OPTIMIZATION
-                  (Haversine + Nearest-Neighbor Order)
-                                   ↓
-                    METRO & PUBLIC TRANSPORT ENGINE
-                  (Proximity Matching → Station Links)
-                                   ↓
-                      DAILY ADAPTIVE ITINERARY
-                                   ↓
-                           TRIPWISE AI API
-                    (Contextual Chat Assistant)
+                        USER
+                         ↓
+                  VERCEL FRONTEND
+             (Next.js App Router UI)
+                         ↓
+                  RENDER BACKEND
+               (Express API Server)
+            ↙         ↓          ↘
+       SUPABASE    GEMINI API   GEOAPIFY
+       DB/Storage   (AI Logic)   (Places)
 ```
 
 ---
 
-### 2. DETAILED FEATURE BREAKDOWN (A TO J)
+## 🔑 ENVIRONMENT VARIABLES SETUP
 
-#### A. How Destination-Specific Itinerary Generation Works
-* When the user enters a city name (e.g. "Delhi", "London", "Paris", "Tokyo"), the system normalizes the city string and fetches curated, real place data from `destinationPlaces.ts`.
-* Each place contains real names (e.g., Red Fort, Humayun's Tomb, Big Ben, Tower Bridge), real descriptions, exact `lat`/`lng` coordinates, outdoor/indoor flags, and real indoor alternatives.
+### Backend (`backend/.env`)
+```env
+PORT=5001
+SUPABASE_URL=https://your-supabase-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+GEMINI_API_KEY=your_gemini_api_key_here
+GEOAPIFY_API_KEY=your_geoapify_api_key_here
+NODE_ENV=development
+```
 
-#### B. How Cross-City Contamination is Prevented (Zero-Leak Rule)
-* Places are grouped inside `DESTINATION_REGISTRY[cityKey]`.
-* Destination selection strictly limits place selection to that specific city key.
-* A validation guard `validateZeroCrossContamination(city, activities)` runs before returning the itinerary. If any landmark from another city is detected, it is immediately stripped out.
-
-#### C. How Traveler Persona Affects Recommendations
-* Personas (Backpacker, Family, Luxury, Explorer, Solo Explorer) filter and score places.
-* For example:
-  * **Backpacker**: Prefers street food, handicraft bazaars, and walking heritage tours.
-  * **Luxury**: Prefers fine dining, iconic monuments, and comfortable pacing.
-  * **Family**: Prefers kid-friendly parks, museums, and manageable walking distances.
-
-#### D. How Weather Affects Activity Selection
-* Live daily forecast data is fetched from the Open-Meteo API (precipitation probability, temperature, WMO weather codes).
-* If rain probability on a day exceeds 40-45%, outdoor attractions are automatically swapped with climate-controlled indoor alternatives (e.g., Red Fort → National Museum).
-
-#### E. How Route Optimization Works
-* Activities are ordered using a **Nearest-Neighbor algorithm**.
-* The itinerary starts at the morning attraction, finds the unvisited attraction with the shortest distance, and sets it as the next stop to eliminate unnecessary travel back-and-forth.
-
-#### F. How Latitude and Longitude Are Used
-* Every attraction and metro station has exact `lat` and `lng` coordinates.
-* The system calculates the geographical straight-line distance between locations using the **Haversine formula**.
-
-#### G. How the Nearest Metro Station is Found
-* For each attraction `(lat, lng)`, the system calculates the distance to all metro stations in that city's dataset using the Haversine formula.
-* The station with the smallest distance is assigned as `nearestMetro`.
-
-#### H. How the Metro & Public Transport Section Works
-* Displays `🚇 Near [Station Name] Metro` badges with estimated walking time.
-* Displays inter-activity transit connectors (e.g., `Lal Qila → Jama Masjid • ~10 min metro, ~5 min walk`).
-* Provides an `Open Route` button linking to Google Maps Transit view (`https://www.google.com/maps/dir/?api=1&origin=...&destination=...&travelmode=transit`).
-
-#### I. Calculated vs External APIs
-* **External APIs**: Open-Meteo Geocoding API (city coordinates) and Open-Meteo Weather Forecast API (weather risk).
-* **Calculated Locally**: Haversine distance, Nearest-Neighbor sorting, nearest metro station matching, travel time estimates, and Trip Health score.
-
-#### J. System Limitations
-* Transit travel times are calculated approximations based on distance and average urban transit speeds, not real-time train schedules.
-* For cities without curated place data, a safe fallback generator builds realistic city-anchored places using geocoded coordinates without showing wrong cities.
+### Frontend (`frontend/.env.local`)
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_API_URL=http://localhost:5001
+```
 
 ---
 
-## 💡 INTERVIEW QUESTIONS & ANSWERS (1 TO 17)
+## 📚 STEP-BY-STEP API KEY GENERATION GUIDE FOR BEGINNERS
 
-1. **"How does your itinerary generator work?"**
-   > *"When a user selects a destination, persona, and duration, TripWise fetches real curated places for that city, filters them by traveler persona, checks Open-Meteo forecast data to adjust for rain, orders them geographically using Nearest Neighbor, and links nearest metro stations."*
+### 1. How to Get a Free Gemini API Key
+1. Go to [Google AI Studio](https://aistudio.google.com/).
+2. Sign in with your Google account.
+3. Click the **"Get API Key"** button on the top left.
+4. Click **"Create API Key in new project"**.
+5. Copy the generated string starting with `AIzaSy...`.
+6. Open `backend/.env` and paste it into `GEMINI_API_KEY=AIzaSy...`.
+7. **Important**: Keep `GEMINI_API_KEY` on the backend server only. Never put it in frontend code.
 
-2. **"How do you make recommendations specific to the destination?"**
-   > *"We maintain a destination-aware database (`destinationPlaces.ts`) mapped by city keys. Each city has curated real landmarks, coordinates, descriptions, and local metro station datasets."*
-
-3. **"How do you make sure Delhi places don't appear when someone selects London?"**
-   > *"Destination selection strictly gates place selection to that city's registry key. We also run a `validateZeroCrossContamination` guard function that verifies every place belongs to the selected city before rendering."*
-
-4. **"How does your route optimization work?"**
-   > *"We calculate the geographical distance between activities using the Haversine formula and reorder them using a Nearest-Neighbor algorithm so activities close to each other are grouped together."*
-
-5. **"Which algorithm did you use?"**
-   > *"We used the **Nearest-Neighbor algorithm** paired with the **Haversine distance formula**."*
-
-6. **"Why did you choose that algorithm?"**
-   > *"It is computationally efficient, simple to implement on the frontend, and easy to explain clearly in an interview without unnecessary complexity."*
-
-7. **"How do latitude and longitude help?"**
-   > *"Latitude and longitude provide exact spatial coordinates for attractions and metro stations, allowing us to calculate distances and order activities geographically."*
-
-8. **"How did you integrate metro routes?"**
-   > *"We match attraction coordinates to the nearest metro station in that city using Haversine proximity, calculate estimated transit/walk times, and provide Google Maps Transit links."*
-
-9. **"Are your metro travel times live?"**
-   > *"No, they are approximate planning estimates calculated using geographical distance and average urban transit speeds. We clearly label them as 'Estimated' in the UI."*
-
-10. **"What happens if a city doesn't have a metro?"**
-    > *"For cities without a metro, the system displays general public transport guidance and provides direct Google Maps transit route links."*
-
-11. **"How does weather affect the itinerary?"**
-    > *"We fetch precipitation risk from Open-Meteo. If rain risk exceeds 40%, outdoor activities automatically swap to indoor alternatives (Plan B Mode)."*
-
-12. **"How does the traveler persona affect the itinerary?"**
-    > *"Personas (e.g. Backpacker vs Luxury) filter place suitability. Backpackers get budget street food and walking tours, while Luxury travelers get premium dining and iconic spots."*
-
-13. **"What is the role of AI?"**
-    > *"TripWise AI serves as a contextual assistant. It takes the generated itinerary, places, weather, and transit data as context and answers user questions about why places were chosen or what to prepare."*
-
-14. **"Why didn't you let AI generate the entire itinerary?"**
-    > *"AI can hallucinate non-existent places or invent fake travel times. Using a deterministic place-selection and routing engine guarantees zero cross-city contamination, reliable metro stations, and consistent performance."*
-
-15. **"What are the limitations of your route optimization?"**
-    > *"It uses straight-line Haversine distance rather than live road traffic or subway schedules."*
-
-16. **"What was the hardest part of implementing this?"**
-    > *"Ensuring strict zero cross-city contamination while dynamically mapping real metro stations and weather fallbacks seamlessly across multi-day itineraries."*
-
-17. **"What would you improve in the future?"**
-    > *"I would integrate real-time public transit APIs (like GTFS feeds) and live traffic routing."*
+### 2. How to Get a Free Geoapify API Key
+1. Go to [Geoapify MyProjects](https://myprojects.geoapify.com/).
+2. Register for a free account.
+3. Click **"Create New Project"** and name it `TRIPWISE`.
+4. Copy the API Key under Project Details.
+5. Open `backend/.env` and paste it into `GEOAPIFY_API_KEY=...`.
 
 ---
 
-## 🛠️ LOCAL RUN & TESTING INSTRUCTIONS
+## 💡 INTERVIEW PREPARATION (18 ANSWERS)
 
-### 1. Install Dependencies
-```bash
-# Frontend
-cd frontend
-npm install
+1. **Why did you use Gemini?**
+   > *"We used Gemini for natural language reasoning, personalized recommendation explanations, adapting inspiration trips to traveler personas, and multimodal structured receipt extraction."*
 
-# Backend
-cd ../backend
-npm install
-```
+2. **Why did you use Geoapify?**
+   > *"Geoapify provides real-world location data (sights, restaurants, parks, coordinates) for specific cities so AI never invents fake places."*
 
-### 2. Run Local Development Servers
-```bash
-# Terminal 1 - Backend API (Port 5000)
-cd backend
-npm run dev
+3. **Why shouldn't the Gemini API key be in the frontend?**
+   > *"Frontend code runs in the user's browser, making any API key visible in DevTools. Keeping keys on the Express backend prevents key theft and quota abuse."*
 
-# Terminal 2 - Frontend Next.js (Port 3000)
-cd frontend
-npm run dev
-```
+4. **How does your AI recommendation system work?**
+   > *"Geoapify fetches real places near the destination coordinates. Then Gemini ranks those places and generates a 1-sentence reason why that place fits the user's specific persona."*
 
-### 3. Open Application
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. **How does Geoapify find places?**
+   > *"Geoapify queries OpenStreetMap geospatial data using category filters and a circle radius search around the destination city's coordinates."*
+
+6. **How do you make recommendations destination-specific?**
+   > *"Geoapify queries are filtered by exact city latitude/longitude coordinates, ensuring places from other cities never leak in."*
+
+7. **How does the Inspiration page work?**
+   > *"It displays curated high-quality itineraries for major cities. Users can clone them directly or click 'Make It My Own' to customize them with Gemini."*
+
+8. **How does 'Make It My Own' work?**
+   > *"It sends the template trip and the user's chosen persona to Gemini, which adapts activity descriptions and pacing before saving it to the user's account."*
+
+9. **How does receipt extraction work?**
+   > *"The user uploads a receipt image. The backend converts it to base64 and sends it to Gemini's multimodal API, which parses and returns structured JSON (vendor, date, total amount, booking ref)."*
+
+10. **Where are uploaded receipts stored?**
+    > *"Receipt files are stored securely in Supabase Storage (`receipts` bucket), while extracted JSON metadata is stored in Supabase PostgreSQL (`receipts` table)."*
+
+11. **How do you protect users' receipts?**
+    > *"We enforce Supabase Row Level Security (RLS) policies so authenticated users can only view and delete their own uploaded receipts."*
+
+12. **What happens if Gemini fails?**
+    > *"TRIPWISE has built-in rule fallbacks. If Gemini is down, the itinerary engine, recommendations, and vault uploads still function smoothly."*
+
+13. **What happens if Geoapify fails?**
+    > *"The app falls back to curated destination landmark datasets so users never see a broken page."*
+
+14. **Why didn't you implement flight booking?**
+    > *"Flight booking requires live GDS APIs, commercial affiliate keys, and payment gateway compliance, which is unrealistic for a 2-3 hour timeframe."*
+
+15. **Why didn't you implement real-time collaboration?**
+    > *"Real-time WebSocket CRDT editing adds significant complexity. Lightweight sharing with public links, activity likes, and comments delivers high user value reliably."*
+
+16. **What is the difference between AI-generated information and API-provided information?**
+    > *"API information provides factual ground truth (real place names, coordinates, weather data), while AI provides reasoning, natural language summaries, and personalization."*
+
+17. **What was the hardest part?**
+    > *"Integrating multimodal AI receipt parsing with Supabase Storage while maintaining fallback reliability across local and cloud environments."*
+
+18. **What would you improve with more time?**
+    > *"I would add real-time transit GTFS feeds and expense tracking budgeting charts in the Travel Vault."*
