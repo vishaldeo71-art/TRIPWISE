@@ -11,6 +11,7 @@ import TripWiseAIModal from '@/components/TripWiseAIModal';
 import TripReminderBanner from '@/components/TripReminderBanner';
 import DayRouteSummaryCard from '@/components/DayRouteSummaryCard';
 import RecommendationsSection from '@/components/RecommendationsSection';
+import TripFeedbackModal from '@/components/TripFeedbackModal';
 import { supabase } from '@/lib/supabase';
 import {
   CompassIcon,
@@ -39,6 +40,8 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(true);
+
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(12);
 
@@ -613,6 +616,16 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           trip={trip}
           isOpen={isAIModalOpen}
           onClose={() => setIsAIModalOpen(false)}
+        />
+      )}
+
+      {/* Trip Experience Feedback Modal */}
+      {trip && (
+        <TripFeedbackModal
+          tripId={trip.id || params.id}
+          destination={trip.destination}
+          isOpen={isFeedbackOpen}
+          onClose={() => setIsFeedbackOpen(false)}
         />
       )}
 

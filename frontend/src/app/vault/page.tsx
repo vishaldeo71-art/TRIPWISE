@@ -153,11 +153,20 @@ export default function ReceiptVaultPage() {
         }
       }
 
+      const classifyClientReceiptType = (str: string): 'Hotel' | 'Restaurant' | 'Transport' | 'Ticket' | 'Other' => {
+        const lower = (str || '').toLowerCase();
+        if (/\b(hotel|resort|stay|inn|suites|room|airbnb|lodge|booking|agoda|taj|marriott|hilton|hyatt|hostel)\b/.test(lower)) return 'Hotel';
+        if (/\b(restaurant|cafe|dining|food|bistro|bar|pizzeria|diner|zomato|swiggy|mcdonald|starbucks|menu|bill|coffee|eatery|dinner|lunch|breakfast|bakery)\b/.test(lower)) return 'Restaurant';
+        if (/\b(flight|airline|indigo|air|train|irctc|rail|metro|bus|uber|ola|cab|taxi|transport|boarding|flight-ticket|express|seat|pnr)\b/.test(lower)) return 'Transport';
+        if (/\b(ticket|museum|entry|pass|fort|monument|attraction|park|tour|monument-entry|zoo|aquarium|cinema|movie|show)\b/.test(lower)) return 'Ticket';
+        return 'Restaurant'; // default smart fallback instead of Ticket/Other
+      };
+
       // Step 3: Call Gemini AI Extraction via Express Backend
       setUploadStep('Extracting structured details with Gemini AI...');
       let extractedData = {
         title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-        type: selectedType !== 'Auto-detect' ? selectedType : 'Other',
+        type: selectedType !== 'Auto-detect' ? selectedType : classifyClientReceiptType(file.name),
         date: new Date().toISOString().split('T')[0],
         destination: 'Not detected',
         amount: 'Not detected',

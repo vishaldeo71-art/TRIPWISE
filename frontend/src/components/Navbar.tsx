@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { SparklesIcon, UserIcon, LogOutIcon, CloseIcon } from '@/components/Icons';
+import { SparklesIcon, UserIcon, LogOutIcon, CloseIcon, GlobeIcon } from '@/components/Icons';
+import { useLanguage, LANGUAGES, Language } from '@/context/LanguageContext';
 
 export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const pathname = usePathname();
+  const { language, setLanguage, t, currentLanguageOption } = useLanguage();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -73,7 +76,7 @@ export default function Navbar() {
             }`}
           >
             <SparklesIcon size={14} className={pathname === '/plan' ? 'text-amber-400' : 'text-amber-600'} />
-            Plan Trip
+            {t('planTrip')}
           </Link>
 
           <Link
@@ -84,7 +87,7 @@ export default function Navbar() {
                 : 'hover:bg-white/60 text-[#131314]'
             }`}
           >
-            Inspiration
+            {t('inspiration')}
           </Link>
 
           <Link
@@ -95,7 +98,7 @@ export default function Navbar() {
                 : 'hover:bg-white/60 text-[#131314]'
             }`}
           >
-            Travel Vault
+            {t('travelVault')}
           </Link>
 
           <Link
@@ -106,7 +109,7 @@ export default function Navbar() {
                 : 'hover:bg-white/60 text-[#131314]'
             }`}
           >
-            My Trips
+            {t('myTrips')}
           </Link>
 
           <Link
@@ -117,12 +120,51 @@ export default function Navbar() {
                 : 'text-[var(--muted)] hover:text-[#131314]'
             }`}
           >
-            Admin
+            {t('admin')}
           </Link>
         </div>
 
-        {/* Action Buttons */}
+        {/* Top Right Action Buttons + Language Selector Icon */}
         <div className="hidden md:flex items-center gap-2.5">
+          {/* Top Right Language Picker Globe Icon */}
+          <div className="relative">
+            <button
+              onClick={() => setIsLangOpen(!isLangOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-xs font-bold text-[#131314] hover:bg-[var(--surface-2)] transition"
+              title="Select Language"
+            >
+              <GlobeIcon size={16} className="text-amber-600" />
+              <span>{currentLanguageOption.flag}</span>
+              <span className="uppercase text-[11px] font-extrabold">{currentLanguageOption.code}</span>
+            </button>
+
+            {isLangOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-[var(--border)] rounded-2xl shadow-xl py-2 z-50 text-xs font-semibold animate-fade-in">
+                <div className="px-3 py-1 text-[10px] uppercase font-bold text-[var(--muted)] border-b border-[var(--border)] mb-1">
+                  Select Language
+                </div>
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setIsLangOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-[var(--surface)] transition ${
+                      language === lang.code ? 'font-extrabold text-amber-600 bg-amber-50/50' : 'text-[#131314]'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </span>
+                    {language === lang.code && <span className="text-xs">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {user ? (
             <div className="flex items-center gap-2">
               <Link
@@ -146,13 +188,13 @@ export default function Navbar() {
                 href="/login"
                 className="tw-btn-ghost text-xs"
               >
-                Log In
+                {t('logIn')}
               </Link>
               <Link
                 href="/plan"
                 className="tw-btn-primary text-xs !py-2 !px-4"
               >
-                Start Planning →
+                {t('startPlanning')}
               </Link>
             </div>
           )}
@@ -170,40 +212,59 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden mt-3 pt-3 border-t border-[var(--border)] flex flex-col gap-2 pb-2">
+          {/* Mobile Language Selector */}
+          <div className="flex items-center justify-between px-4 py-2 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs font-bold">
+            <span className="flex items-center gap-2">
+              <GlobeIcon size={16} className="text-amber-600" />
+              <span>Language:</span>
+            </span>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className="bg-transparent text-xs font-extrabold text-[#131314] focus:outline-none"
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.flag} {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <Link
             href="/plan"
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#131314] text-white text-xs font-bold"
           >
-            <SparklesIcon size={16} className="text-amber-400" /> Plan My Trip
+            <SparklesIcon size={16} className="text-amber-400" /> {t('planTrip')}
           </Link>
           <Link
             href="/inspiration"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
           >
-            Inspiration Library
+            {t('inspiration')}
           </Link>
           <Link
             href="/vault"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
           >
-            Travel Vault (Receipts)
+            {t('travelVault')}
           </Link>
           <Link
             href="/dashboard"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
           >
-            My Saved Trips
+            {t('myTrips')}
           </Link>
           <Link
             href="/admin"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
           >
-            Admin Dashboard
+            {t('admin')}
           </Link>
           <div className="pt-2 border-t border-[var(--border)] flex flex-col gap-2">
             {user ? (
@@ -220,14 +281,14 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-center py-2 rounded-xl bg-[var(--surface)] text-[#131314] text-xs font-semibold border border-[var(--border)]"
                 >
-                  Log In
+                  {t('logIn')}
                 </Link>
                 <Link
                   href="/signup"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-center py-2 rounded-xl bg-[#131314] text-white text-xs font-bold"
                 >
-                  Sign Up
+                  {t('signUp')}
                 </Link>
               </div>
             )}
