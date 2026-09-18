@@ -12,8 +12,13 @@ export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [langSearch, setLangSearch] = useState('');
   const pathname = usePathname();
   const { language, setLanguage, t, currentLanguageOption } = useLanguage();
+  const filteredLanguages = LANGUAGES.filter((l: any) =>
+    l.name.toLowerCase().includes(langSearch.toLowerCase()) ||
+    l.code.toLowerCase().includes(langSearch.toLowerCase())
+  );
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -139,28 +144,47 @@ export default function Navbar() {
             </button>
 
             {isLangOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-[var(--border)] rounded-2xl shadow-xl py-2 z-50 text-xs font-semibold animate-fade-in">
-                <div className="px-3 py-1 text-[10px] uppercase font-bold text-[var(--muted)] border-b border-[var(--border)] mb-1">
-                  Select Language
+              <div className="absolute right-0 mt-2 w-64 max-h-96 overflow-y-auto bg-white border border-[var(--border)] rounded-2xl shadow-2xl py-2 z-50 text-xs font-semibold animate-fade-in scrollbar-thin">
+                <div className="px-3 py-1.5 border-b border-[var(--border)] mb-1 sticky top-0 bg-white z-10 space-y-1.5">
+                  <div className="text-[10px] uppercase font-bold text-[var(--muted)] flex items-center justify-between">
+                    <span>Select Language ({LANGUAGES.length})</span>
+                    <span className="text-[9px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-bold">100% Page Translate</span>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search language..."
+                    value={langSearch}
+                    onChange={(e) => setLangSearch(e.target.value)}
+                    className="w-full p-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-xs text-[#131314] focus:outline-none"
+                    autoFocus
+                  />
                 </div>
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code);
-                      setIsLangOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-[var(--surface)] transition ${
-                      language === lang.code ? 'font-extrabold text-amber-600 bg-amber-50/50' : 'text-[#131314]'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </span>
-                    {language === lang.code && <span className="text-xs">✓</span>}
-                  </button>
-                ))}
+
+                <div className="py-1">
+                  {filteredLanguages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setIsLangOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-[var(--surface)] transition ${
+                        language === lang.code ? 'font-extrabold text-amber-600 bg-amber-50/50' : 'text-[#131314]'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className="text-base">{lang.flag}</span>
+                        <span className="truncate">{lang.name}</span>
+                      </span>
+                      {language === lang.code && <span className="text-xs font-bold text-amber-600">✓</span>}
+                    </button>
+                  ))}
+                  {filteredLanguages.length === 0 && (
+                    <div className="px-3 py-4 text-center text-[var(--muted)] text-xs">
+                      No language found matching "{langSearch}"
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

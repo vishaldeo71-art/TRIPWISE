@@ -56,6 +56,29 @@
   }
 }
 
+/* Suppress Google Translate UI overlays for clean native feel */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
+body {
+  top: 0px !important;
+  position: static !important;
+}
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+#google_translate_element,
+.VIpgJd-Z44wUd-aG2W3e-wZ2wzc {
+  display: none !important;
+}
+
 /* Custom Design System Components */
 .tw-card {
   background-color: #ffffff;
