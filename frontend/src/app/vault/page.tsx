@@ -14,9 +14,7 @@ import {
   CheckIcon,
   AlertIcon,
   FileTextIcon,
-  CompassIcon,
-  CalendarIcon,
-  MapPinIcon
+  CompassIcon
 } from '@/components/Icons';
 
 interface ReceiptRecord {
@@ -43,6 +41,7 @@ export default function ReceiptVaultPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadStep, setUploadStep] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
+  const [selectedType, setSelectedType] = useState<string>('Auto-detect');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -157,8 +156,8 @@ export default function ReceiptVaultPage() {
       // Step 3: Call Gemini AI Extraction via Express Backend
       setUploadStep('Extracting structured details with Gemini AI...');
       let extractedData = {
-        title: file.name.replace(/\.[^/.]+$/, ''),
-        type: 'Ticket' as const,
+        title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+        type: selectedType !== 'Auto-detect' ? selectedType : 'Other',
         date: new Date().toISOString().split('T')[0],
         destination: 'Not detected',
         amount: 'Not detected',
@@ -186,6 +185,11 @@ export default function ReceiptVaultPage() {
         }
       } catch (aErr) {
         console.warn('AI extraction fallback:', aErr);
+      }
+
+      // Override type if user explicitly selected a category
+      if (selectedType !== 'Auto-detect') {
+        extractedData.type = selectedType;
       }
 
       // Step 4: Construct Record
@@ -232,6 +236,7 @@ export default function ReceiptVaultPage() {
       setUploading(false);
       setIsUploadModalOpen(false);
       setFile(null);
+      setSelectedType('Auto-detect');
     } catch (err: any) {
       setError(err?.message || 'Failed to upload receipt.');
       setUploading(false);
@@ -272,7 +277,7 @@ export default function ReceiptVaultPage() {
               Travel Vault
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] max-w-xl">
-              Upload hotel bookings, restaurant bills, and ticket receipts. Gemini AI automatically extracts dates, reference numbers, and totals.
+              Upload hotel bookings, restaurant bills, ticket passes, and flight/train receipts. Gemini AI automatically categorizes and extracts details into your vault.
             </p>
           </div>
 
@@ -308,9 +313,9 @@ export default function ReceiptVaultPage() {
             <div className="w-14 h-14 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--muted)] mx-auto mb-4">
               <FileTextIcon size={28} className="text-amber-600" />
             </div>
-            <h3 className="text-lg font-extrabold font-display text-[#131314] mb-2">No receipts stored</h3>
+            <h3 className="text-lg font-extrabold font-display text-[#131314] mb-2">No {selectedCategory === 'All' ? '' : selectedCategory} receipts stored</h3>
             <p className="text-xs text-[var(--muted)] mb-6 font-medium">
-              Upload hotel confirmations or restaurant receipts to extract details into your vault.
+              Upload hotel confirmations, restaurant bills, or tickets to store and categorize them in your vault.
             </p>
             <button
               onClick={() => setIsUploadModalOpen(true)}
@@ -328,9 +333,13 @@ export default function ReceiptVaultPage() {
                     <span className={`tw-badge ${
                       rcpt.type === 'Hotel' ? 'tw-badge-amber' :
                       rcpt.type === 'Restaurant' ? 'tw-badge-emerald' :
-                      rcpt.type === 'Ticket' ? 'tw-badge-sky' : 'tw-badge'
+                      rcpt.type === 'Transport' ? 'tw-badge-sky' :
+                      rcpt.type === 'Ticket' ? 'tw-badge-amber' : 'tw-badge'
                     }`}>
-                      {rcpt.type}
+                      {rcpt.type === 'Hotel' ? '🏨 Hotel' :
+                       rcpt.type === 'Restaurant' ? '🍴 Restaurant' :
+                       rcpt.type === 'Transport' ? '✈️ Transport' :
+                       rcpt.type === 'Ticket' ? '🎟️ Ticket' : '📄 Other'}
                     </span>
                     <span className="text-[11px] text-[var(--muted)] font-medium">
                       {new Date(rcpt.createdAt).toLocaleDateString()}
@@ -431,6 +440,22 @@ export default function ReceiptVaultPage() {
             ) : (
               <form onSubmit={handleUploadSubmit} className="space-y-4">
                 <div>
+                  <label className="block tw-eyebrow mb-2">Select Category Type</label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="w-full p-3 bg-white border border-[var(--border)] rounded-xl text-xs font-semibold text-[#131314] focus:outline-none focus:border-[#131314]"
+                  >
+                    <option value="Auto-detect">✨ Auto-detect Category with Gemini AI</option>
+                    <option value="Hotel">🏨 Hotel / Accommodation</option>
+                    <option value="Restaurant">🍴 Restaurant / Food / Cafe</option>
+                    <option value="Transport">✈️ Transport (Flight / Train / Bus / Cab)</option>
+                    <option value="Ticket">🎟️ Attraction / Museum Entry Ticket</option>
+                    <option value="Other">📄 Other Document</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="block tw-eyebrow mb-2">Select Receipt File (JPG, PNG, PDF)</label>
                   <input
                     type="file"
@@ -442,7 +467,7 @@ export default function ReceiptVaultPage() {
                 </div>
 
                 <p className="text-[11px] text-[var(--muted)] leading-relaxed">
-                  Gemini AI will scan your document to extract hotel names, totals, reference codes, and dates automatically.
+                  Gemini AI will scan your document to extract venue names, totals, reference codes, and dates automatically.
                 </p>
 
                 <button

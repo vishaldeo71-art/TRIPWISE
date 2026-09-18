@@ -257,6 +257,24 @@ Return updated JSON array of days matching exact structure with personalized act
   }
 });
 
+// Helper: Classify receipt category from filename/title/text
+function classifyReceiptType(str: string): 'Hotel' | 'Restaurant' | 'Transport' | 'Ticket' | 'Other' {
+  const lower = (str || '').toLowerCase();
+  if (/\b(hotel|resort|stay|inn|suites|room|airbnb|lodge|booking\.com|agoda|taj|marriott|hilton|hyatt|hostel)\b/.test(lower)) {
+    return 'Hotel';
+  }
+  if (/\b(restaurant|cafe|dining|food|bistro|bar|pizzeria|diner|zomato|swiggy|mcdonald|starbucks|menu|bill|coffee|eatery|dinner|lunch|breakfast|bakery)\b/.test(lower)) {
+    return 'Restaurant';
+  }
+  if (/\b(flight|airline|indigo|air|train|irctc|rail|metro|bus|uber|ola|cab|taxi|transport|boarding|ticket-transport|flight-ticket|express)\b/.test(lower)) {
+    return 'Transport';
+  }
+  if (/\b(ticket|museum|entry|pass|fort|monument|attraction|park|tour|monument-entry|zoo|aquarium|cinema|movie|show)\b/.test(lower)) {
+    return 'Ticket';
+  }
+  return 'Other';
+}
+
 // 4. POST /api/vault/extract (Multimodal Receipt AI Extraction using Gemini)
 app.post('/api/vault/extract', async (req: Request, res: Response) => {
   try {
@@ -267,13 +285,14 @@ app.post('/api/vault/extract', async (req: Request, res: Response) => {
     }
 
     const geminiKey = process.env.GEMINI_API_KEY;
+    const initialType = classifyReceiptType(fileName || '');
 
     // Default fallback extraction
     let extractedData = {
-      title: fileName ? fileName.replace(/\.[^/.]+$/, '') : 'Travel Receipt',
-      type: 'Ticket',
+      title: fileName ? fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') : 'Travel Receipt',
+      type: initialType,
       date: new Date().toISOString().split('T')[0],
-      destination: 'Local Destination',
+      destination: 'Not detected',
       amount: 'Not detected',
       currency: 'INR',
       reference: `REF-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -286,19 +305,27 @@ app.post('/api/vault/extract', async (req: Request, res: Response) => {
         const actualMime = mimeType || 'image/png';
 
         const prompt = `
-Extract structured information from this travel receipt or booking document.
-Return JSON ONLY with exact structure:
+Examine this receipt or travel booking document carefully.
+Extract structured details and output JSON ONLY with exact structure:
 {
-  "title": "Clear name of hotel, restaurant, attraction, or transport vendor",
+  "title": "Exact vendor or venue name e.g. Marriott Hotel, Dominos Pizza, Qutub Minar Entry Ticket, IndiGo Flight",
   "type": "Hotel" | "Restaurant" | "Ticket" | "Transport" | "Other",
-  "date": "YYYY-MM-DD or date text (or 'Not detected')",
-  "destination": "City name if visible (or 'Not detected')",
-  "amount": "Formatted price e.g. ₹5,400 or $120 (or 'Not detected')",
-  "currency": "INR/USD/EUR/GBP (or 'Not detected')",
-  "reference": "Booking ref # or PNR (or 'Not detected')",
-  "notes": "Short 1-sentence receipt note"
+  "date": "Date of transaction or visit YYYY-MM-DD (or 'Not detected')",
+  "destination": "City name if visible e.g. Delhi, London, Tokyo (or 'Not detected')",
+  "amount": "Total price with symbol e.g. ₹4,500 or $85 (or 'Not detected')",
+  "currency": "Currency code INR/USD/EUR/GBP (or 'Not detected')",
+  "reference": "Booking ref, PNR or Invoice # (or 'Not detected')",
+  "notes": "Short 1-sentence description of the transaction"
 }
-Do NOT invent fields that are missing. Use 'Not detected' if missing. Output valid JSON only.
+
+CRITICAL RULE FOR "type":
+- If it is a hotel, resort, lodge, airbnb, or stay booking -> "type" MUST BE "Hotel"
+- If it is a restaurant, cafe, food bill, dining receipt, or eatery -> "type" MUST BE "Restaurant"
+- If it is a flight, train, bus, cab, metro, or transit ticket -> "type" MUST BE "Transport"
+- If it is a museum, monument, theme park, or attraction entry ticket -> "type" MUST BE "Ticket"
+- Otherwise -> "type" MUST BE "Other"
+
+Do NOT output everything as Ticket. Identify the exact vendor type. Output valid JSON only.
 `;
 
         const geminiRes = await fetch(
@@ -331,6 +358,12 @@ Do NOT invent fields that are missing. Use 'Not detected' if missing. Output val
       }
     }
 
+    // Final safety check on type: if Gemini output is invalid or missing, run classifier on title
+    const validTypes = ['Hotel', 'Restaurant', 'Ticket', 'Transport', 'Other'];
+    if (!validTypes.includes(extractedData.type)) {
+      extractedData.type = classifyReceiptType(extractedData.title || fileName || '');
+    }
+
     return res.status(200).json({ success: true, extractedData });
   } catch (error: any) {
     console.error('Error extracting receipt:', error);
@@ -338,13 +371,13 @@ Do NOT invent fields that are missing. Use 'Not detected' if missing. Output val
       success: true,
       extractedData: {
         title: 'Travel Document',
-        type: 'Other',
+        type: classifyReceiptType(req.body?.fileName || ''),
         date: new Date().toISOString().split('T')[0],
         destination: 'Not detected',
         amount: 'Not detected',
         currency: 'INR',
         reference: 'Not detected',
-        notes: 'Receipt uploaded successfully. You can update details manually.'
+        notes: 'Receipt uploaded successfully.'
       }
     });
   }
