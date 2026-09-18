@@ -66,7 +66,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-1.5 p-1 bg-[var(--surface)] border border-[var(--border)] rounded-full text-xs font-semibold text-[#131314]">
           <Link
             href="/plan"
-            className={`px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
               pathname === '/plan'
                 ? 'bg-[#131314] text-white shadow-sm'
                 : 'hover:bg-white/60 text-[#131314]'
@@ -77,30 +77,36 @@ export default function Navbar() {
           </Link>
 
           <Link
+            href="/inspiration"
+            className={`px-3.5 py-1.5 rounded-full transition-all ${
+              pathname === '/inspiration'
+                ? 'bg-[#131314] text-white shadow-sm'
+                : 'hover:bg-white/60 text-[#131314]'
+            }`}
+          >
+            Inspiration
+          </Link>
+
+          <Link
+            href="/vault"
+            className={`px-3.5 py-1.5 rounded-full transition-all ${
+              pathname === '/vault'
+                ? 'bg-[#131314] text-white shadow-sm'
+                : 'hover:bg-white/60 text-[#131314]'
+            }`}
+          >
+            Travel Vault
+          </Link>
+
+          <Link
             href="/dashboard"
-            className={`px-4 py-1.5 rounded-full transition-all ${
+            className={`px-3.5 py-1.5 rounded-full transition-all ${
               pathname === '/dashboard'
                 ? 'bg-[#131314] text-white shadow-sm'
                 : 'hover:bg-white/60 text-[#131314]'
             }`}
           >
             My Trips
-          </Link>
-
-          <Link
-            href="/#how-it-works"
-            onClick={(e) => handleSectionClick(e, 'how-it-works')}
-            className="px-4 py-1.5 rounded-full hover:bg-white/60 transition-all text-[var(--muted)] hover:text-[#131314]"
-          >
-            How It Works
-          </Link>
-
-          <Link
-            href="/#features"
-            onClick={(e) => handleSectionClick(e, 'features')}
-            className="px-4 py-1.5 rounded-full hover:bg-white/60 transition-all text-[var(--muted)] hover:text-[#131314]"
-          >
-            Features
           </Link>
 
           <Link
@@ -172,6 +178,20 @@ export default function Navbar() {
             <SparklesIcon size={16} className="text-amber-400" /> Plan My Trip
           </Link>
           <Link
+            href="/inspiration"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
+          >
+            Inspiration Library
+          </Link>
+          <Link
+            href="/vault"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
+          >
+            Travel Vault (Receipts)
+          </Link>
+          <Link
             href="/dashboard"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
@@ -184,20 +204,6 @@ export default function Navbar() {
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
           >
             Admin Dashboard
-          </Link>
-          <Link
-            href="/#how-it-works"
-            onClick={(e) => handleSectionClick(e, 'how-it-works')}
-            className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[var(--muted)] text-xs"
-          >
-            How It Works
-          </Link>
-          <Link
-            href="/#features"
-            onClick={(e) => handleSectionClick(e, 'features')}
-            className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[var(--muted)] text-xs"
-          >
-            Features
           </Link>
           <div className="pt-2 border-t border-[var(--border)] flex flex-col gap-2">
             {user ? (
