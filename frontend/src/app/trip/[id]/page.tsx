@@ -291,6 +291,11 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                 <span className="tw-badge">
                   ⚡ Pace: {trip.pace}
                 </span>
+                {trip.customPreferences && (
+                  <span className="tw-badge tw-badge-amber" title={trip.customPreferences}>
+                    ✨ Custom: {trip.customPreferences}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -626,6 +631,8 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           destination={trip.destination}
           isOpen={isFeedbackOpen}
           onClose={() => setIsFeedbackOpen(false)}
+          trip={trip}
+          onTripUpdated={(updatedTrip) => setTrip(updatedTrip)}
         />
       )}
 

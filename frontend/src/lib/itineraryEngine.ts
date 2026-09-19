@@ -98,7 +98,8 @@ export function generateItinerary(
   interests: string[],
   forecasts: any[],
   geoLat?: number,
-  geoLng?: number
+  geoLng?: number,
+  customPreferences?: string
 ): { days: ItineraryDay[]; weatherSummary: WeatherSummary; healthScore: HealthScore } {
   // Retrieve destination-specific place dataset (guarantees NO cross-city leak)
   const destData = getDestinationPlaces(destination, geoLat, geoLng);
@@ -132,6 +133,11 @@ export function generateItinerary(
       let score = 0;
       if (p.personaSuitability.includes(persona)) score += 10;
       if (p.personaSuitability.includes('Explorer')) score += 5;
+      if (customPreferences && customPreferences.trim()) {
+        const prefLower = customPreferences.toLowerCase();
+        if (p.name.toLowerCase().split(' ').some((word) => word.length > 3 && prefLower.includes(word))) score += 15;
+        if (p.description.toLowerCase().split(' ').some((word) => word.length > 3 && prefLower.includes(word))) score += 10;
+      }
       return { place: p, score };
     }).sort((a, b) => b.score - a.score);
 
@@ -177,6 +183,8 @@ export function generateItinerary(
 
       const nearestMetro = getNearestMetroStation(base.lat || destData.centerLat, base.lng || destData.centerLng, metroStations);
 
+      const prefNote = customPreferences && customPreferences.trim() ? ` (Adapted for preferences: "${customPreferences}")` : '';
+
       return {
         id: `day-${dayIdx + 1}-act-${slot + 1}`,
         name: activeName,
@@ -185,13 +193,13 @@ export function generateItinerary(
         isOutdoor: activeIsOutdoor,
         durationMinutes: base.durationMinutes,
         bestTime: bestTime as any,
-        description: activeDesc,
+        description: activeDesc + prefNote,
         estimatedTravelTime: base.estimatedTravelTime,
         weatherSuitability: isOutdoorRainImpact ? 'Low' : base.weatherSuitability,
         personaSuitability: base.personaSuitability,
         whySelectedReason: isOutdoorRainImpact
           ? `Rain probability (${forecast.rainProbability}%) detected. Switched to climate-controlled indoor venue in ${destData.cityName}.`
-          : `Selected for your ${persona} profile in ${destData.cityName}. ${base.whySelectedReason}`,
+          : `Selected for your ${persona} profile in ${destData.cityName}.${customPreferences ? ` Custom preference match for "${customPreferences}".` : ''} ${base.whySelectedReason}`,
         lat: base.lat,
         lng: base.lng,
         nearestMetro,

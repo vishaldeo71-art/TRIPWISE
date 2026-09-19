@@ -53,6 +53,7 @@ function PlanTripForm() {
   const [persona, setPersona] = useState<Persona>('Explorer');
   const [pace, setPace] = useState<TravelPace>('Balanced');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(['Culture', 'Food']);
+  const [customPreferences, setCustomPreferences] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -110,7 +111,8 @@ function PlanTripForm() {
         selectedInterests,
         forecasts,
         geoResult.lat,
-        geoResult.lon
+        geoResult.lon,
+        customPreferences
       );
 
       // Step 4: Finalize & Save
@@ -130,6 +132,7 @@ function PlanTripForm() {
         persona,
         pace,
         interests: selectedInterests,
+        customPreferences: customPreferences.trim() || undefined,
         weatherSummary,
         days,
         healthScore,
@@ -368,6 +371,28 @@ function PlanTripForm() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Field 6: Custom Requirements / Special Preferences */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="tw-eyebrow">
+                  Custom Preferences & Special Requirements (Optional)
+                </label>
+                <span className="tw-badge tw-badge-amber text-[10px]">
+                  ✨ AI Customized
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                value={customPreferences}
+                onChange={(e) => setCustomPreferences(e.target.value)}
+                placeholder="e.g. Include pure vegetarian / Halal dining spots, wheelchair accessible places, pet-friendly cafes, photography spots, budget under ₹10k, or specific landmarks like Qutub Minar..."
+                className="w-full p-4 bg-white border border-[var(--border)] rounded-2xl text-xs text-[#131314] placeholder:text-[var(--muted)] font-medium focus:outline-none focus:border-[#131314] transition leading-relaxed"
+              />
+              <p className="text-[11px] text-[var(--muted)] mt-1.5 font-medium">
+                TripWise AI will adapt activity recommendations and dining venues to match your exact requests.
+              </p>
             </div>
 
             {/* Generate CTA Button */}

@@ -95,6 +95,7 @@ export interface Trip {
   persona: Persona;
   pace: TravelPace;
   interests: string[];
+  customPreferences?: string;
   weatherSummary: WeatherSummary;
   days: ItineraryDay[];
   healthScore: HealthScore;
