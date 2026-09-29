@@ -412,6 +412,8 @@ app.post('/api/trips', async (req: Request, res: Response) => {
         latitude: tripData.latitude,
         longitude: tripData.longitude,
         duration: tripData.durationDays,
+        start_date: tripData.startDate,
+        end_date: tripData.endDate,
         persona: tripData.persona,
         travel_pace: tripData.pace,
         interests: tripData.interests || [],

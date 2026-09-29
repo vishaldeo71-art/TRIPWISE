@@ -7,6 +7,8 @@ export interface Activity {
   category: 'culture' | 'food' | 'nature' | 'adventure' | 'shopping' | 'relaxation' | 'indoor_museum' | 'indoor_entertainment';
   isOutdoor: boolean;
   durationMinutes: number;
+  startTime?: string; // e.g., "09:00"
+  endTime?: string;   // e.g., "11:00"
   bestTime: 'Morning' | 'Afternoon' | 'Evening' | 'Night';
   description: string;
   estimatedTravelTime: string;
@@ -52,6 +54,9 @@ export interface DayRouteSummary {
 
 export interface ItineraryDay {
   dayNumber: number;
+  date?: string; // e.g. "2026-09-18"
+  formattedDate?: string; // e.g. "September 18, 2026"
+  dayOfWeek?: string; // e.g. "FRI"
   title: string;
   weatherForecast: {
     tempC: number;
@@ -92,6 +97,8 @@ export interface Trip {
   latitude: number;
   longitude: number;
   durationDays: number;
+  startDate?: string; // e.g., "2026-09-18"
+  endDate?: string;   // e.g., "2026-09-21"
   persona: Persona;
   pace: TravelPace;
   interests: string[];
@@ -101,3 +108,4 @@ export interface Trip {
   healthScore: HealthScore;
   createdAt?: string;
 }
+

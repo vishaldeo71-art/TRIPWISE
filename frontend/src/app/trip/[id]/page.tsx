@@ -234,6 +234,13 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </Link>
 
           <div className="flex items-center gap-2.5">
+            <Link
+              href={`/calendar?tripId=${trip.id || trip.shareId}`}
+              className="px-3.5 py-2 rounded-full bg-[#131314] text-white text-xs font-bold shadow-sm hover:bg-slate-800 transition flex items-center gap-1.5"
+            >
+              <span>📅</span> Trip Calendar
+            </Link>
+
             <button
               onClick={() => {
                 setLiked(!liked);

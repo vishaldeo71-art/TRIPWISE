@@ -107,6 +107,17 @@ export default function Navbar() {
           </Link>
 
           <Link
+            href="/calendar"
+            className={`px-3.5 py-1.5 rounded-full transition-all ${
+              pathname === '/calendar'
+                ? 'bg-[#131314] text-white shadow-sm'
+                : 'hover:bg-white/60 text-[#131314]'
+            }`}
+          >
+            📅 Trip Calendar
+          </Link>
+
+          <Link
             href="/dashboard"
             className={`px-3.5 py-1.5 rounded-full transition-all ${
               pathname === '/dashboard'
@@ -275,6 +286,13 @@ export default function Navbar() {
             className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold"
           >
             {t('travelVault')}
+          </Link>
+          <Link
+            href="/calendar"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold flex items-center gap-2"
+          >
+            <span>📅</span> Trip Calendar
           </Link>
           <Link
             href="/dashboard"

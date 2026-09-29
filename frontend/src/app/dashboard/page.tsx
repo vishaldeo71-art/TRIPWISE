@@ -234,6 +234,13 @@ export default function DashboardPage() {
                       <TrashIcon size={14} />
                     </button>
                     <Link
+                      href={`/calendar?tripId=${trip.id || trip.shareId}`}
+                      className="tw-btn-secondary text-xs !py-1.5 !px-3 flex items-center gap-1"
+                      title="View Smart Schedule Calendar"
+                    >
+                      <span>📅 Calendar</span>
+                    </Link>
+                    <Link
                       href={`/trip/${trip.shareId || trip.id}`}
                       className="tw-btn-primary text-xs !py-1.5 !px-3"
                     >

@@ -50,6 +50,7 @@ function PlanTripForm() {
 
   const [destination, setDestination] = useState(initialCity);
   const [durationDays, setDurationDays] = useState(3);
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [persona, setPersona] = useState<Persona>('Explorer');
   const [pace, setPace] = useState<TravelPace>('Balanced');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(['Culture', 'Food']);
@@ -71,6 +72,13 @@ function PlanTripForm() {
     } else {
       setSelectedInterests([...selectedInterests, interest]);
     }
+  };
+
+  // Calculate endDate helper
+  const getEndDate = (start: string, days: number) => {
+    const d = new Date(start || Date.now());
+    d.setDate(d.getDate() + Math.max(0, days - 1));
+    return d.toISOString().split('T')[0];
   };
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -103,6 +111,7 @@ function PlanTripForm() {
       // Step 3: Generate Itinerary Engine
       setLoadingStep(3);
       await new Promise((r) => setTimeout(r, 600));
+      const calculatedEndDate = getEndDate(startDate, durationDays);
       const { days, weatherSummary, healthScore } = generateItinerary(
         geoResult.name,
         durationDays,
@@ -112,7 +121,8 @@ function PlanTripForm() {
         forecasts,
         geoResult.lat,
         geoResult.lon,
-        customPreferences
+        customPreferences,
+        startDate
       );
 
       // Step 4: Finalize & Save
@@ -129,6 +139,8 @@ function PlanTripForm() {
         latitude: geoResult.lat,
         longitude: geoResult.lon,
         durationDays,
+        startDate,
+        endDate: calculatedEndDate,
         persona,
         pace,
         interests: selectedInterests,
@@ -261,6 +273,32 @@ function PlanTripForm() {
                 Supports Delhi, Tokyo, Paris, London, Kyoto, New York, Rome, Barcelona and major global destinations.
               </p>
             </div>
+
+            {/* Field: Trip Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block tw-eyebrow mb-2">
+                  Trip Start Date 📅
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-[var(--border)] rounded-xl text-[#131314] text-xs font-bold focus:outline-none focus:border-[#131314] transition"
+                />
+              </div>
+              <div>
+                <label className="block tw-eyebrow mb-2">
+                  Calculated End Date
+                </label>
+                <div className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[#131314] text-xs font-extrabold flex items-center justify-between">
+                  <span>{getEndDate(startDate, durationDays)}</span>
+                  <span className="text-[10px] text-amber-600 uppercase tracking-wide">({durationDays} Days)</span>
+                </div>
+              </div>
+            </div>
+
 
             {/* Field 2: Duration */}
             <div>

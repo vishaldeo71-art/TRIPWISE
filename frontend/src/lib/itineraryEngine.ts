@@ -6,6 +6,7 @@ import {
   calculateDayRouteSummary,
   haversineDistanceKm
 } from '@/lib/transitEngine';
+import { calculateTripDates, assignActivityTimes } from '@/lib/schedulerEngine';
 
 // Helper: Geocode city using Open-Meteo Geocoding API
 export async function geocodeCity(city: string): Promise<{ name: string; lat: number; lon: number } | null> {
@@ -99,13 +100,15 @@ export function generateItinerary(
   forecasts: any[],
   geoLat?: number,
   geoLng?: number,
-  customPreferences?: string
+  customPreferences?: string,
+  startDate?: string
 ): { days: ItineraryDay[]; weatherSummary: WeatherSummary; healthScore: HealthScore } {
   // Retrieve destination-specific place dataset (guarantees NO cross-city leak)
   const destData = getDestinationPlaces(destination, geoLat, geoLng);
   const cityPlaces = destData.places;
   const metroStations = destData.metroStations;
 
+  const tripDates = calculateTripDates(startDate, durationDays);
   const activitiesPerDay = pace === 'Relaxed' ? 2 : pace === 'Balanced' ? 3 : 4;
   const days: ItineraryDay[] = [];
   let totalRainRiskDays = 0;
@@ -115,6 +118,7 @@ export function generateItinerary(
 
   for (let dayIdx = 0; dayIdx < durationDays; dayIdx++) {
     const forecast = forecasts[dayIdx] || forecasts[0];
+    const dayDateInfo = tripDates[dayIdx] || tripDates[0];
     const isRainyDay = forecast.rainProbability >= 45;
     if (isRainyDay) totalRainRiskDays++;
 
@@ -217,6 +221,9 @@ export function generateItinerary(
       return act;
     });
 
+    // Automatically assign real start/end time blocks (e.g. 09:00 - 11:00)
+    dayActivities = assignActivityTimes(dayActivities, '09:00');
+
     // Validate zero cross-city contamination
     dayActivities = validateZeroCrossContamination(destData.cityName, dayActivities);
 
@@ -225,6 +232,9 @@ export function generateItinerary(
 
     days.push({
       dayNumber: dayIdx + 1,
+      date: dayDateInfo.dateStr,
+      formattedDate: dayDateInfo.formattedDate,
+      dayOfWeek: dayDateInfo.dayOfWeek,
       title: `Day ${dayIdx + 1}: ${destData.cityName} Exploration`,
       weatherForecast: forecast,
       activities: dayActivities,

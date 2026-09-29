@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS public.trips (
   latitude DOUBLE PRECISION,
   longitude DOUBLE PRECISION,
   duration INTEGER NOT NULL,
+  start_date TEXT,
+  end_date TEXT,
   persona TEXT NOT NULL,
   travel_pace TEXT NOT NULL,
   interests JSONB DEFAULT '[]'::jsonb,
