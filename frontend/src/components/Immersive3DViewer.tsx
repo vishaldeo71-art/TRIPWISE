@@ -132,7 +132,7 @@ function GoogleMapsViewer({
 
     streetViewService.getPanorama(
       { location, radius: 200, preference: google.maps.StreetViewPreference.NEAREST },
-      (data, status) => {
+      (data: any, status: any) => {
         if (status === google.maps.StreetViewStatus.OK && data?.location?.latLng) {
           setStreetViewAvailable(true);
           streetViewInstanceRef.current = new google.maps.StreetViewPanorama(
@@ -262,7 +262,7 @@ function GoogleMapsViewer({
           radius: 200,
           preference: google.maps.StreetViewPreference.NEAREST,
         },
-        (data, status) => {
+        (data: any, status: any) => {
           if (status === google.maps.StreetViewStatus.OK && data?.location?.latLng && streetViewInstanceRef.current) {
             streetViewInstanceRef.current.setPosition(data.location.latLng);
             streetViewInstanceRef.current.setPov({
