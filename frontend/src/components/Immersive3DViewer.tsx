@@ -1,10 +1,21 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import Script from 'next/script';
 import { Monument, MonumentFeature } from '@/data/monuments';
-import { CompassIcon, MapPinIcon, SparklesIcon, FlameIcon } from '@/components/Icons';
+import { CompassIcon, MapPinIcon, SparklesIcon } from '@/components/Icons';
 
+// ========================== TYPE DECLARATIONS ==========================
+/* eslint-disable @typescript-eslint/no-explicit-any */
+declare const google: any;
+declare global {
+  interface Window {
+    google: any;
+    initGoogleMaps: () => void;
+  }
+}
+
+// ========================== COMPONENT PROPS ==========================
 interface Immersive3DViewerProps {
   monument: Monument;
   selectedFeature: MonumentFeature | null;
@@ -14,19 +25,511 @@ interface Immersive3DViewerProps {
   onVirtualWalkStepChange?: (stepIdx: number) => void;
 }
 
+// ========================== IMAGE BANKS ==========================
+// Curated real web images for CSS 3D fallback mode (when no API key)
+const MONUMENT_IMAGE_BANK: Record<string, string[]> = {
+  'red-fort': [
+    'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'qutub-minar': [
+    'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'humayun-tomb': [
+    'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'akshardham': [
+    'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'tower-bridge': [
+    'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1486299267070-83823f5448dd?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1520986606214-8b456906c813?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'british-museum': [
+    'https://images.unsplash.com/photo-1565060169194-1a65d5ef07ee?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1574958269340-fa927503f3dd?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'eiffel-tower': [
+    'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1543349689-9a4d426bee8e?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=1200&q=80',
+  ],
+  'louvre-museum': [
+    'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1541264161754-445bbdd7de52?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1503917988258-f87a78e3c995?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1471623320832-752e8bbf8413?auto=format&fit=crop&w=1200&q=80',
+  ],
+};
+
+function getMonumentImages(monumentId: string, overviewImage: string): string[] {
+  return MONUMENT_IMAGE_BANK[monumentId] || [overviewImage, overviewImage, overviewImage, overviewImage];
+}
+
+// ========================== GOOGLE MAPS VIEWER ==========================
+function GoogleMapsViewer({
+  monument,
+  selectedFeature,
+  filteredFeatures,
+  onSelectFeature,
+  apiKey,
+}: {
+  monument: Monument;
+  selectedFeature: MonumentFeature | null;
+  filteredFeatures: MonumentFeature[];
+  onSelectFeature: (f: MonumentFeature) => void;
+  apiKey: string;
+}) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const streetViewRef = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useState<'streetview' | 'satellite' | 'hybrid'>('streetview');
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [streetViewAvailable, setStreetViewAvailable] = useState(true);
+  const mapInstanceRef = useRef<any>(null);
+  const streetViewInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+
+  // Check if Google Maps is loaded
+  useEffect(() => {
+    const check = () => {
+      if (window.google && window.google.maps) {
+        setMapsLoaded(true);
+      }
+    };
+    check();
+    window.initGoogleMaps = () => setMapsLoaded(true);
+  }, []);
+
+  // Initialize Street View
+  useEffect(() => {
+    if (!mapsLoaded || !streetViewRef.current || viewMode !== 'streetview') return;
+
+    const lat = selectedFeature?.lat || monument.lat;
+    const lng = selectedFeature?.lng || monument.lng;
+    const heading = selectedFeature?.cameraHeading || 90;
+    const pitch = selectedFeature?.cameraPitch || -10;
+
+    const streetViewService = new google.maps.StreetViewService();
+    const location = new google.maps.LatLng(lat, lng);
+
+    streetViewService.getPanorama(
+      { location, radius: 200, preference: google.maps.StreetViewPreference.NEAREST },
+      (data, status) => {
+        if (status === google.maps.StreetViewStatus.OK && data?.location?.latLng) {
+          setStreetViewAvailable(true);
+          streetViewInstanceRef.current = new google.maps.StreetViewPanorama(
+            streetViewRef.current!,
+            {
+              position: data.location.latLng,
+              pov: { heading, pitch: pitch + 10 },
+              zoom: 1,
+              motionTracking: false,
+              motionTrackingControl: false,
+              linksControl: true,
+              panControl: true,
+              zoomControl: true,
+              fullscreenControl: false,
+              addressControl: false,
+              enableCloseButton: false,
+              showRoadLabels: false,
+            }
+          );
+        } else {
+          setStreetViewAvailable(false);
+          // Fallback to satellite view
+          setViewMode('satellite');
+        }
+      }
+    );
+
+    return () => {
+      streetViewInstanceRef.current = null;
+    };
+  }, [mapsLoaded, monument.id, selectedFeature?.id, viewMode]);
+
+  // Initialize Satellite/Hybrid Map
+  useEffect(() => {
+    if (!mapsLoaded || !mapRef.current || viewMode === 'streetview') return;
+
+    const lat = selectedFeature?.lat || monument.lat;
+    const lng = selectedFeature?.lng || monument.lng;
+
+    const map = new google.maps.Map(mapRef.current, {
+      center: { lat, lng },
+      zoom: 18,
+      mapTypeId: viewMode === 'satellite' ? 'satellite' : 'hybrid',
+      tilt: 45,
+      heading: selectedFeature?.cameraHeading || 0,
+      disableDefaultUI: true,
+      zoomControl: true,
+      mapTypeControl: false,
+      gestureHandling: 'greedy',
+      mapId: 'tripwise_immersive',
+    });
+
+    mapInstanceRef.current = map;
+
+    // Clear old markers
+    markersRef.current.forEach((m) => (m.map = null));
+    markersRef.current = [];
+
+    // Add feature markers
+    filteredFeatures.forEach((feat) => {
+      const isSelected = selectedFeature?.id === feat.id;
+
+      const markerEl = document.createElement('div');
+      markerEl.innerHTML = `
+        <div style="
+          display: flex; align-items: center; gap: 6px;
+          background: ${isSelected ? '#f59e0b' : feat.isMustSee ? '#10b981' : '#0ea5e9'};
+          color: ${isSelected ? '#0f172a' : '#ffffff'};
+          padding: 6px 12px; border-radius: 20px;
+          font-size: 11px; font-weight: 800;
+          box-shadow: 0 4px 20px ${isSelected ? 'rgba(245,158,11,0.5)' : 'rgba(0,0,0,0.3)'};
+          border: 2px solid ${isSelected ? '#fbbf24' : 'rgba(255,255,255,0.3)'};
+          cursor: pointer; white-space: nowrap;
+          transform: scale(${isSelected ? '1.15' : '1'});
+          transition: all 0.2s ease;
+        ">
+          <span>${feat.category === 'Architecture' ? '🏛️' : feat.category === 'History' ? '📜' : '✨'}</span>
+          <span>${feat.name}</span>
+          ${feat.isMustSee ? '<span style="font-size:9px">⭐</span>' : ''}
+        </div>
+      `;
+
+      try {
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          map,
+          position: { lat: feat.lat, lng: feat.lng },
+          content: markerEl,
+          title: feat.name,
+        });
+
+        marker.addListener('click', () => onSelectFeature(feat));
+        markersRef.current.push(marker);
+      } catch {
+        // Fallback: use basic Marker if AdvancedMarkerElement is not available
+        const marker = new google.maps.Marker({
+          map,
+          position: { lat: feat.lat, lng: feat.lng },
+          title: feat.name,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: isSelected ? 12 : 8,
+            fillColor: isSelected ? '#f59e0b' : feat.isMustSee ? '#10b981' : '#0ea5e9',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+          },
+        });
+        marker.addListener('click', () => onSelectFeature(feat));
+      }
+    });
+
+    return () => {
+      markersRef.current.forEach((m) => (m.map = null));
+      markersRef.current = [];
+    };
+  }, [mapsLoaded, monument.id, selectedFeature?.id, viewMode, filteredFeatures.length]);
+
+  // Pan to selected feature
+  useEffect(() => {
+    if (!selectedFeature || !mapsLoaded) return;
+
+    if (viewMode === 'streetview' && streetViewInstanceRef.current) {
+      const streetViewService = new google.maps.StreetViewService();
+      streetViewService.getPanorama(
+        {
+          location: { lat: selectedFeature.lat, lng: selectedFeature.lng },
+          radius: 200,
+          preference: google.maps.StreetViewPreference.NEAREST,
+        },
+        (data, status) => {
+          if (status === google.maps.StreetViewStatus.OK && data?.location?.latLng && streetViewInstanceRef.current) {
+            streetViewInstanceRef.current.setPosition(data.location.latLng);
+            streetViewInstanceRef.current.setPov({
+              heading: selectedFeature.cameraHeading || 90,
+              pitch: (selectedFeature.cameraPitch || -10) + 10,
+            });
+          }
+        }
+      );
+    } else if (mapInstanceRef.current) {
+      mapInstanceRef.current.panTo({ lat: selectedFeature.lat, lng: selectedFeature.lng });
+      mapInstanceRef.current.setZoom(19);
+      if (selectedFeature.cameraHeading !== undefined) {
+        mapInstanceRef.current.setHeading(selectedFeature.cameraHeading);
+      }
+    }
+  }, [selectedFeature?.id, mapsLoaded]);
+
+  return (
+    <>
+      {/* Google Maps Script */}
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&callback=initGoogleMaps&v=weekly`}
+        strategy="afterInteractive"
+      />
+
+      {/* View Mode Toggle */}
+      <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 bg-slate-950/90 backdrop-blur-xl rounded-2xl p-1 border border-slate-700/80 shadow-xl">
+        <button
+          onClick={() => setViewMode('streetview')}
+          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
+            viewMode === 'streetview'
+              ? 'bg-amber-500 text-slate-950 shadow-md'
+              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+          }`}
+        >
+          📸 360° Street View
+        </button>
+        <button
+          onClick={() => setViewMode('satellite')}
+          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
+            viewMode === 'satellite'
+              ? 'bg-cyan-500 text-white shadow-md'
+              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+          }`}
+        >
+          🛰️ Satellite
+        </button>
+        <button
+          onClick={() => setViewMode('hybrid')}
+          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all ${
+            viewMode === 'hybrid'
+              ? 'bg-emerald-500 text-white shadow-md'
+              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+          }`}
+        >
+          🗺️ Hybrid 3D
+        </button>
+      </div>
+
+      {/* Street View Container */}
+      <div
+        ref={streetViewRef}
+        className={`w-full h-full ${viewMode === 'streetview' ? 'block' : 'hidden'}`}
+      />
+
+      {/* Satellite / Hybrid Map Container */}
+      <div
+        ref={mapRef}
+        className={`w-full h-full ${viewMode !== 'streetview' ? 'block' : 'hidden'}`}
+      />
+
+      {/* Loading Spinner */}
+      {!mapsLoaded && (
+        <div className="absolute inset-0 z-40 bg-slate-950/95 flex flex-col items-center justify-center gap-3">
+          <CompassIcon size={36} className="text-amber-400 animate-spin" />
+          <div className="text-white text-sm font-bold">Loading Google Maps Immersive View...</div>
+          <div className="text-slate-400 text-xs">Connecting to Google Earth Satellite & Street View</div>
+        </div>
+      )}
+
+      {/* Street View Unavailable Notice */}
+      {viewMode === 'streetview' && !streetViewAvailable && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-xl bg-amber-500/90 text-slate-950 text-xs font-bold shadow-xl">
+          ⚠️ Street View not available here — switching to Satellite View
+        </div>
+      )}
+    </>
+  );
+}
+
+// ========================== CSS 3D FALLBACK VIEWER ==========================
+function CSS3DFallbackViewer({
+  monument,
+  selectedFeature,
+  filteredFeatures,
+  onSelectFeature,
+}: {
+  monument: Monument;
+  selectedFeature: MonumentFeature | null;
+  filteredFeatures: MonumentFeature[];
+  onSelectFeature: (f: MonumentFeature) => void;
+}) {
+  const [rotateY, setRotateY] = useState(0);
+  const [rotateX, setRotateX] = useState(10);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const images = getMonumentImages(monument.id, monument.overviewImage);
+
+  useEffect(() => {
+    if (!autoRotate || isDragging) return;
+    const interval = setInterval(() => setRotateY((p) => p + 0.3), 30);
+    return () => clearInterval(interval);
+  }, [autoRotate, isDragging]);
+
+  useEffect(() => {
+    if (selectedFeature) {
+      setAutoRotate(false);
+      const t = setTimeout(() => setAutoRotate(true), 6000);
+      return () => clearTimeout(t);
+    }
+  }, [selectedFeature?.id]);
+
+  const onDown = useCallback((x: number, y: number) => {
+    setIsDragging(true);
+    setDragStart({ x, y });
+    setAutoRotate(false);
+  }, []);
+
+  const onMove = useCallback((x: number, y: number) => {
+    if (!isDragging) return;
+    setRotateY((p) => p + (x - dragStart.x) * 0.3);
+    setRotateX((p) => Math.max(-30, Math.min(40, p + (y - dragStart.y) * 0.2)));
+    setDragStart({ x, y });
+  }, [isDragging, dragStart]);
+
+  const onUp = useCallback(() => {
+    setIsDragging(false);
+    setTimeout(() => setAutoRotate(true), 3000);
+  }, []);
+
+  const cubeSize = 280;
+  const tz = cubeSize / 2;
+
+  const faces = [
+    { label: 'Front View', color: 'amber', transform: `translateZ(${tz}px)`, imgIdx: 0 },
+    { label: 'Rear View', color: 'cyan', transform: `rotateY(180deg) translateZ(${tz}px)`, imgIdx: 1 },
+    { label: 'East View', color: 'emerald', transform: `rotateY(90deg) translateZ(${tz}px)`, imgIdx: 2 },
+    { label: 'West View', color: 'purple', transform: `rotateY(-90deg) translateZ(${tz}px)`, imgIdx: 3 },
+    { label: 'Aerial View', color: 'amber', transform: `rotateX(90deg) translateZ(${tz}px)`, imgIdx: 4 % images.length },
+  ];
+
+  return (
+    <div
+      className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
+      style={{ perspective: '1200px' }}
+      onMouseDown={(e) => onDown(e.clientX, e.clientY)}
+      onMouseMove={(e) => onMove(e.clientX, e.clientY)}
+      onMouseUp={onUp}
+      onMouseLeave={onUp}
+      onTouchStart={(e) => onDown(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchMove={(e) => onMove(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchEnd={onUp}
+    >
+      <div
+        className="relative transition-transform duration-100"
+        style={{
+          width: `${cubeSize}px`,
+          height: `${cubeSize}px`,
+          transformStyle: 'preserve-3d',
+          transform: `rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`,
+        }}
+      >
+        {faces.map((face, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 rounded-2xl overflow-hidden border-2 border-${face.color}-500/30 shadow-2xl`}
+            style={{ transform: face.transform, backfaceVisibility: 'hidden' }}
+          >
+            <img src={images[face.imgIdx]} alt={`${monument.name} - ${face.label}`} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+            <div className="absolute bottom-3 left-3 right-3">
+              <div className={`text-${face.color}-400 text-[10px] font-extrabold uppercase tracking-widest`}>{face.label}</div>
+              <div className="text-white text-sm font-bold truncate">{monument.name}</div>
+            </div>
+          </div>
+        ))}
+
+        {/* Bottom face */}
+        <div
+          className="absolute inset-0 rounded-2xl overflow-hidden border-2 border-slate-500/30"
+          style={{ transform: `rotateX(-90deg) translateZ(${tz}px)`, backfaceVisibility: 'hidden' }}
+        >
+          <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)' }}>
+            <div className="text-center">
+              <MapPinIcon size={32} className="text-amber-500 mx-auto mb-2" />
+              <div className="text-amber-400 text-xs font-bold">{monument.cityName}, {monument.country}</div>
+              <div className="text-slate-400 text-[10px] mt-1">{monument.builtYear}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Hotspot Markers */}
+        {filteredFeatures.map((feat, idx) => {
+          const angle = (idx / Math.max(1, filteredFeatures.length)) * Math.PI * 2;
+          const radius = tz + 70;
+          const x = Math.cos(angle) * radius;
+          const z = Math.sin(angle) * radius;
+          const isSelected = selectedFeature?.id === feat.id;
+          const isHovered = hoveredId === feat.id;
+
+          return (
+            <div
+              key={feat.id}
+              className="absolute cursor-pointer transition-all duration-300"
+              style={{
+                left: '50%', top: '50%',
+                transform: `translate(-50%, -50%) translate3d(${x}px, ${-20 + idx * 8}px, ${z}px)`,
+                transformStyle: 'preserve-3d', zIndex: isSelected ? 50 : 10,
+              }}
+              onClick={(e) => { e.stopPropagation(); onSelectFeature(feat); }}
+              onMouseEnter={() => setHoveredId(feat.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              <div className={`relative flex items-center justify-center transition-all duration-300 ${isSelected ? 'scale-125' : isHovered ? 'scale-110' : ''}`}>
+                <div className={`absolute inset-0 rounded-full animate-ping opacity-30 ${isSelected ? 'bg-amber-500' : feat.isMustSee ? 'bg-emerald-500' : 'bg-cyan-500'}`}
+                  style={{ width: '44px', height: '44px', margin: '-6px' }} />
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-xl border-2 font-black text-[10px] ${
+                  isSelected ? 'bg-amber-500 border-amber-300 text-slate-950'
+                    : feat.isMustSee ? 'bg-emerald-500 border-emerald-300 text-white'
+                      : 'bg-cyan-500 border-cyan-300 text-white'
+                }`}>
+                  {feat.category === 'Architecture' ? '🏛' : feat.category === 'History' ? '📜' : '✨'}
+                </div>
+                {(isSelected || isHovered) && (
+                  <div className={`absolute top-full mt-1 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full whitespace-nowrap text-[10px] font-extrabold shadow-lg border ${
+                    isSelected ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-900/95 text-white border-slate-700'
+                  }`} style={{ backdropFilter: 'blur(8px)' }}>
+                    {feat.name}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ========================== MAIN COMPONENT ==========================
 export default function Immersive3DViewer({
   monument,
   selectedFeature,
   onSelectFeature,
   activeCategoryMode,
   isVirtualWalk,
-  onVirtualWalkStepChange
+  onVirtualWalkStepChange,
 }: Immersive3DViewerProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const [providerMode, setProviderMode] = useState<'free_3d' | 'google_3d' | 'geoapify_fallback'>('free_3d');
   const [isExplodedView, setIsExplodedView] = useState(false);
-  const [webglError, setWebglError] = useState(false);
   const [hoveredFeatureName, setHoveredFeatureName] = useState<string | null>(null);
+
+  const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+  const hasGoogleMaps = googleApiKey.length > 10;
 
   // Filter features based on mode
   const filteredFeatures = monument.features.filter((f) => {
@@ -36,506 +539,7 @@ export default function Immersive3DViewer({
     return true;
   });
 
-  const googleApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  useEffect(() => {
-    if (!mountRef.current) return;
-
-    let renderer: THREE.WebGLRenderer;
-    let animationFrameId: number;
-
-    try {
-      const width = mountRef.current.clientWidth || 800;
-      const height = mountRef.current.clientHeight || 520;
-
-      // 1. Scene & Dark High-Contrast Studio Environment
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x07090e);
-      scene.fog = new THREE.FogExp2(0x07090e, 0.01);
-
-      // 2. Camera Setup
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      camera.position.set(0, 15, 28);
-      camera.lookAt(0, 3.5, 0);
-
-      // 3. Renderer
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.3;
-
-      mountRef.current.innerHTML = '';
-      mountRef.current.appendChild(renderer.domElement);
-
-      // 4. High-Contrast Studio Lighting System
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-      scene.add(ambientLight);
-
-      // Main Sun Key Light
-      const keyLight = new THREE.DirectionalLight(0xfffaed, 2.3);
-      keyLight.position.set(25, 45, 20);
-      keyLight.castShadow = true;
-      keyLight.shadow.mapSize.width = 2048;
-      keyLight.shadow.mapSize.height = 2048;
-      scene.add(keyLight);
-
-      // Cyan Tech Rim Light
-      const cyanRim = new THREE.DirectionalLight(0x38bdf8, 1.8);
-      cyanRim.position.set(-25, 15, -25);
-      scene.add(cyanRim);
-
-      // Amber Gold Accent Spot Light
-      const goldAccent = new THREE.SpotLight(0xf59e0b, 4.0, 55, Math.PI / 4, 0.5);
-      goldAccent.position.set(0, 2, 20);
-      scene.add(goldAccent);
-
-      // 5. Dark Glossy Showroom Grid Floor
-      const floorRadius = 20;
-      const floorGeo = new THREE.CylinderGeometry(floorRadius, floorRadius + 1, 0.8, 64);
-      const floorMat = new THREE.MeshStandardMaterial({
-        color: 0x0f172a,
-        roughness: 0.25,
-        metalness: 0.8,
-      });
-      const floor = new THREE.Mesh(floorGeo, floorMat);
-      floor.position.y = -0.4;
-      floor.receiveShadow = true;
-      scene.add(floor);
-
-      // Tech Grid Rings
-      const ringGeo1 = new THREE.RingGeometry(19.8, 20.0, 64);
-      const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
-      const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-      ring1.rotation.x = Math.PI / 2;
-      ring1.position.y = 0.02;
-      scene.add(ring1);
-
-      const gridHelper = new THREE.GridHelper(36, 36, 0xf59e0b, 0x1e293b);
-      gridHelper.position.y = 0.01;
-      scene.add(gridHelper);
-
-      // 6. BUILD AUTHENTIC PROCEDURAL 3D ARCHITECTURE
-      const monumentGroup = new THREE.Group();
-      scene.add(monumentGroup);
-
-      const raycastTargets: THREE.Object3D[] = [];
-      const explodedParts: { mesh: THREE.Object3D; origY: number; targetOffset: number; featureId?: string }[] = [];
-
-      // Color Materials
-      const redSandstoneMat = new THREE.MeshStandardMaterial({ color: 0x8b1a1a, roughness: 0.65, metalness: 0.15 });
-      const darkSandstoneMat = new THREE.MeshStandardMaterial({ color: 0x6b1111, roughness: 0.7, metalness: 0.1 });
-      const whiteMarbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.1 });
-      const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8, metalness: 0.1 }); // Grassy Ramparts
-      const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 });
-      const metallicDarkMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.2 });
-
-      if (monument.id === 'red-fort' || monument.cityName === 'Delhi') {
-        // =========================================================
-        // AUTHENTIC LAHORI GATE MODEL MATCHING THE USER'S PHOTO
-        // =========================================================
-
-        const lahoriGateGroup = new THREE.Group();
-        lahoriGateGroup.userData = { featureId: 'lahori-gate', featureName: 'Lahori Gate' };
-
-        // 1. Long Fortified Side Walls (Matching the photo's red sandstone ramparts)
-        [-13, 13].forEach((xPos) => {
-          const sideWallGeo = new THREE.BoxGeometry(10, 5, 4);
-          const sideWall = new THREE.Mesh(sideWallGeo, redSandstoneMat);
-          sideWall.position.set(xPos, 2.5, -2);
-          sideWall.castShadow = true;
-          sideWall.userData = { featureId: 'lahori-gate' };
-          lahoriGateGroup.add(sideWall);
-          raycastTargets.push(sideWall);
-        });
-
-        // 2. Slanted Green Grassy Rampart Embankments (Matching photo green slope)
-        [-7.5, 7.5].forEach((xPos) => {
-          const grassSlopeGeo = new THREE.PrismGeometry ? new THREE.BoxGeometry(4.5, 3.5, 6) : new THREE.BoxGeometry(4.5, 3.5, 6);
-          const grassSlope = new THREE.Mesh(grassSlopeGeo, grassMat);
-          grassSlope.position.set(xPos, 1.75, 2);
-          grassSlope.rotation.x = -0.25;
-          grassSlope.userData = { featureId: 'lahori-gate' };
-          lahoriGateGroup.add(grassSlope);
-          raycastTargets.push(grassSlope);
-        });
-
-        // 3. Central Lahori Main Gatehouse Block
-        const gatehouseGeo = new THREE.BoxGeometry(8.5, 6.0, 5.5);
-        const gatehouseMesh = new THREE.Mesh(gatehouseGeo, darkSandstoneMat);
-        gatehouseMesh.position.set(0, 5.0, 0);
-        gatehouseMesh.castShadow = true;
-        gatehouseMesh.userData = { featureId: 'lahori-gate' };
-        lahoriGateGroup.add(gatehouseMesh);
-        raycastTargets.push(gatehouseMesh);
-        explodedParts.push({ mesh: gatehouseMesh, origY: 5.0, targetOffset: 1.5, featureId: 'lahori-gate' });
-
-        // 4. Pointed Mughal Archway Entrance Portal (Matching photo entrance vault)
-        const archPortalGeo = new THREE.BoxGeometry(3.6, 4.2, 5.8);
-        const archPortalMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
-        const archPortal = new THREE.Mesh(archPortalGeo, archPortalMat);
-        archPortal.position.set(0, 3.8, 0);
-        archPortal.userData = { featureId: 'lahori-gate' };
-        lahoriGateGroup.add(archPortal);
-        raycastTargets.push(archPortal);
-
-        // White Marble Arch Frame Trim
-        const archFrameGeo = new THREE.BoxGeometry(4.2, 4.5, 0.4);
-        const archFrame = new THREE.Mesh(archFrameGeo, whiteMarbleMat);
-        archFrame.position.set(0, 4.0, 2.9);
-        archFrame.userData = { featureId: 'lahori-gate' };
-        lahoriGateGroup.add(archFrame);
-        raycastTargets.push(archFrame);
-
-        // 5. Twin Octagonal Flanking Towers (Matching photo octagonal towers)
-        [-5.0, 5.0].forEach((xPos) => {
-          const towerGeo = new THREE.CylinderGeometry(1.9, 2.1, 8.5, 8);
-          const towerMesh = new THREE.Mesh(towerGeo, redSandstoneMat);
-          towerMesh.position.set(xPos, 5.25, 0);
-          towerMesh.castShadow = true;
-          towerMesh.userData = { featureId: 'lahori-gate' };
-          lahoriGateGroup.add(towerMesh);
-          raycastTargets.push(towerMesh);
-          explodedParts.push({ mesh: towerMesh, origY: 5.25, targetOffset: 1.2, featureId: 'lahori-gate' });
-
-          // Tower Top White Marble Chhatri Pavilions (Matching photo corner domed pavilions)
-          const chhatriGeo = new THREE.SphereGeometry(1.3, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2);
-          const chhatriMesh = new THREE.Mesh(chhatriGeo, whiteMarbleMat);
-          chhatriMesh.position.set(xPos, 9.8, 0);
-          chhatriMesh.castShadow = true;
-          chhatriMesh.userData = { featureId: 'lahori-gate' };
-          lahoriGateGroup.add(chhatriMesh);
-          raycastTargets.push(chhatriMesh);
-          explodedParts.push({ mesh: chhatriMesh, origY: 9.8, targetOffset: 3.0, featureId: 'lahori-gate' });
-
-          // Slender Minaret Spire Pillars
-          const spireGeo = new THREE.CylinderGeometry(0.15, 0.2, 2.5, 8);
-          const spireMesh = new THREE.Mesh(spireGeo, redSandstoneMat);
-          spireMesh.position.set(xPos, 11.2, 0);
-          lahoriGateGroup.add(spireMesh);
-        });
-
-        // 6. Arcade Gallery with 7 White Marble Cupolas / Chhatris (Matching photo roof line)
-        for (let i = -3; i <= 3; i++) {
-          const miniChhatriGeo = new THREE.SphereGeometry(0.6, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-          const miniChhatri = new THREE.Mesh(miniChhatriGeo, whiteMarbleMat);
-          miniChhatri.position.set(i * 1.1, 8.3, 2.6);
-          miniChhatri.userData = { featureId: 'lahori-gate' };
-          lahoriGateGroup.add(miniChhatri);
-          raycastTargets.push(miniChhatri);
-          explodedParts.push({ mesh: miniChhatri, origY: 8.3, targetOffset: 2.2, featureId: 'lahori-gate' });
-        }
-
-        // 7. Flag Pole (Matching photo national flag on top)
-        const flagPoleGeo = new THREE.CylinderGeometry(0.08, 0.08, 3.5, 8);
-        const flagPole = new THREE.Mesh(flagPoleGeo, metallicDarkMat);
-        flagPole.position.set(0, 10.0, 0);
-        lahoriGateGroup.add(flagPole);
-
-        const flagGeo = new THREE.BoxGeometry(1.2, 0.7, 0.05);
-        const flagMat = new THREE.MeshStandardMaterial({ color: 0xf97316 }); // Tricolor Saffron
-        const flag = new THREE.Mesh(flagGeo, flagMat);
-        flag.position.set(0.6, 11.2, 0);
-        lahoriGateGroup.add(flag);
-
-        monumentGroup.add(lahoriGateGroup);
-
-        // Diwan-i-Am (Hall of Public Audience)
-        const diwanAmGroup = new THREE.Group();
-        diwanAmGroup.position.set(0, 1.0, -9.5);
-        diwanAmGroup.userData = { featureId: 'diwan-i-am', featureName: 'Diwan-i-Am' };
-
-        const diwanAmRoof = new THREE.Mesh(new THREE.BoxGeometry(10, 0.7, 6), redSandstoneMat);
-        diwanAmRoof.position.y = 3.2;
-        diwanAmRoof.userData = { featureId: 'diwan-i-am' };
-        diwanAmGroup.add(diwanAmRoof);
-        raycastTargets.push(diwanAmRoof);
-
-        for (let px = -4.2; px <= 4.2; px += 2.1) {
-          for (let pz = -2.2; pz <= 2.2; pz += 2.2) {
-            const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 3.2, 8), redSandstoneMat);
-            col.position.set(px, 1.6, pz);
-            col.userData = { featureId: 'diwan-i-am' };
-            diwanAmGroup.add(col);
-            raycastTargets.push(col);
-          }
-        }
-        monumentGroup.add(diwanAmGroup);
-        explodedParts.push({ mesh: diwanAmGroup, origY: 1.0, targetOffset: 2.5, featureId: 'diwan-i-am' });
-
-        // Diwan-i-Khas (Hall of Private Audience - Pure White Marble)
-        const diwanKhasGroup = new THREE.Group();
-        diwanKhasGroup.position.set(10.0, 1.0, -5.0);
-        diwanKhasGroup.userData = { featureId: 'diwan-i-khas', featureName: 'Diwan-i-Khas' };
-
-        const diwanKhasRoof = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.6, 5.0), whiteMarbleMat);
-        diwanKhasRoof.position.y = 3.0;
-        diwanKhasRoof.userData = { featureId: 'diwan-i-khas' };
-        diwanKhasGroup.add(diwanKhasRoof);
-        raycastTargets.push(diwanKhasRoof);
-
-        const khasChhatri = new THREE.Mesh(new THREE.SphereGeometry(1.1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), whiteMarbleMat);
-        khasChhatri.position.set(0, 3.8, 0);
-        khasChhatri.userData = { featureId: 'diwan-i-khas' };
-        diwanKhasGroup.add(khasChhatri);
-        raycastTargets.push(khasChhatri);
-
-        monumentGroup.add(diwanKhasGroup);
-        explodedParts.push({ mesh: diwanKhasGroup, origY: 1.0, targetOffset: 2.8, featureId: 'diwan-i-khas' });
-
-      } else if (monument.id === 'qutub-minar') {
-        const minarGroup = new THREE.Group();
-        minarGroup.userData = { featureId: 'minaret-column', featureName: 'Qutub Minar Victory Tower' };
-        const storeyHeights = [4.0, 3.5, 3.0, 2.5, 2.0];
-        const radii = [2.4, 2.0, 1.6, 1.3, 1.0, 0.7];
-        let currentY = 0;
-
-        for (let s = 0; s < 5; s++) {
-          const h = storeyHeights[s];
-          const mat = s >= 3 ? whiteMarbleMat : redSandstoneMat;
-          const cylGeo = new THREE.CylinderGeometry(radii[s + 1], radii[s], h, 24);
-          const storeyMesh = new THREE.Mesh(cylGeo, mat);
-          storeyMesh.position.y = currentY + h / 2;
-          storeyMesh.userData = { featureId: 'minaret-column' };
-          minarGroup.add(storeyMesh);
-          raycastTargets.push(storeyMesh);
-
-          const balconyGeo = new THREE.CylinderGeometry(radii[s] + 0.35, radii[s] + 0.35, 0.35, 24);
-          const balconyMesh = new THREE.Mesh(balconyGeo, goldMat);
-          balconyMesh.position.y = currentY + h;
-          balconyMesh.userData = { featureId: 'minaret-column' };
-          minarGroup.add(balconyMesh);
-          raycastTargets.push(balconyMesh);
-
-          currentY += h;
-        }
-
-        minarGroup.position.set(-2, 0, 0);
-        monumentGroup.add(minarGroup);
-        explodedParts.push({ mesh: minarGroup, origY: 0, targetOffset: 1.5, featureId: 'minaret-column' });
-
-        // Rustless Iron Pillar
-        const pillarGeo = new THREE.CylinderGeometry(0.22, 0.28, 5.5, 16);
-        const pillarMesh = new THREE.Mesh(pillarGeo, metallicDarkMat);
-        pillarMesh.position.set(5, 2.75, 3);
-        pillarMesh.userData = { featureId: 'iron-pillar', featureName: 'Rustless Iron Pillar' };
-        monumentGroup.add(pillarMesh);
-        raycastTargets.push(pillarMesh);
-        explodedParts.push({ mesh: pillarMesh, origY: 2.75, targetOffset: 2.0, featureId: 'iron-pillar' });
-
-      } else {
-        const landmarkGroup = new THREE.Group();
-        const baseGeo = new THREE.BoxGeometry(11, 3.5, 8.5);
-        const baseMesh = new THREE.Mesh(baseGeo, redSandstoneMat);
-        baseMesh.position.y = 1.75;
-        landmarkGroup.add(baseMesh);
-
-        const domeGeo = new THREE.SphereGeometry(3.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-        const domeMesh = new THREE.Mesh(domeGeo, whiteMarbleMat);
-        domeMesh.position.y = 3.5;
-        landmarkGroup.add(domeMesh);
-
-        monumentGroup.add(landmarkGroup);
-        explodedParts.push({ mesh: landmarkGroup, origY: 0, targetOffset: 2.0 });
-      }
-
-      // 7. HOTSPOTS & FLOATING 3D CALLOUT MARKERS
-      const hotspotGroup = new THREE.Group();
-      scene.add(hotspotGroup);
-
-      filteredFeatures.forEach((feat, idx) => {
-        let pos = new THREE.Vector3();
-        if (feat.id === 'lahori-gate') pos.set(0, 6.0, 4.0);
-        else if (feat.id === 'diwan-i-am') pos.set(0, 4.0, -9.5);
-        else if (feat.id === 'diwan-i-khas') pos.set(10.0, 4.0, -5.0);
-        else if (feat.id === 'moti-masjid') pos.set(5.0, 5.0, -2.0);
-        else if (feat.id === 'minaret-column') pos.set(-2, 12.0, 0);
-        else if (feat.id === 'iron-pillar') pos.set(5, 4.5, 3);
-        else {
-          const angle = (idx / Math.max(1, filteredFeatures.length)) * Math.PI * 2;
-          pos.set(Math.cos(angle) * 8, 4.5, Math.sin(angle) * 8);
-        }
-
-        const isSelected = selectedFeature?.id === feat.id;
-
-        const markerGeo = new THREE.SphereGeometry(0.65, 24, 24);
-        const markerMat = new THREE.MeshStandardMaterial({
-          color: isSelected ? 0xf59e0b : feat.isMustSee ? 0x10b981 : 0x38bdf8,
-          emissive: isSelected ? 0xd97706 : 0x0284c7,
-          emissiveIntensity: isSelected ? 1.2 : 0.6,
-          roughness: 0.1
-        });
-        const marker = new THREE.Mesh(markerGeo, markerMat);
-        marker.position.copy(pos);
-        marker.userData = { featureId: feat.id, feature: feat };
-        hotspotGroup.add(marker);
-        raycastTargets.push(marker);
-
-        const points = [pos.clone(), new THREE.Vector3(pos.x, 0.1, pos.z)];
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-        const lineMat = new THREE.LineDashedMaterial({ color: isSelected ? 0xf59e0b : 0x38bdf8, dashSize: 0.3, gapSize: 0.2 });
-        const line = new THREE.Line(lineGeo, lineMat);
-        line.computeLineDistances();
-        hotspotGroup.add(line);
-      });
-
-      // 8. THREE.JS RAYCASTER FOR DIRECT 3D MESH & HOTSPOT CLICKING (Fixes Issue 2)
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      const handleCanvasClick = (e: MouseEvent) => {
-        if (!mountRef.current) return;
-        const rect = mountRef.current.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(raycastTargets, true);
-
-        if (intersects.length > 0) {
-          let hit: THREE.Object3D | null = intersects[0].object;
-          while (hit) {
-            if (hit.userData && hit.userData.featureId) {
-              const feat = monument.features.find((f) => f.id === hit!.userData.featureId);
-              if (feat) {
-                onSelectFeature(feat);
-                return;
-              }
-            }
-            hit = hit.parent;
-          }
-        }
-      };
-
-      const handleCanvasPointerMove = (e: MouseEvent) => {
-        if (!mountRef.current) return;
-        const rect = mountRef.current.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(raycastTargets, true);
-
-        if (intersects.length > 0) {
-          let hit: THREE.Object3D | null = intersects[0].object;
-          while (hit) {
-            if (hit.userData && hit.userData.featureId) {
-              const feat = monument.features.find((f) => f.id === hit!.userData.featureId);
-              if (feat) {
-                setHoveredFeatureName(feat.name);
-                mountRef.current.style.cursor = 'pointer';
-                return;
-              }
-            }
-            hit = hit.parent;
-          }
-        }
-        setHoveredFeatureName(null);
-        mountRef.current.style.cursor = 'grab';
-      };
-
-      // 9. INTERACTIVE ORBIT CONTROLS
-      let isDragging = false;
-      let previousMousePosition = { x: 0, y: 0 };
-      let targetRotationY = 0.4;
-      let targetRotationX = 0.35;
-
-      const onMouseDown = (e: MouseEvent) => {
-        isDragging = true;
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-      };
-
-      const onMouseMove = (e: MouseEvent) => {
-        handleCanvasPointerMove(e);
-        if (!isDragging) return;
-        const deltaX = e.clientX - previousMousePosition.x;
-        const deltaY = e.clientY - previousMousePosition.y;
-
-        targetRotationY += deltaX * 0.007;
-        targetRotationX += deltaY * 0.007;
-        targetRotationX = Math.max(0.1, Math.min(Math.PI / 3, targetRotationX));
-
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-      };
-
-      const onMouseUp = () => {
-        isDragging = false;
-      };
-
-      const domEl = mountRef.current;
-      domEl.addEventListener('click', handleCanvasClick);
-      domEl.addEventListener('mousedown', onMouseDown);
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-
-      const handleResize = () => {
-        if (!mountRef.current) return;
-        const w = mountRef.current.clientWidth;
-        const h = mountRef.current.clientHeight;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-      };
-      window.addEventListener('resize', handleResize);
-
-      // 10. ANIMATION LOOP & EXPLODED VIEW MOTION
-      let clock = new THREE.Clock();
-
-      const animate = () => {
-        animationFrameId = requestAnimationFrame(animate);
-        const elapsedTime = clock.getElapsedTime();
-
-        if (!isDragging && !selectedFeature) {
-          targetRotationY += 0.0015;
-        }
-
-        const distance = 26;
-        camera.position.x = Math.sin(targetRotationY) * Math.cos(targetRotationX) * distance;
-        camera.position.z = Math.cos(targetRotationY) * Math.cos(targetRotationX) * distance;
-        camera.position.y = Math.sin(targetRotationX) * distance + 3.5;
-        camera.lookAt(0, 3.5, 0);
-
-        // Exploded View Interpolation
-        explodedParts.forEach((part) => {
-          const shouldExplode = isExplodedView || (selectedFeature && part.featureId === selectedFeature.id);
-          const targetY = shouldExplode ? part.origY + part.targetOffset : part.origY;
-          part.mesh.position.y += (targetY - part.mesh.position.y) * 0.08;
-        });
-
-        // Pulsing Hotspots
-        hotspotGroup.children.forEach((child) => {
-          if (child instanceof THREE.Mesh) {
-            const scale = 1 + Math.sin(elapsedTime * 4) * 0.12;
-            child.scale.set(scale, scale, scale);
-          }
-        });
-
-        renderer.render(scene, camera);
-      };
-
-      animate();
-
-      return () => {
-        cancelAnimationFrame(animationFrameId);
-        domEl.removeEventListener('click', handleCanvasClick);
-        domEl.removeEventListener('mousedown', onMouseDown);
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-        window.removeEventListener('resize', handleResize);
-        if (renderer && renderer.domElement) {
-          renderer.dispose();
-        }
-      };
-    } catch (err) {
-      console.warn('WebGL Context Warning:', err);
-      setWebglError(true);
-      setProviderMode('geoapify_fallback');
-    }
-  }, [monument.id, filteredFeatures.length, selectedFeature?.id, isExplodedView]);
-
-  // Virtual Walk Steps Auto-Transition
+  // Virtual Walk Auto-Transition
   useEffect(() => {
     if (isVirtualWalk && filteredFeatures.length > 0) {
       let stepIdx = 0;
@@ -549,52 +553,87 @@ export default function Immersive3DViewer({
   }, [isVirtualWalk, filteredFeatures.length]);
 
   return (
-    <div className="relative w-full h-[520px] sm:h-[580px] rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl group">
-      {/* 3D WebGL Canvas */}
-      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
-
-      {/* Top Left Status & Exploded View Toggle */}
-      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
-        <div className="px-3.5 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-extrabold flex items-center gap-2 shadow-lg">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>TripWise Architectural 3D Studio</span>
-        </div>
-
-        <button
-          onClick={() => setIsExplodedView(!isExplodedView)}
-          className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold transition-all flex items-center gap-1.5 shadow-lg ${
-            isExplodedView
-              ? 'bg-amber-500 text-slate-950 scale-105 shadow-amber-500/30'
-              : 'bg-slate-900/90 text-amber-300 border border-amber-500/40 hover:bg-slate-800'
-          }`}
-        >
-          <span>💥</span>
-          <span>{isExplodedView ? 'Exploded View Active' : 'Explode Components'}</span>
-        </button>
-      </div>
-
-      {/* Hover Tooltip / Hover Banner for Direct Mesh Clicking */}
-      {hoveredFeatureName ? (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-amber-500 text-slate-950 text-xs font-black shadow-2xl animate-bounce flex items-center gap-1.5">
-          <span>👇</span> Click to view <strong>"{hoveredFeatureName}"</strong> details!
-        </div>
-      ) : (
-        <div className="absolute top-16 left-4 z-20 text-[10px] text-amber-300 font-bold bg-slate-900/80 px-3 py-1 rounded-full border border-amber-500/30">
-          💡 Click directly on any 3D arch, dome, tower, or hotspot marker to open details!
+    <div
+      className="relative w-full h-[520px] sm:h-[580px] rounded-3xl overflow-hidden border border-slate-800 shadow-2xl group select-none"
+      style={{ background: 'linear-gradient(135deg, #07090e 0%, #0f172a 40%, #1e1b4b 70%, #07090e 100%)' }}
+    >
+      {/* Animated Background Particles (only visible in fallback mode) */}
+      {!hasGoogleMaps && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(15)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full opacity-20 animate-pulse"
+              style={{
+                width: `${2 + Math.random() * 4}px`,
+                height: `${2 + Math.random() * 4}px`,
+                background: i % 3 === 0 ? '#f59e0b' : i % 3 === 1 ? '#38bdf8' : '#a78bfa',
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+              }}
+            />
+          ))}
         </div>
       )}
 
-      {/* Top Right Studio Orbit Tips */}
-      <div className="absolute top-4 right-4 z-20 hidden sm:flex items-center gap-2">
-        <div className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-slate-300 text-[10px] font-semibold">
-          🖱️ Click 3D Mesh • Rotate 360°
+      {/* MAIN VIEWER: Google Maps or CSS 3D Fallback */}
+      {hasGoogleMaps ? (
+        <GoogleMapsViewer
+          monument={monument}
+          selectedFeature={selectedFeature}
+          filteredFeatures={filteredFeatures}
+          onSelectFeature={onSelectFeature}
+          apiKey={googleApiKey}
+        />
+      ) : (
+        <CSS3DFallbackViewer
+          monument={monument}
+          selectedFeature={selectedFeature}
+          filteredFeatures={filteredFeatures}
+          onSelectFeature={onSelectFeature}
+        />
+      )}
+
+      {/* ============= OVERLAY UI (shared by both modes) ============= */}
+
+      {/* Top Left Status Badge */}
+      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
+        <div className="px-3.5 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-extrabold flex items-center gap-2 shadow-lg">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>{hasGoogleMaps ? 'Google Earth Immersive View' : 'TripWise 3D Photo Explorer'}</span>
         </div>
+
+        {!hasGoogleMaps && (
+          <button
+            onClick={() => setIsExplodedView(!isExplodedView)}
+            className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold transition-all flex items-center gap-1.5 shadow-lg ${
+              isExplodedView
+                ? 'bg-amber-500 text-slate-950 scale-105 shadow-amber-500/30'
+                : 'bg-slate-900/90 text-amber-300 border border-amber-500/40 hover:bg-slate-800'
+            }`}
+          >
+            <span>💥</span>
+            <span>{isExplodedView ? 'Exploded Active' : 'Explode'}</span>
+          </button>
+        )}
       </div>
 
-      {/* Floating 3D Callout Hotspots Bar */}
-      <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-center gap-2 overflow-x-auto py-2.5 px-4 bg-slate-950/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl scrollbar-none">
+      {/* Instruction hint (CSS3D mode) */}
+      {!hasGoogleMaps && (
+        <div className="absolute top-16 left-4 z-20 text-[10px] text-amber-300 font-bold bg-slate-900/80 px-3 py-1 rounded-full border border-amber-500/30">
+          💡 Drag to rotate 360° • Click hotspot markers to view details
+        </div>
+      )}
+
+      {/* Bottom Hotspot Navigation Bar */}
+      <div
+        className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-center gap-2 overflow-x-auto py-2.5 px-4 bg-slate-950/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl"
+        style={{ scrollbarWidth: 'none' }}
+      >
         <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 shrink-0 flex items-center gap-1">
-          <span>📍</span> CLICK ARCHITECTURAL HOTSPOT:
+          <span>📍</span> EXPLORE FEATURE:
         </span>
         {filteredFeatures.map((feat) => {
           const isSelected = selectedFeature?.id === feat.id;
@@ -610,22 +649,11 @@ export default function Immersive3DViewer({
             >
               <span>{feat.category === 'Architecture' ? '🏛️' : feat.category === 'History' ? '📜' : '✨'}</span>
               <span>{feat.name}</span>
-              {feat.isMustSee && <span className="text-[9px] text-emerald-400 font-black">⭐ MUST SEE</span>}
+              {feat.isMustSee && <span className="text-[9px] text-emerald-400 font-black">⭐</span>}
             </button>
           );
         })}
       </div>
-
-      {/* Fallback */}
-      {webglError && (
-        <div className="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center text-white space-y-3">
-          <MapPinIcon size={36} className="text-amber-400" />
-          <h4 className="text-lg font-bold">Immersive View Fallback</h4>
-          <p className="text-xs text-slate-300 max-w-md">
-            WebGL 3D acceleration is limited on this device. Displaying interactive destination coordinates map.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
