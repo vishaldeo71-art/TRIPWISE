@@ -23,7 +23,6 @@ import {
   SparklesIcon,
   CompassIcon,
   CheckIcon,
-  ChevronDownIcon,
   ExternalLinkIcon,
   UmbrellaIcon,
   FlameIcon,

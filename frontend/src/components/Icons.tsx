@@ -257,4 +257,11 @@ export const GlobeIcon: React.FC<IconProps> = ({ size = 20, className = '', ...p
   </svg>
 );
 
+export const ChevronDownIcon: React.FC<IconProps> = ({ size = 20, className = '', ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
+
 
