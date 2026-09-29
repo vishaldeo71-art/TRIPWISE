@@ -427,6 +427,31 @@ Provide a friendly 2-3 sentence answer.
                   </p>
                 </div>
 
+                {/* Multi-Angle Real Web Photo Gallery Inspector */}
+                {selectedFeature.multiViewImages && selectedFeature.multiViewImages.length > 0 && (
+                  <div className="space-y-2 border-b border-[var(--border)] pb-4">
+                    <h4 className="font-extrabold text-[var(--muted)] uppercase text-[10px] tracking-wider flex items-center justify-between">
+                      <span>📸 Real Web Photo Views ({selectedFeature.multiViewImages.length} Angles)</span>
+                      <span className="text-amber-600 font-bold">Multi-Angle Inspection</span>
+                    </h4>
+                    <div className="grid grid-cols-1 gap-2">
+                      {selectedFeature.multiViewImages.map((img, imgIdx) => (
+                        <div key={imgIdx} className="rounded-xl overflow-hidden border border-[var(--border)] bg-slate-900 group/img relative">
+                          <img
+                            src={img.url}
+                            alt={img.title}
+                            className="w-full h-36 object-cover group-hover/img:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent text-white text-[10px]">
+                            <span className="font-extrabold block text-amber-300">{img.title}</span>
+                            <span className="text-slate-300 font-medium truncate block">{img.caption}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Simplified Explanation Callout if active */}
                 {simplifiedText ? (
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs space-y-2 animate-fade-in">

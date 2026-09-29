@@ -1,3 +1,9 @@
+export interface MultiViewImage {
+  title: string;
+  url: string;
+  caption: string;
+}
+
 export interface MonumentFeature {
   id: string;
   name: string;
@@ -10,6 +16,7 @@ export interface MonumentFeature {
   historicalImportance: string;
   architecturalImportance: string;
   whyVisit: string;
+  multiViewImages?: MultiViewImage[];
   cameraPitch?: number;
   cameraHeading?: number;
 }
@@ -53,10 +60,27 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           lng: 77.2400,
           description: 'The monumental main entrance to the Red Fort, named for its orientation towards the historic city of Lahore.',
           historicalImportance: 'Symbolic site where the Prime Minister of India unfurls the national flag on Independence Day every 15th of August.',
-          architecturalImportance: 'Framed by grand octagonal towers, flame-shaped battlements, and white marble cupolas (chhatris).',
+          architecturalImportance: 'Framed by grand octagonal towers, flame-shaped battlements, pointed Mughal arch, and white marble cupolas (chhatris).',
           whyVisit: 'Offers a breathtaking first view of the fort and leads into the historic Chhatta Chowk covered bazaar.',
           cameraPitch: -25,
-          cameraHeading: 90
+          cameraHeading: 90,
+          multiViewImages: [
+            {
+              title: 'Front Elevation & Archway View',
+              url: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80',
+              caption: 'Frontal perspective showing the pointed Mughal entrance portal and red sandstone ramparts.'
+            },
+            {
+              title: 'Arcade & White Chhatri Detail',
+              url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80',
+              caption: 'Close-up of the 7 white marble domed cupolas lining the upper parapet arcade.'
+            },
+            {
+              title: 'Aerial Fortified Ramparts View',
+              url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+              caption: 'Panoramic view over the grassy embankments and octagonal flanking towers.'
+            }
+          ]
         },
         {
           id: 'diwan-i-am',
@@ -70,7 +94,19 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Features a large hall with 9 archways supported by red sandstone pillars with intricate Pietra Dura stone inlays.',
           whyVisit: 'Witness fine Florentine pietra dura artwork depicting Orpheus playing the lute behind the royal throne seat.',
           cameraPitch: -20,
-          cameraHeading: 120
+          cameraHeading: 120,
+          multiViewImages: [
+            {
+              title: 'Pillared Hall Elevation',
+              url: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=800&q=80',
+              caption: 'Red sandstone pillars supporting cusped Mughal arches in the public hall.'
+            },
+            {
+              title: 'Royal Marble Throne Canopy',
+              url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+              caption: 'Carved marble throne seat with Florentine pietra dura stone inlays.'
+            }
+          ]
         },
         {
           id: 'diwan-i-khas',
@@ -84,21 +120,19 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Crafted from pure white marble with gold leaf foil ceilings and silver-encrusted marble pillars.',
           whyVisit: 'Inscribed with the famous Persian poem line: "If there be a paradise on earth, it is this, it is this, it is this."',
           cameraPitch: -15,
-          cameraHeading: 45
-        },
-        {
-          id: 'naubat-khana',
-          name: 'Naubat Khana (Drum House)',
-          category: 'History',
-          isMustSee: false,
-          lat: 28.6561,
-          lng: 77.2408,
-          description: 'The royal music gallery where court musicians played ceremonial music five times daily to announce royal arrivals.',
-          historicalImportance: 'All visitors except the emperor were required to dismount their horses and elephants here before proceeding on foot.',
-          architecturalImportance: 'Double-storied red sandstone pavilion with carved floral motifs and vaulted acoustics.',
-          whyVisit: 'Houses the Indian War Memorial Museum showcasing historic armor, weapons, and royal artifacts.',
-          cameraPitch: -30,
-          cameraHeading: 180
+          cameraHeading: 45,
+          multiViewImages: [
+            {
+              title: 'White Marble Pavilion Exterior',
+              url: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80',
+              caption: 'Pure white marble facade with corner domed chhatris overlooking gardens.'
+            },
+            {
+              title: 'Inlaid Marble Pillars & Inscriptions',
+              url: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=800&q=80',
+              caption: 'Intricate floral pietra dura craftsmanship and golden leaf ceiling details.'
+            }
+          ]
         },
         {
           id: 'moti-masjid',
@@ -112,7 +146,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Features three bulbous domes, carved marble screens (jalis), and black marble prayer floor contours.',
           whyVisit: 'A masterpiece of compact marble symmetry tucked quietly within the royal quarter.',
           cameraPitch: -10,
-          cameraHeading: 310
+          cameraHeading: 310,
+          multiViewImages: [
+            {
+              title: 'Triple Marble Domes View',
+              url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+              caption: 'Bulbous white marble domes and carved marble screen facade.'
+            }
+          ]
         }
       ]
     },
@@ -141,7 +182,19 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Decreasing diameter from 14.3m at the base to 2.7m at the peak, covered in band inscriptions of Quranic verses.',
           whyVisit: 'Admire intricate calligraphy carved into red sandstone tapering gracefully into the blue sky.',
           cameraPitch: -35,
-          cameraHeading: 0
+          cameraHeading: 0,
+          multiViewImages: [
+            {
+              title: 'Vertical Elevation Shaft View',
+              url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+              caption: 'Full 72.5m fluted red sandstone and marble tower tapering skyward.'
+            },
+            {
+              title: 'Inscribed Calligraphy Band Detail',
+              url: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80',
+              caption: 'Intricate Arabic calligraphy bands and muqarnas stalactite balcony carvings.'
+            }
+          ]
         },
         {
           id: 'quwwat-ul-islam',
@@ -155,7 +208,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Hypostyle courtyard with carved stone pillars displaying floral, bell, and geometric motifs.',
           whyVisit: 'Fascinating blend of early Indian stone carving combined with Islamic arched screen facades.',
           cameraPitch: -20,
-          cameraHeading: 270
+          cameraHeading: 270,
+          multiViewImages: [
+            {
+              title: 'Carved Temple Pillar Colonnade',
+              url: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=800&q=80',
+              caption: 'Ornate carved stone pillars displaying bell and lotus motifs.'
+            }
+          ]
         },
         {
           id: 'iron-pillar',
@@ -166,24 +226,17 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           lng: 77.1853,
           description: 'A 7.2-meter metallurgical marvel forged during the Gupta Empire around 400 AD that has withstood 1,600 years without rusting.',
           historicalImportance: 'Dedicated to Lord Vishnu by Emperor Chandragupta II (Vikramaditya).',
-          architecturalImportance: 'Forged from wrought iron with high phosphorus content content creating a protective passive oxide layer.',
+          architecturalImportance: 'Forged from wrought iron with high phosphorus content creating a protective passive oxide layer.',
           whyVisit: 'Scientists worldwide still study its rust-resistant metallurgical composition.',
           cameraPitch: -15,
-          cameraHeading: 135
-        },
-        {
-          id: 'alai-darwaza',
-          name: 'Alai Darwaza Gate',
-          category: 'Architecture',
-          isMustSee: false,
-          lat: 28.5242,
-          lng: 77.1857,
-          description: 'The magnificent southern gateway added by Sultan Alauddin Khalji in 1311 AD.',
-          historicalImportance: 'First building in India constructed using true Islamic horseshoe arch principles.',
-          architecturalImportance: 'Decorated with red sandstone, white marble latticework screens, and domed roof symmetry.',
-          whyVisit: 'Showcases the highest artistic craftsmanship of the Khalji dynasty.',
-          cameraPitch: -25,
-          cameraHeading: 210
+          cameraHeading: 135,
+          multiViewImages: [
+            {
+              title: 'Gupta Iron Pillar & Capital Top',
+              url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+              caption: '1,600-year-old rust-resistant iron pillar standing in the mosque courtyard.'
+            }
+          ]
         }
       ]
     },
@@ -212,7 +265,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Outer shell creates grand exterior scale while inner dome maintains proportionate interior ceiling height.',
           whyVisit: 'Stunning visual contrast between the pure white dome and red sandstone octagonal base.',
           cameraPitch: -30,
-          cameraHeading: 60
+          cameraHeading: 60,
+          multiViewImages: [
+            {
+              title: 'Central Dome & Facade Elevation',
+              url: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=800&q=80',
+              caption: 'Symmetrical red sandstone octagonal structure topped by double marble dome.'
+            }
+          ]
         },
         {
           id: 'charbagh-gardens',
@@ -226,21 +286,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Symmetrical geometric quadrants with causeways, sunken flower beds, and fountain basins.',
           whyVisit: 'Serene walking pathways offering peaceful views of the tomb reflected in water channels.',
           cameraPitch: -15,
-          cameraHeading: 180
-        },
-        {
-          id: 'arched-facade',
-          name: 'Persian Iwan Arched Facade',
-          category: 'Architecture',
-          isMustSee: false,
-          lat: 28.5852,
-          lng: 77.2510,
-          description: 'Deep vaulted archways (Iwans) with inlaid yellow and black marble geometric borders.',
-          historicalImportance: 'Designed by Persian architect Mirak Mirza Ghiyas.',
-          architecturalImportance: 'Combines Persian recessed arch symmetry with Indian chhatri pavilions.',
-          whyVisit: 'Provides shade and breathtaking perspective photo angles across the gardens.',
-          cameraPitch: -20,
-          cameraHeading: 300
+          cameraHeading: 180,
+          multiViewImages: [
+            {
+              title: 'Water Channel Paradise Garden View',
+              url: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe707?auto=format&fit=crop&w=800&q=80',
+              caption: 'Persian Charbagh geometry with water channels and flower quadrants.'
+            }
+          ]
         }
       ]
     },
@@ -269,7 +322,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Carved from solid pink Rajasthani sandstone blocks without using steel or concrete reinforcement.',
           whyVisit: 'Admire 148 unique handcrafted stone elephant sculptures surrounding the temple base.',
           cameraPitch: -25,
-          cameraHeading: 120
+          cameraHeading: 120,
+          multiViewImages: [
+            {
+              title: '148 Elephant Relief Plinth View',
+              url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80',
+              caption: 'Solid pink sandstone plinth with 148 handcrafted full-sized elephant carvings.'
+            }
+          ]
         },
         {
           id: 'mandovar-facade',
@@ -283,7 +343,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Stands 25 feet high and stretches 611 feet long with pure pink sandstone craftsmanship.',
           whyVisit: 'View detailed hand-carved relief sculptures depicting stories from Indian heritage.',
           cameraPitch: -20,
-          cameraHeading: 270
+          cameraHeading: 270,
+          multiViewImages: [
+            {
+              title: 'Pink Sandstone Mandovar Wall Detail',
+              url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80',
+              caption: '200 carved stone figures of sages and spiritual teachers lining the temple wall.'
+            }
+          ]
         }
       ]
     }
@@ -314,7 +381,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Houses the hydraulic lifts that raise the bridge bascules over 800 times a year for river traffic.',
           whyVisit: 'Iconic London skyline landmark with high-level glass floor walkways.',
           cameraPitch: -25,
-          cameraHeading: 45
+          cameraHeading: 45,
+          multiViewImages: [
+            {
+              title: 'Thames Elevation Twin Towers',
+              url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
+              caption: 'Gothic stone towers and suspension spans over River Thames.'
+            }
+          ]
         },
         {
           id: 'glass-walkways',
@@ -328,21 +402,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Reinforced glass panels measuring 11m long by 1.8m wide capable of holding 6 elephants.',
           whyVisit: 'Look straight down at London red double-decker buses crossing the bridge below.',
           cameraPitch: -40,
-          cameraHeading: 0
-        },
-        {
-          id: 'engine-rooms',
-          name: 'Victorian Steam Engine Rooms',
-          category: 'History',
-          isMustSee: false,
-          lat: 51.5050,
-          lng: -0.0750,
-          description: 'Preserved steam engines and hydraulic accumulators that originally powered the bridge until 1976.',
-          historicalImportance: 'Engineering marvel of 19th-century industrial technology.',
-          architecturalImportance: 'Polished brass fittings, coal boilers, and massive drive wheels.',
-          whyVisit: 'Immerse in the sights and sounds of London’s industrial heritage.',
-          cameraPitch: -15,
-          cameraHeading: 120
+          cameraHeading: 0,
+          multiViewImages: [
+            {
+              title: 'High-Level Glass Floor Perspective',
+              url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
+              caption: 'Transparent glass walkway looking down on bridge traffic 42 meters below.'
+            }
+          ]
         }
       ]
     },
@@ -371,7 +438,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Tessellated glass canopy consisting of 3,312 unique glass panes spanning 2 acres.',
           whyVisit: 'Breathtaking light-filled central hub connecting all historic galleries.',
           cameraPitch: -30,
-          cameraHeading: 90
+          cameraHeading: 90,
+          multiViewImages: [
+            {
+              title: 'Tessellated Glass Roof Canopy',
+              url: 'https://images.unsplash.com/photo-1565060169194-1a65d5ef07ee?auto=format&fit=crop&w=800&q=80',
+              caption: '3,312 glass panes forming Europe’s largest covered square.'
+            }
+          ]
         },
         {
           id: 'rosetta-stone',
@@ -385,7 +459,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Display casing with controlled humidity and anti-reflective protective casing.',
           whyVisit: 'The most visited single artifact in the British Museum.',
           cameraPitch: -15,
-          cameraHeading: 180
+          cameraHeading: 180,
+          multiViewImages: [
+            {
+              title: 'Rosetta Stone Display Stele',
+              url: 'https://images.unsplash.com/photo-1565060169194-1a65d5ef07ee?auto=format&fit=crop&w=800&q=80',
+              caption: 'Ancient Egyptian granodiorite stone inscribed with Greek and Demotic scripts.'
+            }
+          ]
         }
       ]
     }
@@ -416,7 +497,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Wind-resistant geometric openwork lattice design that sways only a maximum of 9 cm in high storms.',
           whyVisit: 'Marvel at 19th-century French precision structural engineering.',
           cameraPitch: -45,
-          cameraHeading: 30
+          cameraHeading: 30,
+          multiViewImages: [
+            {
+              title: 'Champ de Mars Lattice Tower Elevation',
+              url: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80',
+              caption: '330-meter iron lattice structure viewed from Champ de Mars.'
+            }
+          ]
         },
         {
           id: 'summit-deck',
@@ -430,7 +518,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Enclosed indoor deck and outdoor upper balcony with champagne bar.',
           whyVisit: 'Offers unparalleled 360-degree views over Paris landmarks.',
           cameraPitch: -20,
-          cameraHeading: 180
+          cameraHeading: 180,
+          multiViewImages: [
+            {
+              title: 'Parisian Skyline from Summit',
+              url: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80',
+              caption: '360-degree panoramic deck looking towards River Seine and Arc de Triomphe.'
+            }
+          ]
         }
       ]
     },
@@ -459,7 +554,14 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Constructed from 603 rhombus and 70 triangular glass segments with ultra-clear diamond glass.',
           whyVisit: 'Stunning fusion of modern glass architecture contrasting against classical French Renaissance palace facades.',
           cameraPitch: -25,
-          cameraHeading: 220
+          cameraHeading: 220,
+          multiViewImages: [
+            {
+              title: 'Cour Napoléon Glass Pyramid Entrance',
+              url: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80',
+              caption: 'Modern glass pyramid in front of classical French Renaissance palace facade.'
+            }
+          ]
         },
         {
           id: 'mona-lisa-gallery',
@@ -473,16 +575,20 @@ export const MONUMENTS_REGISTRY: Record<string, Monument[]> = {
           architecturalImportance: 'Bulletproof climate-controlled glass enclosure with directional lighting.',
           whyVisit: 'See the world’s most celebrated masterpiece in person.',
           cameraPitch: -15,
-          cameraHeading: 90
+          cameraHeading: 90,
+          multiViewImages: [
+            {
+              title: 'Salle des États Gallery',
+              url: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80',
+              caption: 'Leonardo da Vinci’s Mona Lisa portrait inside bulletproof display casing.'
+            }
+          ]
         }
       ]
     }
   ]
 };
 
-/**
- * Get monuments for a specific city or return default Delhi registry
- */
 export function getMonumentsForCity(city: string): Monument[] {
   const normalized = (city || 'delhi').toLowerCase().trim();
   for (const key of Object.keys(MONUMENTS_REGISTRY)) {
@@ -493,9 +599,6 @@ export function getMonumentsForCity(city: string): Monument[] {
   return MONUMENTS_REGISTRY.delhi;
 }
 
-/**
- * Find specific monument by ID across all cities
- */
 export function getMonumentById(monumentId: string): { monument: Monument; cityKey: string } | null {
   const normId = (monumentId || '').toLowerCase().trim();
   for (const [cityKey, monuments] of Object.entries(MONUMENTS_REGISTRY)) {
