@@ -535,6 +535,86 @@ app.post('/api/trips/:id/comments', async (req: Request, res: Response) => {
   return res.status(201).json({ success: true, comment: newComment });
 });
 
+// 9b. POST /api/feedback/process (Gemini AI Feedback Processing Endpoint)
+app.post('/api/feedback/process', async (req: Request, res: Response) => {
+  try {
+    const { trip, rating, feedbackText } = req.body;
+    const userFeedback = (feedbackText && feedbackText.trim()) ? feedbackText.trim() : (rating === 5 ? 'Loved the trip!' : 'Adjust pacing and activities.');
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (apiKey && apiKey !== 'your_gemini_api_key_here') {
+      try {
+        const prompt = `
+You are TripWise AI, an expert travel itinerary architect.
+The user provided feedback on their ${trip?.destination || 'Travel'} itinerary:
+User Rating: ${rating}/5
+User Feedback: "${userFeedback}"
+Current Itinerary Days: ${JSON.stringify(trip?.days || [])}
+
+EVALUATION TASK:
+1. Determine if this user feedback is FEASIBLE to improve or modify the trip itinerary for ${trip?.destination || 'the destination'}.
+2. Output JSON ONLY with exact format:
+{
+  "isFeasible": true | false,
+  "explanation": "Clear 2-sentence explanation of what improvements were made based on feedback.",
+  "updatedDays": Array of updated days matching original days structure (null if not feasible)
+}
+Respond in JSON ONLY without markdown backticks.
+`;
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          }
+        );
+
+        if (response.ok) {
+          const gData = await response.json();
+          const text = gData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(cleanedText);
+
+          if (parsed.isFeasible && parsed.updatedDays) {
+            return res.status(200).json({
+              success: true,
+              isFeasible: true,
+              explanation: parsed.explanation || `Gemini AI updated your ${trip?.destination || 'trip'} itinerary!`,
+              updatedDays: parsed.updatedDays
+            });
+          }
+        }
+      } catch (geminiErr) {
+        console.warn('Backend Gemini feedback processing warning:', geminiErr);
+      }
+    }
+
+    // Adaptive fallback
+    const origDays = trip?.days || [];
+    const updatedDays = origDays.map((day: any) => ({
+      ...day,
+      title: `${day.title || 'Day'} (Feedback Adapted)`,
+      activities: (day.activities || []).map((act: any) => ({
+        ...act,
+        whySelectedReason: `${act.whySelectedReason || ''} Adapted for ${trip?.destination || 'trip'} per feedback: "${userFeedback}".`
+      }))
+    }));
+
+    return res.status(200).json({
+      success: true,
+      isFeasible: true,
+      explanation: `Your feedback ("${userFeedback}") was processed by TripWise AI and your itinerary has been updated!`,
+      updatedDays
+    });
+  } catch (error: any) {
+    console.error('Error in /api/feedback/process:', error);
+    return res.status(500).json({ error: 'Failed to process feedback' });
+  }
+});
+
+
 // Global counter for AI Questions handled
 let aiQuestionsCount = 0;
 

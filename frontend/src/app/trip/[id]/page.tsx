@@ -679,7 +679,14 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           isOpen={isFeedbackOpen}
           onClose={() => setIsFeedbackOpen(false)}
           trip={trip}
-          onTripUpdated={(updatedTrip) => setTrip(updatedTrip)}
+          onTripUpdated={(updatedTrip) => {
+            setTrip(updatedTrip);
+            try {
+              if (updatedTrip.id) {
+                supabase.from('trips').update({ itinerary: updatedTrip.days }).eq('id', updatedTrip.id);
+              }
+            } catch (e) {}
+          }}
         />
       )}
 

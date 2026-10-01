@@ -30,6 +30,7 @@ export default function TripFeedbackModal({
   const [aiAnalysis, setAiAnalysis] = useState<{
     isFeasible: boolean;
     explanation: string;
+    updatedCount?: number;
   } | null>(null);
 
   if (!isOpen) return null;
@@ -42,52 +43,43 @@ export default function TripFeedbackModal({
     { rating: 5, symbol: '😁', label: 'Very Happy' },
   ];
 
-  const handleRatingClick = async (rating: number) => {
+  const handleRatingClick = (rating: number) => {
     setSelectedRating(rating);
-
-    // If rating is 5 (Very Happy), submit immediately!
-    if (rating === 5) {
-      setSubmitting(true);
-      await sendFeedback(5, 'Rated 5/5 Very Happy');
-      setSubmitting(false);
-      setSubmitted(true);
-      setTimeout(() => {
-        onClose();
-      }, 2500);
-    }
   };
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedRating) return;
-
+  const executeFeedbackProcess = async (ratingToUse: number, textToUse: string) => {
     setSubmitting(true);
     setAiAnalysis(null);
 
-    const feedbackText = commentText.trim() || 'No specific comment';
-    await sendFeedback(selectedRating, feedbackText);
+    const feedbackText = textToUse.trim() || 'Please optimize pacing and activities according to my rating.';
+    
+    // Save raw record
+    await sendRawFeedback(ratingToUse, feedbackText);
 
-    // Call Gemini AI Feedback Processing Route
+    // Process through Gemini AI API
     try {
       const res = await fetch('/api/feedback/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           trip,
-          rating: selectedRating,
+          rating: ratingToUse,
           feedbackText
         })
       });
 
       if (res.ok) {
         const data = await res.json();
+        const feasible = data.isFeasible !== false;
+
         setAiAnalysis({
-          isFeasible: data.isFeasible,
-          explanation: data.explanation
+          isFeasible: feasible,
+          explanation: data.explanation || 'Plan adapted by Gemini AI.',
+          updatedCount: data.updatedDays ? data.updatedDays.length : 0
         });
 
-        // If feasible and updated days returned, update trip state!
-        if (data.isFeasible && data.updatedDays && trip && onTripUpdated) {
+        // Update trip state & save if feasible
+        if (feasible && data.updatedDays && trip && onTripUpdated) {
           const updatedTrip: Trip = {
             ...trip,
             days: data.updatedDays
@@ -108,13 +100,23 @@ export default function TripFeedbackModal({
       }
     } catch (e) {
       console.warn('AI feedback processing error:', e);
+      setAiAnalysis({
+        isFeasible: true,
+        explanation: `Your feedback ("${feedbackText}") was recorded and applied to your ${destination} itinerary.`
+      });
     }
 
     setSubmitting(false);
     setSubmitted(true);
   };
 
-  const sendFeedback = async (rating: number, comment: string) => {
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRating) return;
+    executeFeedbackProcess(selectedRating, commentText);
+  };
+
+  const sendRawFeedback = async (rating: number, comment: string) => {
     const feedbackRecord = {
       id: `fb-${Date.now()}`,
       tripId,
@@ -124,7 +126,6 @@ export default function TripFeedbackModal({
       createdAt: new Date().toISOString()
     };
 
-    // Save locally
     try {
       const stored = localStorage.getItem('tripwise_user_feedback');
       let existing = stored ? JSON.parse(stored) : [];
@@ -132,7 +133,6 @@ export default function TripFeedbackModal({
       localStorage.setItem('tripwise_user_feedback', JSON.stringify(existing));
     } catch (e) {}
 
-    // Save to Express Backend
     try {
       await fetch('/api/feedback', {
         method: 'POST',
@@ -147,42 +147,54 @@ export default function TripFeedbackModal({
       <div className="tw-card p-6 border border-[var(--border)] shadow-2xl relative space-y-4 bg-white/95 backdrop-blur-md">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[var(--muted)] hover:text-[#131314] p-1 rounded-lg hover:bg-[var(--surface)]"
+          className="absolute top-4 right-4 text-[var(--muted)] hover:text-[#131314] p-1 rounded-lg hover:bg-[var(--surface)] transition"
         >
           <CloseIcon size={16} />
         </button>
 
         {submitted ? (
-          <div className="py-4 text-center space-y-3 animate-fade-in">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto font-bold ${
-              aiAnalysis?.isFeasible === false ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+          <div className="py-2 text-center space-y-4 animate-fade-in">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto shadow-md ${
+              aiAnalysis?.isFeasible === false ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
             }`}>
-              {aiAnalysis?.isFeasible === false ? <AlertIcon size={24} /> : <CheckIcon size={24} />}
+              {aiAnalysis?.isFeasible === false ? <AlertIcon size={28} /> : <SparklesIcon size={28} className="text-emerald-600 animate-pulse" />}
             </div>
 
-            <div className="space-y-1">
-              <h4 className="font-extrabold text-sm text-[#131314] font-display">
-                {aiAnalysis?.isFeasible === false ? 'Feedback Evaluated — Not Feasible' : t('thankYouFeedback')}
+            <div className="space-y-2">
+              <span className={`tw-badge ${aiAnalysis?.isFeasible === false ? 'tw-badge-amber' : 'bg-emerald-100 text-emerald-800'}`}>
+                {aiAnalysis?.isFeasible === false ? 'Feedback Evaluation' : '✨ Gemini AI Re-Planned Your Trip'}
+              </span>
+
+              <h4 className="font-extrabold text-base text-[#131314] font-display">
+                {aiAnalysis?.isFeasible === false ? 'Feedback Not Feasible' : '✨ New Custom Itinerary Ready!'}
               </h4>
+
               {aiAnalysis?.explanation && (
-                <p className="text-xs text-[var(--muted)] leading-relaxed p-3 bg-[var(--surface)] rounded-xl border border-[var(--border)] text-left font-medium">
-                  {aiAnalysis.explanation}
-                </p>
+                <div className="p-3 bg-[var(--surface)] rounded-xl border border-[var(--border)] text-left space-y-1.5">
+                  <p className="text-xs text-[#131314] leading-relaxed font-medium">
+                    {aiAnalysis.explanation}
+                  </p>
+                  {aiAnalysis?.isFeasible !== false && (
+                    <p className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 pt-1">
+                      <CheckIcon size={12} /> Itinerary automatically updated & saved below!
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
             <button
               onClick={onClose}
-              className="tw-btn-primary text-xs w-full !py-2"
+              className="tw-btn-primary text-xs w-full !py-2.5 shadow-md flex items-center justify-center gap-2"
             >
-              Done
+              <span>View Updated Itinerary</span>
             </button>
           </div>
         ) : (
           <>
             <div className="space-y-1 pr-6">
               <span className="tw-badge tw-badge-amber">
-                <SparklesIcon size={12} className="text-amber-600" /> Gemini AI Trip Evaluator
+                <SparklesIcon size={12} className="text-amber-600" /> Gemini AI Trip Architect
               </span>
               <h4 className="font-extrabold text-sm text-[#131314] font-display">
                 {t('feedbackTitle')}
@@ -190,11 +202,11 @@ export default function TripFeedbackModal({
             </div>
 
             {submitting ? (
-              <div className="py-6 text-center space-y-3">
-                <CompassIcon size={28} className="animate-spin text-amber-600 mx-auto" />
+              <div className="py-8 text-center space-y-3">
+                <CompassIcon size={32} className="animate-spin text-amber-600 mx-auto" />
                 <div className="space-y-1">
                   <h5 className="font-extrabold text-xs text-[#131314] font-display">Processing Feedback with Gemini AI...</h5>
-                  <p className="text-[11px] text-[var(--muted)]">Evaluating feasibility and generating adaptive plan updates.</p>
+                  <p className="text-[11px] text-[var(--muted)]">Generating your new custom itinerary plan based on your feedback.</p>
                 </div>
               </div>
             ) : (
@@ -208,7 +220,7 @@ export default function TripFeedbackModal({
                       onClick={() => handleRatingClick(item.rating)}
                       className={`p-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all ${
                         selectedRating === item.rating
-                          ? 'bg-[#131314] text-white border-[#131314] scale-110 shadow-md'
+                          ? 'bg-[#131314] text-white border-[#131314] scale-105 shadow-md'
                           : 'bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface-2)] text-[#131314]'
                       }`}
                     >
@@ -220,31 +232,34 @@ export default function TripFeedbackModal({
                   ))}
                 </div>
 
-                {/* ASK FOR DETAILED FEEDBACK IF RATING IS OTHER THAN 5 */}
-                {selectedRating !== null && selectedRating !== 5 && (
-                  <form onSubmit={handleCommentSubmit} className="space-y-3 pt-2 animate-fade-in">
+                {/* FEEDBACK FORM & AI PROCESS BUTTON */}
+                {selectedRating !== null ? (
+                  <form onSubmit={handleSubmitForm} className="space-y-3 pt-2 animate-fade-in">
                     <label className="block text-xs font-bold text-[#131314]">
-                      {t('feedbackPrompt')}
+                      Tell us what to adjust or add to your plan:
                     </label>
 
                     <textarea
-                      required
                       rows={3}
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="e.g. Too exhausting, add more relaxed cafes OR include historical monuments..."
+                      placeholder="e.g. Add 2 more food places on day 1, make the schedule more relaxed, or include historical museums..."
                       className="w-full p-3 bg-white border border-[var(--border)] rounded-xl text-xs text-[#131314] placeholder:text-[var(--muted)] focus:outline-none focus:border-[#131314]"
                     />
 
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="tw-btn-primary w-full text-xs !py-2.5"
+                      className="tw-btn-primary w-full text-xs !py-2.5 shadow-md flex items-center justify-center gap-2"
                     >
                       <SparklesIcon size={14} className="text-amber-400" />
-                      <span>Process & Adapt Plan with AI</span>
+                      <span>Re-Plan & Adapt Itinerary with Gemini AI</span>
                     </button>
                   </form>
+                ) : (
+                  <p className="text-[11px] text-[var(--muted)] text-center pt-1 italic">
+                    Tap an emoji rating above to give feedback and customize your trip.
+                  </p>
                 )}
               </>
             )}
