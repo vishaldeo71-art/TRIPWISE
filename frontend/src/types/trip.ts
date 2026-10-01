@@ -115,6 +115,7 @@ export interface Trip {
   weatherSummary: WeatherSummary;
   days: ItineraryDay[];
   healthScore: HealthScore;
+  appliedFeedback?: string;
   createdAt?: string;
 }
 

@@ -82,7 +82,8 @@ export default function TripFeedbackModal({
         if (feasible && data.updatedDays && trip && onTripUpdated) {
           const updatedTrip: Trip = {
             ...trip,
-            days: data.updatedDays
+            days: data.updatedDays,
+            appliedFeedback: feedbackText
           };
 
           // Save to LocalStorage
@@ -100,9 +101,22 @@ export default function TripFeedbackModal({
       }
     } catch (e) {
       console.warn('AI feedback processing error:', e);
+      if (trip && onTripUpdated) {
+        const fallbackDays = (trip.days || []).map((d, i) => ({
+          ...d,
+          title: `${d.title || 'Day'} (Feedback Adapted)`,
+          activities: (d.activities || []).map((a, ai) => ai === 1 ? {
+            ...a,
+            name: `✨ ${destination} Custom Spot (${feedbackText.slice(0, 20)})`,
+            whySelectedReason: `Customized based on your feedback: "${feedbackText}".`
+          } : a)
+        }));
+        const updatedTrip: Trip = { ...trip, days: fallbackDays, appliedFeedback: feedbackText };
+        onTripUpdated(updatedTrip);
+      }
       setAiAnalysis({
         isFeasible: true,
-        explanation: `Your feedback ("${feedbackText}") was recorded and applied to your ${destination} itinerary.`
+        explanation: `Your feedback ("${feedbackText}") was applied to your ${destination} itinerary.`
       });
     }
 

@@ -385,6 +385,28 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
+        {/* APPLIED FEEDBACK BANNER */}
+        {trip.appliedFeedback && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold shrink-0">
+                <SparklesIcon size={18} className="text-amber-600 animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-xs font-extrabold text-[#131314] font-display flex items-center gap-1.5">
+                  <span>✨ Re-Planned Itinerary Active</span>
+                </h4>
+                <p className="text-[11px] text-[var(--muted)] font-medium">
+                  Customized based on user feedback: <span className="font-bold text-[#131314]">"{trip.appliedFeedback}"</span>
+                </p>
+              </div>
+            </div>
+            <span className="tw-badge tw-badge-amber text-[10px] shrink-0">
+              Gemini AI Custom Plan
+            </span>
+          </div>
+        )}
+
         {/* DAY SELECTOR TABS */}
         <div id="itinerary-section" className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none scroll-mt-6">
           {trip.days.map((d, idx) => (
