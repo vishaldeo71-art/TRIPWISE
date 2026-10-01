@@ -106,17 +106,7 @@ export default function Navbar() {
             {t('travelVault')}
           </Link>
 
-          <Link
-            href="/immersive"
-            className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
-              pathname?.startsWith('/immersive')
-                ? 'bg-[#131314] text-white shadow-sm'
-                : 'hover:bg-white/60 text-[#131314]'
-            }`}
-          >
-            <SparklesIcon size={14} className={pathname?.startsWith('/immersive') ? 'text-amber-400' : 'text-amber-600'} />
-            <span>Immersive 3D</span>
-          </Link>
+
 
           <Link
             href="/calendar"
@@ -299,13 +289,7 @@ export default function Navbar() {
           >
             {t('travelVault')}
           </Link>
-          <Link
-            href="/immersive"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="px-4 py-2 rounded-xl hover:bg-[var(--surface)] text-[#131314] text-xs font-semibold flex items-center gap-2"
-          >
-            <SparklesIcon size={16} className="text-amber-600" /> Immersive 3D Explorer
-          </Link>
+
           <Link
             href="/calendar"
             onClick={() => setIsMobileMenuOpen(false)}

@@ -234,13 +234,7 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
           </Link>
 
           <div className="flex items-center gap-2.5">
-            <Link
-              href={`/immersive?city=${encodeURIComponent(trip.destination)}`}
-              className="px-3.5 py-2 rounded-full bg-amber-500 text-slate-950 font-extrabold text-xs shadow-sm hover:bg-amber-400 transition flex items-center gap-1.5"
-            >
-              <SparklesIcon size={14} className="text-slate-950" />
-              <span>✨ 3D Explore</span>
-            </Link>
+
 
             <Link
               href={`/calendar?tripId=${trip.id || trip.shareId}`}

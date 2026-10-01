@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Hero3DCube from '@/components/Hero3DCube';
 import {
   SparklesIcon,
   CloudRainIcon,
@@ -120,35 +121,9 @@ export default function LandingPage() {
               </form>
             </div>
 
-            {/* Right Visual Stage */}
+            {/* Right Visual Stage: Interactive 3D Landmark Cube */}
             <div className="lg:col-span-5 relative">
-              <div className="relative rounded-[28px] overflow-hidden border border-[var(--border)] shadow-2xl bg-slate-900 group">
-                <img
-                  src="https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1000&q=80"
-                  alt="Delhi Humayun's Tomb"
-                  className="w-full h-[420px] object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                {/* Floating Badge 1: Weather Suitability */}
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/20 shadow-lg flex items-center gap-2 text-xs font-bold text-[#131314]">
-                  <SunIcon size={16} className="text-amber-500" />
-                  <div>
-                    <div className="text-[10px] text-[var(--muted)] uppercase">Outdoor Score</div>
-                    <div>94/100 • Clear Sky</div>
-                  </div>
-                </div>
-
-                {/* Floating Badge 2: Real Place Card */}
-                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl space-y-2 text-left">
-                  <div className="flex items-center justify-between">
-                    <span className="tw-badge tw-badge-amber">Delhi Heritage Stop</span>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">🚇 Lal Qila Metro</span>
-                  </div>
-                  <h4 className="font-extrabold text-sm font-display text-[#131314]">Red Fort & Jama Masjid Walk</h4>
-                  <p className="text-xs text-[var(--muted)] line-clamp-1">Real historical landmark with indoor rain alternative ready.</p>
-                </div>
-              </div>
+              <Hero3DCube onSelectCity={(c) => fillCity(c)} />
             </div>
           </div>
         </section>
