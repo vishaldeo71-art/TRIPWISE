@@ -77,7 +77,7 @@ export async function fetchWeatherForecast(lat: number, lon: number, daysCount: 
       } else {
         // Extrapolate realistic forecast for days > 16 (up to 30 days)
         const baseIdx = i % Math.max(1, availableDays);
-        const baseForecast = forecasts[baseIdx] || { tempC: 25, condition: 'Clear Skies', rainProbability: 10, suitability: 'High' as const, icon: '☀️', note: 'Favorable seasonal weather expected.' };
+        const baseForecast: { tempC: number; condition: string; rainProbability: number; suitability: 'High' | 'Moderate' | 'Low'; icon: string; note: string } = forecasts[baseIdx] || { tempC: 25, condition: 'Clear Skies', rainProbability: 10, suitability: 'High' as const, icon: '☀️', note: 'Favorable seasonal weather expected.' };
         forecasts.push({
           ...baseForecast,
           tempC: baseForecast.tempC + ((i % 3) - 1),
