@@ -221,9 +221,8 @@ function PlanTripForm() {
       setError(err?.message || 'An error occurred while generating your trip.');
       setLoading(false);
     }
-  return (
-}
-    <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  }
+  return <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Title Header */}
       <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
         <span className="tw-badge tw-badge-amber">

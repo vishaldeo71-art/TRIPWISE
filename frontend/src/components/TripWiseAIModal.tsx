@@ -8,6 +8,7 @@ interface TripWiseAIModalProps {
   trip: Trip;
   isOpen: boolean;
   onClose: () => void;
+  onNewPlanGenerated?: (newTrip: Trip) => void;
 }
 
 interface ChatMessage {
@@ -34,6 +35,7 @@ export default function TripWiseAIModal({ trip, isOpen, onClose }: TripWiseAIMod
     'What can I do if it rains?',
     'Give me food recommendations.',
     'Suggest cultural activities.',
+    'Adjust trip based on my feedback',
   ];
 
   const handleSend = async (textToSend?: string) => {
@@ -72,10 +74,44 @@ export default function TripWiseAIModal({ trip, isOpen, onClose }: TripWiseAIMod
 
       if (response.ok) {
         const data = await response.json();
-        setMessages((prev) => [
-          ...prev,
-          { sender: 'ai', text: data.answer || 'I have analyzed your itinerary request!' },
-        ]);
+        
+        // Check if this is a feedback-based re-planning request
+        if (query.toLowerCase().includes('adjust trip based on my feedback') || query.toLowerCase().includes('generate new plan based on feedback')) {
+          // Send the feedback to generate a new plan
+          const feedbackResponse = await fetch('/api/ai/generate-from-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: query,
+              currentTrip: {
+                destination: trip.destination,
+                durationDays: trip.durationDays,
+                persona: trip.persona,
+                pace: trip.pace,
+                customPreferences: trip.customPreferences || '',
+                itinerary: trip.days?.map((d) => d.activities?.map((a) => a.name)).filter(Boolean) || [],
+              },
+              userFeedback: query,
+            }),
+          });
+          
+          if (feedbackResponse.ok) {
+            const newTripData = await feedbackResponse.json();
+            setMessages((prev) => [
+              ...prev,
+              { sender: 'ai', text: data.answer || 'I have processed your request for your trip!' },
+            ]);
+            // Trigger new plan generation
+            onNewPlanGenerated?.(newTripData.newTrip);
+          } else {
+            throw new Error('Failed to generate new plan from feedback');
+          }
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            { sender: 'ai', text: data.answer || 'I have analyzed your itinerary request!' },
+          ]);
+        }
       } else {
         throw new Error('API request failed');
       }
@@ -160,7 +196,7 @@ export default function TripWiseAIModal({ trip, isOpen, onClose }: TripWiseAIMod
         <div className="px-6 py-2.5 border-t border-white/[0.06] bg-slate-950/60">
           <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-2 font-bold">Quick suggestions:</p>
           <div className="flex flex-wrap gap-1.5">
-            {quickPrompts.slice(0, 4).map((prompt, i) => (
+            {quickPrompts.slice(0, 5).map((prompt, i) => (
               <button
                 key={i}
                 onClick={() => handleSend(prompt)}
@@ -169,6 +205,15 @@ export default function TripWiseAIModal({ trip, isOpen, onClose }: TripWiseAIMod
                 {prompt}
               </button>
             ))}
+            {quickPrompts[5] && (
+              <button
+                key={5}
+                onClick={() => handleSend(quickPrompts[5])}
+                className="text-xs px-2.5 py-1 rounded-full bg-slate-900 hover:bg-amber-500/15 text-slate-300 hover:text-amber-200 border border-slate-800 hover:border-amber-500/30 transition-colors font-medium"
+              >
+                {quickPrompts[5]}
+              </button>
+            )}
           </div>
         </div>
 
