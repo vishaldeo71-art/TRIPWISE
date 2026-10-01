@@ -360,7 +360,7 @@ function CalendarContent() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-300 mt-0.5">
-                    {activeTrip.startDate} — {activeTrip.endDate || `+${activeTrip.durationDays} Days`} • {activeTrip.durationDays} Days • {activeTrip.pace} Pace
+                    {activeTrip.startDate} — {activeTrip.endDate || `+${activeTrip.durationDays} Days`} • {activeTrip.durationDays} Days • 👥 {activeTrip.travelersCount || activeTrip.familyMembers?.total || 1} Travelers • {activeTrip.pace} Pace
                   </p>
                 </div>
               </div>

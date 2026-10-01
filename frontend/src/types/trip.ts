@@ -89,6 +89,12 @@ export interface HealthScore {
   }[];
 }
 
+export interface FamilyMembers {
+  adults: number;
+  kids: number;
+  total: number;
+}
+
 export interface Trip {
   id?: string;
   shareId?: string;
@@ -97,12 +103,15 @@ export interface Trip {
   latitude: number;
   longitude: number;
   durationDays: number;
+  travelersCount?: number;
   startDate?: string; // e.g., "2026-09-18"
   endDate?: string;   // e.g., "2026-09-21"
   persona: Persona;
   pace: TravelPace;
   interests: string[];
   customPreferences?: string;
+  familyMembers?: FamilyMembers;
+  groupMembersText?: string;
   weatherSummary: WeatherSummary;
   days: ItineraryDay[];
   healthScore: HealthScore;

@@ -189,14 +189,24 @@ export default function DashboardPage() {
                       </h3>
                     </div>
 
-                    <span className="tw-badge tw-badge-amber shrink-0 font-bold">
-                      {trip.durationDays} {trip.durationDays === 1 ? 'Day' : 'Days'}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {trip.durationDays > 7 && (
+                        <span className="tw-badge bg-emerald-100 text-emerald-900 border-emerald-300 font-extrabold text-[10px]">
+                          ✨ {trip.durationDays}D Extended
+                        </span>
+                      )}
+                      <span className="tw-badge tw-badge-amber font-bold">
+                        {trip.durationDays} {trip.durationDays === 1 ? 'Day' : 'Days'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2 text-xs text-[var(--muted)] mb-4">
                     <span className="tw-badge">
                       <UserIcon size={12} className="text-amber-600" /> {trip.persona}
+                    </span>
+                    <span className="tw-badge">
+                      👥 {trip.travelersCount || trip.familyMembers?.total || 1} {(trip.travelersCount || trip.familyMembers?.total || 1) === 1 ? 'Traveler' : 'Travelers'}
                     </span>
                     <span className="tw-badge">
                       ⚡ {trip.pace}

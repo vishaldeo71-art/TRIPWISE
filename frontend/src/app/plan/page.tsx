@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Persona, TravelPace, Trip } from '@/types/trip';
+import { Persona, TravelPace, Trip, FamilyMembers } from '@/types/trip';
 import { geocodeCity, fetchWeatherForecast, generateItinerary } from '@/lib/itineraryEngine';
 import {
   SparklesIcon,
@@ -17,7 +17,8 @@ import {
   CameraIcon,
   TreesIcon,
   ShoppingIcon,
-  FlameIcon
+  FlameIcon,
+  UserIcon
 } from '@/components/Icons';
 import { supabase } from '@/lib/supabase';
 
@@ -50,11 +51,16 @@ function PlanTripForm() {
 
   const [destination, setDestination] = useState(initialCity);
   const [durationDays, setDurationDays] = useState(3);
+  const [customDaysInput, setCustomDaysInput] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [persona, setPersona] = useState<Persona>('Explorer');
   const [pace, setPace] = useState<TravelPace>('Balanced');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(['Culture', 'Food']);
   const [customPreferences, setCustomPreferences] = useState('');
+
+  // Family Members State
+  const [adultsCount, setAdultsCount] = useState(2);
+  const [kidsCount, setKidsCount] = useState(2);
 
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -81,12 +87,25 @@ function PlanTripForm() {
     return d.toISOString().split('T')[0];
   };
 
+  const handleCustomDaysChange = (val: string) => {
+    setCustomDaysInput(val);
+    const parsed = parseInt(val, 10);
+    if (!isNaN(parsed) && parsed >= 1 && parsed <= 30) {
+      setDurationDays(parsed);
+    }
+  };
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!destination.trim()) {
       setError('Please enter a destination city (e.g. Delhi, Tokyo, Paris, London).');
+      return;
+    }
+
+    if (durationDays < 1 || durationDays > 30) {
+      setError('Trip duration must be between 1 and 30 days.');
       return;
     }
 
@@ -103,10 +122,20 @@ function PlanTripForm() {
         return;
       }
 
-      // Step 2: Fetch Weather Forecast
+      // Step 2: Fetch Weather Forecast (handles 1-30 days)
       setLoadingStep(2);
       await new Promise((r) => setTimeout(r, 600));
       const forecasts = await fetchWeatherForecast(geoResult.lat, geoResult.lon, durationDays);
+
+      // Family members & Travelers object
+      const totalTravelers = adultsCount + kidsCount;
+      const familyMembersObj: FamilyMembers = {
+        adults: adultsCount,
+        kids: kidsCount,
+        total: totalTravelers,
+      };
+
+      const groupMembersTextStr = `${totalTravelers} Traveler${totalTravelers > 1 ? 's' : ''} (${adultsCount} Adult${adultsCount > 1 ? 's' : ''}${kidsCount > 0 ? `, ${kidsCount} Kid${kidsCount > 1 ? 's' : ''}` : ''})`;
 
       // Step 3: Generate Itinerary Engine
       setLoadingStep(3);
@@ -122,7 +151,9 @@ function PlanTripForm() {
         geoResult.lat,
         geoResult.lon,
         customPreferences,
-        startDate
+        startDate,
+        familyMembersObj,
+        totalTravelers
       );
 
       // Step 4: Finalize & Save
@@ -139,12 +170,15 @@ function PlanTripForm() {
         latitude: geoResult.lat,
         longitude: geoResult.lon,
         durationDays,
+        travelersCount: totalTravelers,
         startDate,
         endDate: calculatedEndDate,
         persona,
         pace,
         interests: selectedInterests,
         customPreferences: customPreferences.trim() || undefined,
+        familyMembers: familyMembersObj,
+        groupMembersText: groupMembersTextStr,
         weatherSummary,
         days,
         healthScore,
@@ -226,7 +260,7 @@ function PlanTripForm() {
             <div className="space-y-1.5">
               <h3 className="text-xl font-extrabold font-display text-[#131314]">Constructing Itinerary...</h3>
               <p className="text-xs text-[var(--muted)] max-w-md mx-auto">
-                Processing Open-Meteo weather forecasts, real place landmarks, and nearest metro stations.
+                Processing Open-Meteo weather forecasts, real place landmarks, custom requests, and nearest metro stations.
               </p>
             </div>
 
@@ -237,11 +271,11 @@ function PlanTripForm() {
               </div>
               <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 2 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
                 <CheckIcon size={16} className={loadingStep >= 2 ? 'text-emerald-600' : 'text-slate-400'} />
-                <span>Analyzing rain risk & Open-Meteo weather forecast...</span>
+                <span>Analyzing forecast for {durationDays} Days...</span>
               </div>
               <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 3 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
                 <CheckIcon size={16} className={loadingStep >= 3 ? 'text-emerald-600' : 'text-slate-400'} />
-                <span>Matching real {destination} places & metro transit...</span>
+                <span>Matching real {destination} places & custom preferences...</span>
               </div>
               <div className={`p-3.5 rounded-xl flex items-center gap-3 transition-all ${loadingStep >= 4 ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>
                 <CheckIcon size={16} className={loadingStep >= 4 ? 'text-emerald-600' : 'text-slate-400'} />
@@ -274,7 +308,7 @@ function PlanTripForm() {
               </p>
             </div>
 
-            {/* Field: Trip Dates */}
+            {/* Field: Trip Start & End Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block tw-eyebrow mb-2">
@@ -294,41 +328,185 @@ function PlanTripForm() {
                 </label>
                 <div className="w-full px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[#131314] text-xs font-extrabold flex items-center justify-between">
                   <span>{getEndDate(startDate, durationDays)}</span>
-                  <span className="text-[10px] text-amber-600 uppercase tracking-wide">({durationDays} Days)</span>
+                  <span className="text-[10px] text-amber-600 uppercase tracking-wide">({durationDays} {durationDays === 1 ? 'Day' : 'Days'})</span>
                 </div>
               </div>
             </div>
 
-
-            {/* Field 2: Duration */}
+            {/* Field 2: Duration Selector (Supports > 7 Days up to 30 Days) */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="tw-eyebrow">
-                  Trip Duration
+                  Trip Duration (1 to 30 Days)
                 </label>
-                <span className="tw-badge tw-badge-amber">
-                  {durationDays} {durationDays === 1 ? 'Day' : 'Days'}
+                <span className="tw-badge tw-badge-amber font-extrabold">
+                  {durationDays} {durationDays === 1 ? 'Day' : 'Days'} Itinerary
                 </span>
               </div>
-              <div className="grid grid-cols-7 gap-2">
-                {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setDurationDays(num)}
-                    className={`py-3 rounded-xl font-bold text-xs border transition-all ${
-                      durationDays === num
-                        ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
-                        : 'bg-[var(--surface)] text-[#131314] border-[var(--border)] hover:bg-[var(--surface-2)]'
-                    }`}
-                  >
-                    {num} {num === 1 ? 'Day' : 'D'}
-                  </button>
-                ))}
+
+              <div className="space-y-3">
+                {/* Standard & Multi-Week Preset Buttons */}
+                <div className="grid grid-cols-3 sm:grid-cols-9 gap-2">
+                  {[
+                    { days: 1, label: '1 Day' },
+                    { days: 2, label: '2 Days' },
+                    { days: 3, label: '3 Days' },
+                    { days: 5, label: '5 Days' },
+                    { days: 7, label: '7 Days (1 Wk)' },
+                    { days: 10, label: '10 Days' },
+                    { days: 14, label: '14 Days (2 Wks)' },
+                    { days: 21, label: '21 Days (3 Wks)' },
+                    { days: 30, label: '30 Days (1 Mo)' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.days}
+                      type="button"
+                      onClick={() => {
+                        setDurationDays(preset.days);
+                        setCustomDaysInput('');
+                      }}
+                      className={`py-2.5 px-2 rounded-xl font-extrabold text-[11px] border transition-all ${
+                        durationDays === preset.days && !customDaysInput
+                          ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
+                          : 'bg-[var(--surface)] text-[#131314] border-[var(--border)] hover:bg-[var(--surface-2)]'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Days Direct Input */}
+                <div className="flex items-center gap-3 p-3.5 bg-[var(--surface)] border border-[var(--border)] rounded-2xl">
+                  <span className="text-xs font-bold text-[#131314] shrink-0">Custom Days (1–30):</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    placeholder="Enter custom days (e.g. 8, 12, 18, 25)"
+                    value={customDaysInput}
+                    onChange={(e) => handleCustomDaysChange(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-white border border-[var(--border)] rounded-xl text-xs font-bold text-[#131314] focus:outline-none focus:border-[#131314]"
+                  />
+                  {durationDays > 7 && (
+                    <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-full shrink-0">
+                      ✨ Extended {durationDays}-Day Plan
+                    </span>
+                  )}
+                </div>
+
+                {/* Informative banner for trips > 7 days */}
+                {durationDays > 7 && (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs font-medium text-emerald-900 space-y-1">
+                    <div className="font-extrabold text-emerald-950 flex items-center gap-1.5 font-display">
+                      <span>✨ Extended Trip Feature Active ({durationDays} Days)</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-800 leading-relaxed">
+                      TripWise AI structures multi-week itineraries into balanced weekly themes, neighborhood clusters, and 30-day projected weather forecasts to ensure a seamless long trip experience.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Field 3: Traveler Persona */}
+            {/* Field 3: Number of People Traveling (Travelers Count) */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="tw-eyebrow">
+                  Number of People Traveling (Travelers) 👥
+                </label>
+                <span className="tw-badge tw-badge-amber text-[10px] font-extrabold">
+                  Total: {adultsCount + kidsCount} {adultsCount + kidsCount === 1 ? 'Person' : 'People'}
+                </span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
+                {/* Quick Presets */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[
+                    { label: '👤 Solo (1)', adults: 1, kids: 0 },
+                    { label: '👫 Duo (2)', adults: 2, kids: 0 },
+                    { label: '👨‍👩‍👧 Family / Group (4)', adults: 2, kids: 2 },
+                    { label: '👨‍👩‍👧‍👦 Large Party (6)', adults: 4, kids: 2 },
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setAdultsCount(preset.adults);
+                        setKidsCount(preset.kids);
+                      }}
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs border transition-all ${
+                        adultsCount === preset.adults && kidsCount === preset.kids
+                          ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
+                          : 'bg-white text-[#131314] border-[var(--border)] hover:bg-slate-100'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Fine-grained Counter Controls */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Adults Selector */}
+                  <div className="bg-white p-3.5 rounded-xl border border-[var(--border)] flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-extrabold text-[#131314]">Adults (12+ yrs)</div>
+                      <div className="text-[10px] text-[var(--muted)]">Primary travelers</div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setAdultsCount(Math.max(1, adultsCount - 1))}
+                        className="w-8 h-8 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-bold text-sm flex items-center justify-center hover:bg-slate-200 transition text-[#131314]"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center font-extrabold text-sm text-[#131314]">{adultsCount}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAdultsCount(adultsCount + 1)}
+                        className="w-8 h-8 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-bold text-sm flex items-center justify-center hover:bg-slate-200 transition text-[#131314]"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Children Selector */}
+                  <div className="bg-white p-3.5 rounded-xl border border-[var(--border)] flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-extrabold text-[#131314]">Children / Kids (0-11 yrs)</div>
+                      <div className="text-[10px] text-[var(--muted)]">Kid & stroller pacing</div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setKidsCount(Math.max(0, kidsCount - 1))}
+                        className="w-8 h-8 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-bold text-sm flex items-center justify-center hover:bg-slate-200 transition text-[#131314]"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center font-extrabold text-sm text-[#131314]">{kidsCount}</span>
+                      <button
+                        type="button"
+                        onClick={() => setKidsCount(kidsCount + 1)}
+                        className="w-8 h-8 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-bold text-sm flex items-center justify-center hover:bg-slate-200 transition text-[#131314]"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-[var(--muted)] font-medium leading-relaxed">
+                  💡 TripWise AI will customize daily attraction order, group transit options, rest breaks, and group dining options for your party of <strong>{adultsCount + kidsCount} traveler{adultsCount + kidsCount > 1 ? 's' : ''}</strong> ({adultsCount} Adult{adultsCount > 1 ? 's' : ''}{kidsCount > 0 ? `, ${kidsCount} Kid${kidsCount > 1 ? 's' : ''}` : ''}).
+                </p>
+              </div>
+            </div>
+
+            {/* Field 4: Traveler Persona */}
             <div>
               <label className="block tw-eyebrow mb-2">
                 Traveler Persona
@@ -357,7 +535,7 @@ function PlanTripForm() {
               </div>
             </div>
 
-            {/* Field 4: Travel Pace */}
+            {/* Field 5: Travel Pace */}
             <div>
               <label className="block tw-eyebrow mb-2">
                 Travel Pace
@@ -429,7 +607,7 @@ function PlanTripForm() {
                 className="w-full p-4 bg-white border border-[var(--border)] rounded-2xl text-xs text-[#131314] placeholder:text-[var(--muted)] font-medium focus:outline-none focus:border-[#131314] transition leading-relaxed"
               />
               <p className="text-[11px] text-[var(--muted)] mt-1.5 font-medium">
-                TripWise AI will adapt activity recommendations and dining venues to match your exact requests.
+                TripWise AI will adapt activity recommendations, specific landmarks, and dining venues to match your exact requests.
               </p>
             </div>
 

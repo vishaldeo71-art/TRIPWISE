@@ -300,6 +300,12 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
                 <span className="tw-badge">
                   ⚡ Pace: {trip.pace}
                 </span>
+                {(trip.travelersCount || trip.familyMembers?.total) && (
+                  <span className="tw-badge tw-badge-amber">
+                    👥 {trip.travelersCount || trip.familyMembers?.total} { (trip.travelersCount || trip.familyMembers?.total) === 1 ? 'Traveler' : 'Travelers'}
+                    {trip.familyMembers ? ` (${trip.familyMembers.adults} Adults${trip.familyMembers.kids ? `, ${trip.familyMembers.kids} Kids` : ''})` : ''}
+                  </span>
+                )}
                 {trip.customPreferences && (
                   <span className="tw-badge tw-badge-amber" title={trip.customPreferences}>
                     ✨ Custom: {trip.customPreferences}
@@ -346,6 +352,38 @@ export default function TripViewPage({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
+
+        {/* WEEK SWITCHER FOR EXTENDED TRIPS (>7 DAYS) */}
+        {trip.durationDays > 7 && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-extrabold text-emerald-950 font-display flex items-center gap-1.5">
+                <span>✨ Extended {trip.durationDays}-Day Itinerary</span>
+              </span>
+              <span className="text-[10px] text-emerald-700 font-medium">Quick Week Jump:</span>
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+              {Array.from({ length: Math.ceil(trip.durationDays / 7) }).map((_, wIdx) => {
+                const startDay = wIdx * 7 + 1;
+                const endDay = Math.min((wIdx + 1) * 7, trip.durationDays);
+                const isWeekActive = activeDayIdx >= wIdx * 7 && activeDayIdx < (wIdx + 1) * 7;
+                return (
+                  <button
+                    key={wIdx}
+                    onClick={() => setActiveDayIdx(wIdx * 7)}
+                    className={`px-3 py-1 rounded-full text-[11px] font-extrabold border transition ${
+                      isWeekActive
+                        ? 'bg-[#131314] text-white border-[#131314] shadow-sm'
+                        : 'bg-white text-[#131314] border-emerald-200 hover:bg-emerald-100'
+                    }`}
+                  >
+                    Week {wIdx + 1} (Days {startDay}–{endDay})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* DAY SELECTOR TABS */}
         <div id="itinerary-section" className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none scroll-mt-6">
