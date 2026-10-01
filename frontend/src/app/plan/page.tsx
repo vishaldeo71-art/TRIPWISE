@@ -57,8 +57,6 @@ function PlanTripForm() {
   const [pace, setPace] = useState<TravelPace>('Balanced');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(['Culture', 'Food']);
   const [customPreferences, setCustomPreferences] = useState('');
-
-  // Family Members State
   const [adultsCount, setAdultsCount] = useState(2);
   const [kidsCount, setKidsCount] = useState(2);
 
@@ -223,9 +221,8 @@ function PlanTripForm() {
       setError(err?.message || 'An error occurred while generating your trip.');
       setLoading(false);
     }
-  };
-
   return (
+}
     <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Title Header */}
       <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
@@ -589,7 +586,10 @@ function PlanTripForm() {
               </div>
             </div>
 
-            {/* Field 6: Custom Requirements / Special Preferences */}
+              </p>
+            </div>
+
+            {/* Field 8: Custom Requirements / Special Preferences */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="tw-eyebrow">

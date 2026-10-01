@@ -115,7 +115,9 @@ export function generateItinerary(
   customPreferences?: string,
   startDate?: string,
   familyMembers?: FamilyMembers,
-  travelersCount?: number
+  travelersCount?: number,
+  dietaryPrefs?: string[],
+  budgetPerDay?: number
 ): { days: ItineraryDay[]; weatherSummary: WeatherSummary; healthScore: HealthScore } {
   // Retrieve destination-specific place dataset (guarantees NO cross-city leak)
   const destData = getDestinationPlaces(destination, geoLat, geoLng);
