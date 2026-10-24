@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { CompassIcon, MailIcon, LockIcon, AlertIcon, CheckIcon, ArrowRightIcon } from '@/components/Icons';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,6 +21,14 @@ export default function LoginPage() {
 
     if (!email.trim() || !password) {
       setError('Please enter both email and password.');
+      return;
+    }
+
+    // Guard: catch missing Vercel env vars before making a network call
+    if (!isSupabaseConfigured) {
+      setError(
+        '⚠️ Authentication service is not configured. If you are the developer: go to your Vercel Dashboard → Project Settings → Environment Variables and add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then redeploy.'
+      );
       return;
     }
 
@@ -69,7 +77,12 @@ export default function LoginPage() {
         }, 1000);
       }
     } catch (err: any) {
-      setError(err?.message || 'An unexpected error occurred during login.');
+      const msg = err?.message || '';
+      if (msg.toLowerCase().includes('load failed') || msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror')) {
+        setError('⚠️ Cannot reach the authentication server. Please check your internet connection, or if you are the developer: ensure NEXT_PUBLIC_SUPABASE_URL is set correctly in your Vercel environment variables and redeploy.');
+      } else {
+        setError(msg || 'An unexpected error occurred during login.');
+      }
       setLoading(false);
     }
   };
